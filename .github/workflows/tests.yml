@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - '*'
   pull_request:
   schedule:
     # Run weekly, Friday at 7:15 EST.
@@ -82,6 +84,7 @@ jobs:
       run: |
         sudo apt-get install libgsl-dev
         pip install -vU pip
+        pip install -vU Cython numpy setuptools wheel
 
     - name: Install package from source
       if: ${{ env.PUBLISH != 'true' }}

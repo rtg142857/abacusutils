@@ -1044,6 +1044,8 @@ def main(
         config['Params']['redshift'] = alt_z
     if newseed:
         config["Misc"]["random_seed"] = newseed
+    else:
+        newseed = config["Misc"]["random_seed"]
     if alt_simlabel:
         config["Labels"]["sim_label"] = alt_simlabel
 

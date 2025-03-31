@@ -20,12 +20,17 @@ import h5py
 import numba
 import numpy as np
 import yaml
+import re
 from numba import njit
 from scipy.interpolate import interpn
 from scipy.spatial import cKDTree
 
-from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
-from abacusnbody.data.read_abacus import read_asdf
+import astropy.table
+from astropy.table import Table
+
+#from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
+#from abacusnbody.data.read_abacus import read_asdf
+from abacusnbody.data.flamingo_halo_catalog import SwiftHaloCatalog
 
 from ..analysis.shear import get_shear, smooth_density
 from ..analysis.tsc import tsc_parallel
@@ -325,51 +330,65 @@ def do_Menv_from_tree(
     Menv[mmask] = calc_Menv(allmasses, inner_arr, inner_starts, outer_arr, outer_starts)
     return Menv
 
+def get_file_number(filename):
+    """
+    Returns the last string of digits before the .hdf5 in a filename, as an int
+    """
+    filename_without_hdf5 = filename[:-5]
+    return int(re.compile(r'(\d+)$').search(filename_without_hdf5).group(1))
 
 def prepare_slab(
-    i,
+    halo_file,
+    path_config_filename,
     savedir,
-    simdir,
     simname,
     z_mock,
     z_type,
     tracer_flags,
-    MT,
+    MT, # ELG or QSO are true
     want_ranks,
     want_AB,
     want_shear,
     shearmark,
     cleaning,
     newseed,
-    halo_lc=False,
+    halo_lc=False, # halo lightcone
     nthread=1,
     overwrite=1,
     mcut=1e11,
     rad_outer=10,
 ):
+    """
+    Makes a prepared HDF5 file from a single halo file
+    Args: halo_file (full path to a halo file), path_config_filename,
+    savedir (output directory), simname (just a label)...
+    """
+    i = get_file_number(halo_file)
     outfilename_halos = (
         savedir
-        + '/halos_xcom_'
+        + '/'
+        + simname + "_"
         + str(i)
         + '_seed'
         + str(newseed)
-        + '_abacushod_oldfenv'
+        + '_flamingohod_basic'
     )
-    outfilename_particles = (
-        savedir
-        + '/particles_xcom_'
-        + str(i)
-        + '_seed'
-        + str(newseed)
-        + '_abacushod_oldfenv'
-    )
-    print('processing slab ', i)
-    if MT:
+    # Particles not supported yet
+    # outfilename_particles = (
+    #     savedir
+    #     + '/particles_xcom_'
+    #     + str(i)
+    #     + '_seed'
+    #     + str(newseed)
+    #     + '_abacushod_oldfenv'
+    # )
+    print('processing file ', i)
+    if MT: # if tracer_flags ELG or QSO are true:
         outfilename_halos += '_MT'
-        outfilename_particles += '_MT'
-    if want_ranks:
-        outfilename_particles += '_withranks'
-    outfilename_particles += '_new.h5'
+        #outfilename_particles += '_MT'
+    #if want_ranks:
+        #outfilename_particles += '_withranks'
+    #outfilename_particles += '_new.h5'
     outfilename_halos += '_new.h5'
 
     np.random.seed(newseed + i)
@@ -378,7 +397,7 @@ def prepare_slab(
     if (
         (not overwrite)
         and (os.path.exists(outfilename_halos))
-        and (os.path.exists(outfilename_particles))
+        #and (os.path.exists(outfilename_particles))
     ):
         print('files exists, skipping ', i)
         return 0
@@ -386,6 +405,7 @@ def prepare_slab(
     # load the halo catalog slab
     print('loading halo catalog ')
     if halo_lc:
+        raise Exception("Lightcone not implemented yet")
         slabname = (
             simdir
             + '/'
@@ -398,23 +418,24 @@ def prepare_slab(
         pos_key = 'pos_interp'
         vel_key = 'vel_interp'
         N_key = 'N_interp'
-    else:
-        slabname = (
-            simdir
-            + '/'
-            + simname
-            + '/halos/z'
-            + str(z_mock).ljust(5, '0')
-            + '/halo_info/halo_info_'
-            + str(i).zfill(3)
-            + '.asdf'
-        )
-        id_key = 'id'
-        pos_key = 'x_L2com'
-        vel_key = 'v_L2com'
-        N_key = 'N'
+    # else:
+        # slabname = (
+        #     simdir
+        #     + '/'
+        #     + simname
+        #     + '/halos/z'
+        #     + str(z_mock).ljust(5, '0')
+        #     + '/halo_info/halo_info_'
+        #     + str(i).zfill(3)
+        #     + '.asdf'
+        # )
+        # id_key = 'id'
+        # pos_key = 'x_L2com'
+        # vel_key = 'v_L2com'
+        # N_key = 'N'
 
     if z_type == 'primary' or z_type == 'lightcone':
+        raise Exception("Particles not implemented yet; do not use z_type: primary")
         cat = CompaSOHaloCatalog(
             slabname,
             subsamples=dict(A=True, rv=True),
@@ -433,26 +454,32 @@ def prepare_slab(
             cleaned=cleaning,
         )
     else:
-        cat = CompaSOHaloCatalog(
-            slabname,
-            fields=[
-                N_key,
-                pos_key,
-                vel_key,
-                'r90_L2com',
-                'r25_L2com',
-                'r98_L2com',
-                'npstartA',
-                'npoutA',
-                id_key,
-                'sigmav3d_L2com',
-            ],
-            cleaned=cleaning,
+        cat = SwiftHaloCatalog(
+            path_config_filename
         )
+        # cat = CompaSOHaloCatalog(
+        #     slabname,
+        #     fields=[
+        #         N_key,
+        #         pos_key,
+        #         vel_key,
+        #         'r90_L2com',
+        #         'r25_L2com',
+        #         'r98_L2com',
+        #         'npstartA',
+        #         'npoutA',
+        #         id_key,
+        #         'sigmav3d_L2com',
+        #     ],
+        #     cleaned=cleaning,
+        # )
+        cat.get_halo_data(halo_file)
+        cat.compute_additional_halo_data(z_mock)
     assert halo_lc == cat.halo_lc
 
-    halos = cat.halos
+    halos = Table(cat.halos, copy=False) # because it's not being done within the SwiftHaloCatalog object
     if halo_lc:
+        raise Exception("Lightcone not implemented yet")
         halos['id'] = halos[id_key]
         halos['x_L2com'] = halos[pos_key]
         halos['v_L2com'] = halos[vel_key]
@@ -461,16 +488,19 @@ def prepare_slab(
         halos = halos[halos['N'] > 0]
 
     if z_type == 'primary' or z_type == 'lightcone':
+        raise Exception("Lightcone not implemented yet")
         parts = cat.subsamples
-    header = cat.header
-    Lbox = cat.header['BoxSizeHMpc']
-    Mpart = header['ParticleMassHMsun']  # msun / h
-    H0 = header['H0']
-    h = H0 / 100.0
+    #header = cat.header
+    #Lbox = cat.header['BoxSizeHMpc']
+    #Mpart = header['ParticleMassHMsun']  # msun / h
+    #H0 = header['H0']
+    #h = H0 / 100.0
+    h = cat.h
 
     # # form a halo table of the columns i care about
     # creating a mask of which halos to keep, which halos to drop
-    p_halos = subsample_halos(halos['N'] * Mpart, MT)
+    #p_halos = subsample_halos(halos['N'] * Mpart, MT)
+    p_halos = subsample_halos(halos["M200_crit"], MT)
     mask_halos = np.random.random(len(halos)) < p_halos
     print('total number of halos, ', len(halos), 'keeping ', np.sum(mask_halos))
 
@@ -479,6 +509,7 @@ def prepare_slab(
 
     # only generate fenv ranks and c ranks if the user wants to enable secondary biases
     if want_AB:
+        raise Exception("AB not implemented yet")
         nbins = 100
         mbins = np.logspace(np.log10(mcut), 15.5, nbins + 1)
 
@@ -631,6 +662,7 @@ def prepare_slab(
         halos['deltac_rank'] = np.zeros(len(halos))
 
     if want_shear:
+        raise Exception("Shear not implemented yet")
         assert len(np.unique(shearmark.shape)) == 1
         N_dim = len(shearmark)
         cell = Lbox / N_dim
@@ -655,13 +687,14 @@ def prepare_slab(
         halos['shear_rank'] = np.zeros(len(halos))
 
     # the new particle start, len, and multiplier
-    halos_pstart = halos['npstartA']
-    halos_pnum = halos['npoutA']
+    # halos_pstart = halos['npstartA']
+    # halos_pnum = halos['npoutA']
     halos_pstart_new = np.zeros(len(halos))
     halos_pnum_new = np.zeros(len(halos))
 
     # particle arrays for ranks and mask
     if z_type == 'primary' or z_type == 'lightcone':
+        raise Exception("Particles not implemented yet")
         mask_parts = np.zeros(len(parts))
         len_old = len(parts)
         ranks_parts = np.full(len_old, -1.0)
@@ -844,12 +877,12 @@ def prepare_slab(
     halos['randoms_exp'] = (
         np.random.randint(0, 2, size=(len(halos), 3)) * 2 - 1
     ) * np.random.exponential(
-        scale=np.repeat(halos['sigmav3d_L2com'], 3).reshape((-1, 3)) / np.sqrt(3),
+        scale=np.repeat(halos['sigmav3d'], 3).reshape((-1, 3)) / np.sqrt(3),
         size=(len(halos), 3),
     )  # attaching random numbers
     halos['randoms_gaus_vrms'] = np.random.normal(
         loc=0,
-        scale=np.repeat(halos['sigmav3d_L2com'], 3).reshape((-1, 3)) / np.sqrt(3),
+        scale=np.repeat(halos['sigmav3d'], 3).reshape((-1, 3)) / np.sqrt(3),
         size=(len(halos), 3),
     )  # attaching random numbers
 
@@ -864,6 +897,7 @@ def prepare_slab(
 
     # output the new particle file
     if z_type == 'primary' or z_type == 'lightcone':
+        raise Exception("Particles not implemented yet, do not use z_type = primary")
         print('adding rank fields to particle data ')
         mask_parts = mask_parts.astype(bool)
         parts = parts[mask_parts]
@@ -911,6 +945,8 @@ def prepare_slab(
 
 
 def calc_shearmark(simdir, simname, z_mock, N_dim, R, fn, partdown=100):
+    raise Exception("Not implemented in Flamingo")
+    """ Not implemented in Flamingo"""
     start = time.time()
 
     fns = glob.glob(
@@ -986,28 +1022,30 @@ def calc_shearmark(simdir, simname, z_mock, N_dim, R, fn, partdown=100):
 
 
 def main(
-    path2config,
+    path_config_filename,
     params=None,
-    alt_simname=None,
+    alt_halo_path=None,
     alt_z=None,
-    newseed=600,
+    newseed=None,
     halo_lc=False,
     overwrite=1,
 ):
     print('compiling compaso halo catalogs into subsampled catalogs')
 
-    config = yaml.safe_load(open(path2config))
+    config = yaml.safe_load(open(path_config_filename))
     # update params if needed
     if params:
         config.update(params)
-    if alt_simname:
-        config['sim_params']['sim_name'] = alt_simname
+    if alt_halo_path:
+        config['Paths']['halo_path'] = alt_halo_path
     if alt_z:
-        config['sim_params']['z_mock'] = alt_z
+        config['Params']['redshift'] = alt_z
+    if newseed:
+        config["Misc"]["random_seed"] = newseed
 
-    simname = config['sim_params']['sim_name']  # "AbacusSummit_base_c000_ph006"
-    simdir = config['sim_params']['sim_dir']
-    z_mock = float(config['sim_params']['z_mock'])
+    simname = config['Labels']['sim_label']  # "AbacusSummit_base_c000_ph006"
+    halo_path = config['Paths']['halo_path']
+    z_mock = float(config['Params']['redshift'])
     savedir = (
         config['sim_params']['subsample_dir']
         + simname
@@ -1016,66 +1054,87 @@ def main(
     )
     cleaning = config['sim_params']['cleaned_halos']
     if 'halo_lc' in config['sim_params'].keys():
+        raise Exception("Lightcones not yet implemented")
         halo_lc = config['sim_params']['halo_lc']
+    
+    halo_type = config["Misc"]["halo_type"]
 
     # build in some redshift checks
     ztype = None
-    if halo_lc:
-        ztype = 'lightcone'
-    elif z_mock in [3.0, 2.5, 2.0, 1.7, 1.4, 1.1, 0.8, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0]:
-        ztype = 'primary'
-    elif z_mock in [
-        0.15,
-        0.25,
-        0.35,
-        0.45,
-        0.575,
-        0.65,
-        0.725,
-        0.875,
-        0.95,
-        1.025,
-        1.175,
-        1.25,
-        1.325,
-        1.475,
-        1.55,
-        1.625,
-        1.85,
-        2.25,
-        2.75,
-        3.0,
-        5.0,
-        8.0,
-    ]:
-        ztype = 'secondary'
-    else:
-        raise Exception('illegal redshift')
+    # if halo_lc:
+    #     ztype = 'lightcone'
+    # elif z_mock in [3.0, 2.5, 2.0, 1.7, 1.4, 1.1, 0.8, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0]:
+    #     ztype = 'primary'
+    # elif z_mock in [
+    #     0.15,
+    #     0.25,
+    #     0.35,
+    #     0.45,
+    #     0.575,
+    #     0.65,
+    #     0.725,
+    #     0.875,
+    #     0.95,
+    #     1.025,
+    #     1.175,
+    #     1.25,
+    #     1.325,
+    #     1.475,
+    #     1.55,
+    #     1.625,
+    #     1.85,
+    #     2.25,
+    #     2.75,
+    #     3.0,
+    #     5.0,
+    #     8.0,
+    # ]:
+    #     ztype = 'secondary'
+    # else:
+    #     raise Exception('illegal redshift')
+    ztype = "secondary" # will implement particles later
 
-    if halo_lc:
-        halo_info_fns = [
-            str(
-                Path(simdir) / Path(simname) / ('z%4.3f' % z_mock) / 'lc_halo_info.asdf'
-            )
-        ]
-    else:
-        halo_info_fns = list(
-            sorted(
-                (
-                    Path(simdir)
-                    / Path(simname)
-                    / 'halos'
-                    / ('z%4.3f' % z_mock)
-                    / 'halo_info'
-                ).glob('*.asdf')
-            )
-        )
-    numslabs = len(halo_info_fns)
+    # Do by halo file, not by number of slabs
+    # if halo_lc:
+    #     raise Exception("Lightcones not yet implemented")
+    #     halo_info_fns = [
+    #         str(
+    #             Path(simdir) / Path(simname) / ('z%4.3f' % z_mock) / 'lc_halo_info.asdf'
+    #         )
+    #     ]
+    # else:
+    #     halo_info_fns = list(
+    #         sorted(
+    #             (
+    #                 Path(simdir)
+    #                 / Path(simname)
+    #                 / 'halos'
+    #                 / ('z%4.3f' % z_mock)
+    #                 / 'halo_info'
+    #             ).glob('*.asdf')
+    #         )
+    #     )
+    # numslabs = len(halo_info_fns)
 
     os.makedirs(savedir, exist_ok=True)
 
-    if numslabs == 0:
-        raise ValueError('prepare_sim could not find any slabs!')
+    if halo_type == "soap":
+        if halo_path[-5:] == ".hdf5": # the output path is a single file
+            halo_files = [halo_path]
+        else:
+            raise Exception("TODO: Soap halo type with multiple halo files")
+            halo_files = [halo_path + halo_file for halo_file in os.listdir(halo_path)]
+    elif halo_type == "peregrinus":
+        if halo_path[-5:] == ".hdf5":
+            raise Exception("TODO: Peregrinus halo type with only one halo file")
+        else:
+            halo_files = [halo_path + halo_file for halo_file in os.listdir(halo_path) if "Catalogue" in halo_file]
+            halo_files.sort()
+    else:
+        raise Exception("Only SOAP- or Peregrinus-type halo data supported at present")
+
+    if len(halo_files) == 0:
+        raise ValueError('prepare_sim could not find any halo files!')
 
     tracer_flags = config['HOD_params']['tracer_flags']
     MT = False
@@ -1084,8 +1143,9 @@ def main(
     want_ranks = config['HOD_params'].get('want_ranks', False)
     want_AB = config['HOD_params'].get('want_AB', False)
     want_shear = config['HOD_params'].get('want_shear', False)
-    # if want shear, calculate shear field first
+    # if want shear, calculate shear field first; currently not supported
     if want_shear:
+        raise Exception("Shear not implemented on flamingo/peregrinus without particle data")
         if (not ztype == 'primary') and (not halo_lc):
             raise Exception('redshift does not have particle data, cant compute shear')
         Ndim = config['HOD_params'].get('shear_N', 1000)
@@ -1120,9 +1180,9 @@ def main(
         futures = [
             pool.submit(
                 prepare_slab,
-                i,
+                halo_file,
+                path_config_filename,
                 savedir=savedir,
-                simdir=simdir,
                 simname=simname,
                 z_mock=z_mock,
                 z_type=ztype,
@@ -1137,8 +1197,26 @@ def main(
                 halo_lc=halo_lc,
                 nthread=nthread,
                 overwrite=overwrite,
+                # prepare_slab,
+                # i,
+                # savedir=savedir,
+                # simdir=simdir,
+                # simname=simname,
+                # z_mock=z_mock,
+                # z_type=ztype,
+                # tracer_flags=tracer_flags,
+                # MT=MT,
+                # want_ranks=want_ranks,
+                # want_AB=want_AB,
+                # want_shear=want_shear,
+                # shearmark=shearmark,
+                # cleaning=cleaning,
+                # newseed=newseed,
+                # halo_lc=halo_lc,
+                # nthread=nthread,
+                # overwrite=overwrite,
             )
-            for i in range(numslabs)
+            for halo_file in halo_files
         ]
 
     # check that all futures succeeded
@@ -1164,7 +1242,7 @@ if __name__ == '__main__':
         description=__doc__, formatter_class=ArgParseFormatter
     )
     parser.add_argument(
-        '--path2config', help='Path to the config file', default=DEFAULTS['path2config']
+        '--path_config_filename', help='Path to the config file', default=DEFAULTS['path2config']
     )
     parser.add_argument(
         '--alt_simname',
@@ -1178,7 +1256,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--newseed',
         help='alternative random number seed, positive integer',
-        default=600,
+        default=None,
         type=int,
     )
     parser.add_argument(

@@ -117,8 +117,10 @@ class SwiftHaloCatalog(object):
         relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
         relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
 
+        number_of_halos = np.count_nonzero(relevant_field_halos)
+
         halos = {}
-        halos["id"] = np.array(halo_cat["VR"]["ID"])[relevant_field_halos]
+        halos["id"] = np.array(halo_cat["InputHalos"]["HBTplus"]['TrackId'])[relevant_field_halos]
         halos["pos"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * self.h
         halos["vel"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
         halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h

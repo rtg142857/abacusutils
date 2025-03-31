@@ -1024,6 +1024,7 @@ def calc_shearmark(simdir, simname, z_mock, N_dim, R, fn, partdown=100):
 def main(
     path_config_filename,
     params=None,
+    alt_simlabel=None,
     alt_halo_path=None,
     alt_z=None,
     newseed=None,
@@ -1042,6 +1043,8 @@ def main(
         config['Params']['redshift'] = alt_z
     if newseed:
         config["Misc"]["random_seed"] = newseed
+    if alt_simlabel:
+        config["Labels"]["sim_label"] = alt_simlabel
 
     simname = config['Labels']['sim_label']  # "AbacusSummit_base_c000_ph006"
     halo_path = config['Paths']['halo_path']
@@ -1245,8 +1248,12 @@ if __name__ == '__main__':
         '--path_config_filename', help='Path to the config file', default=DEFAULTS['path2config']
     )
     parser.add_argument(
-        '--alt_simname',
-        help='alternative simname to process, like "AbacusSummit_base_c000_ph003"',
+        '--alt_simlabel',
+        help='alternative sim label to use, like "AbacusSummit_base_c000_ph003"',
+    )
+    parser.add_argument(
+        '--alt_halo_path',
+        help='alternative halo path to use, like "/insert/path/to/halo/folder"',
     )
     parser.add_argument(
         '--alt_z',

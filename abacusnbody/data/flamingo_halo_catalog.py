@@ -3,7 +3,8 @@ import yaml
 import h5py
 import astropy.table
 from astropy.table import Table
-from cosmology import CosmologyFlamingo
+#from cosmology import CosmologyFlamingo
+from abacusnbody.data.cosmology import CosmologyFlamingo
 
 # This is a halo catalog loading module designed to 
 # imitate the compaso halo catalog for Flamingo and Peregrinus.

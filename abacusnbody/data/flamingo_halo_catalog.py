@@ -35,6 +35,8 @@ class SwiftHaloCatalog(object):
 
         self.cosmology = CosmologyFlamingo(path_config_filename)
 
+        self.halo_lc = False # lightcone catalogues not yet supported
+
     def get_halo_data(self, file_path):
         if self.halo_type == "soap":
             self.read_soap_file(file_path)

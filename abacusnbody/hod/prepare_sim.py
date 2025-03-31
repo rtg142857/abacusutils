@@ -20,12 +20,17 @@ import h5py
 import numba
 import numpy as np
 import yaml
+import re
 from numba import njit
 from scipy.interpolate import interpn
 from scipy.spatial import cKDTree
 
+import astropy.table
+from astropy.table import Table
+
 #from abacusnbody.data.compaso_halo_catalog import CompaSOHaloCatalog
 #from abacusnbody.data.read_abacus import read_asdf
+from abacusnbody.data.flamingo_halo_catalog import SwiftHaloCatalog
 
 from ..analysis.shear import get_shear, smooth_density
 from ..analysis.tsc import tsc_parallel
@@ -325,11 +330,17 @@ def do_Menv_from_tree(
     Menv[mmask] = calc_Menv(allmasses, inner_arr, inner_starts, outer_arr, outer_starts)
     return Menv
 
+def get_file_number(filename):
+    """
+    Returns the last string of digits before the .hdf5 in a filename, as an int
+    """
+    filename_without_hdf5 = filename[:-5]
+    return int(re.compile(r'(\d+)$').search(filename_without_hdf5).group(1))
 
 def prepare_slab(
-    i,
+    halo_file,
+    path_config_filename,
     savedir,
-    simdir,
     simname,
     z_mock,
     z_type,
@@ -347,29 +358,37 @@ def prepare_slab(
     mcut=1e11,
     rad_outer=10,
 ):
+    """
+    Makes a prepared HDF5 file from a single halo file
+    Args: halo_file (full path to a halo file), path_config_filename,
+    savedir (output directory), simname (just a label)...
+    """
+    i = get_file_number(halo_file)
     outfilename_halos = (
         savedir
-        + '/halos_xcom_'
+        + '/'
+        + simname + "_"
         + str(i)
         + '_seed'
         + str(newseed)
-        + '_abacushod_oldfenv'
+        + '_flamingohod_basic'
     )
-    outfilename_particles = (
-        savedir
-        + '/particles_xcom_'
-        + str(i)
-        + '_seed'
-        + str(newseed)
-        + '_abacushod_oldfenv'
-    )
-    print('processing slab ', i)
+    # Particles not supported yet
+    # outfilename_particles = (
+    #     savedir
+    #     + '/particles_xcom_'
+    #     + str(i)
+    #     + '_seed'
+    #     + str(newseed)
+    #     + '_abacushod_oldfenv'
+    # )
+    print('processing file ', i)
     if MT: # if tracer_flags ELG or QSO are true:
         outfilename_halos += '_MT'
-        outfilename_particles += '_MT'
-    if want_ranks:
-        outfilename_particles += '_withranks'
-    outfilename_particles += '_new.h5'
+        #outfilename_particles += '_MT'
+    #if want_ranks:
+        #outfilename_particles += '_withranks'
+    #outfilename_particles += '_new.h5'
     outfilename_halos += '_new.h5'
 
     np.random.seed(newseed + i)
@@ -378,7 +397,7 @@ def prepare_slab(
     if (
         (not overwrite)
         and (os.path.exists(outfilename_halos))
-        and (os.path.exists(outfilename_particles))
+        #and (os.path.exists(outfilename_particles))
     ):
         print('files exists, skipping ', i)
         return 0
@@ -386,6 +405,7 @@ def prepare_slab(
     # load the halo catalog slab
     print('loading halo catalog ')
     if halo_lc:
+        raise Exception("Lightcone not implemented yet")
         slabname = (
             simdir
             + '/'
@@ -398,21 +418,21 @@ def prepare_slab(
         pos_key = 'pos_interp'
         vel_key = 'vel_interp'
         N_key = 'N_interp'
-    else:
-        slabname = (
-            simdir
-            + '/'
-            + simname
-            + '/halos/z'
-            + str(z_mock).ljust(5, '0')
-            + '/halo_info/halo_info_'
-            + str(i).zfill(3)
-            + '.asdf'
-        )
-        id_key = 'id'
-        pos_key = 'x_L2com'
-        vel_key = 'v_L2com'
-        N_key = 'N'
+    # else:
+        # slabname = (
+        #     simdir
+        #     + '/'
+        #     + simname
+        #     + '/halos/z'
+        #     + str(z_mock).ljust(5, '0')
+        #     + '/halo_info/halo_info_'
+        #     + str(i).zfill(3)
+        #     + '.asdf'
+        # )
+        # id_key = 'id'
+        # pos_key = 'x_L2com'
+        # vel_key = 'v_L2com'
+        # N_key = 'N'
 
     if z_type == 'primary' or z_type == 'lightcone':
         raise Exception("Particles not implemented yet; do not use z_type: primary")
@@ -434,25 +454,30 @@ def prepare_slab(
             cleaned=cleaning,
         )
     else:
-        cat = CompaSOHaloCatalog(
-            slabname,
-            fields=[
-                N_key,
-                pos_key,
-                vel_key,
-                'r90_L2com',
-                'r25_L2com',
-                'r98_L2com',
-                'npstartA',
-                'npoutA',
-                id_key,
-                'sigmav3d_L2com',
-            ],
-            cleaned=cleaning,
+        cat = SwiftHaloCatalog(
+            path_config_filename
         )
+        # cat = CompaSOHaloCatalog(
+        #     slabname,
+        #     fields=[
+        #         N_key,
+        #         pos_key,
+        #         vel_key,
+        #         'r90_L2com',
+        #         'r25_L2com',
+        #         'r98_L2com',
+        #         'npstartA',
+        #         'npoutA',
+        #         id_key,
+        #         'sigmav3d_L2com',
+        #     ],
+        #     cleaned=cleaning,
+        # )
+        cat.get_halo_data(halo_file)
+        cat.compute_additional_halo_data(z_mock)
     assert halo_lc == cat.halo_lc
 
-    halos = cat.halos
+    halos = Table(cat.halos, copy=False) # because it's not being done within the SwiftHaloCatalog object
     if halo_lc:
         raise Exception("Lightcone not implemented yet")
         halos['id'] = halos[id_key]
@@ -465,15 +490,17 @@ def prepare_slab(
     if z_type == 'primary' or z_type == 'lightcone':
         raise Exception("Lightcone not implemented yet")
         parts = cat.subsamples
-    header = cat.header
-    Lbox = cat.header['BoxSizeHMpc']
-    Mpart = header['ParticleMassHMsun']  # msun / h
-    H0 = header['H0']
-    h = H0 / 100.0
+    #header = cat.header
+    #Lbox = cat.header['BoxSizeHMpc']
+    #Mpart = header['ParticleMassHMsun']  # msun / h
+    #H0 = header['H0']
+    #h = H0 / 100.0
+    h = cat.h
 
     # # form a halo table of the columns i care about
     # creating a mask of which halos to keep, which halos to drop
-    p_halos = subsample_halos(halos['N'] * Mpart, MT)
+    #p_halos = subsample_halos(halos['N'] * Mpart, MT)
+    p_halos = subsample_halos(halos["M200_crit"], MT)
     mask_halos = np.random.random(len(halos)) < p_halos
     print('total number of halos, ', len(halos), 'keeping ', np.sum(mask_halos))
 
@@ -660,8 +687,8 @@ def prepare_slab(
         halos['shear_rank'] = np.zeros(len(halos))
 
     # the new particle start, len, and multiplier
-    halos_pstart = halos['npstartA']
-    halos_pnum = halos['npoutA']
+    # halos_pstart = halos['npstartA']
+    # halos_pnum = halos['npoutA']
     halos_pstart_new = np.zeros(len(halos))
     halos_pnum_new = np.zeros(len(halos))
 
@@ -850,12 +877,12 @@ def prepare_slab(
     halos['randoms_exp'] = (
         np.random.randint(0, 2, size=(len(halos), 3)) * 2 - 1
     ) * np.random.exponential(
-        scale=np.repeat(halos['sigmav3d_L2com'], 3).reshape((-1, 3)) / np.sqrt(3),
+        scale=np.repeat(halos['sigmav3d'], 3).reshape((-1, 3)) / np.sqrt(3),
         size=(len(halos), 3),
     )  # attaching random numbers
     halos['randoms_gaus_vrms'] = np.random.normal(
         loc=0,
-        scale=np.repeat(halos['sigmav3d_L2com'], 3).reshape((-1, 3)) / np.sqrt(3),
+        scale=np.repeat(halos['sigmav3d'], 3).reshape((-1, 3)) / np.sqrt(3),
         size=(len(halos), 3),
     )  # attaching random numbers
 
@@ -1154,6 +1181,7 @@ def main(
             pool.submit(
                 prepare_slab,
                 halo_file,
+                path_config_filename,
                 savedir=savedir,
                 simname=simname,
                 z_mock=z_mock,

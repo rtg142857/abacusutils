@@ -350,7 +350,7 @@ def prepare_slab(
     want_AB,
     want_shear,
     shearmark,
-    cleaning,
+    #cleaning,
     newseed,
     halo_lc=False, # halo lightcone
     nthread=1,
@@ -484,8 +484,9 @@ def prepare_slab(
         halos['x_L2com'] = halos[pos_key]
         halos['v_L2com'] = halos[vel_key]
         halos['N'] = halos[N_key]
-    if cleaning:
-        halos = halos[halos['N'] > 0]
+    # if cleaning:
+    #     halos = halos[halos['N'] > 0]
+    # swifthalocatalog already omits n=0 halos
 
     if z_type == 'primary' or z_type == 'lightcone':
         raise Exception("Lightcone not implemented yet")
@@ -1055,7 +1056,7 @@ def main(
         + '/z'
         + str(z_mock).ljust(5, '0')
     )
-    cleaning = config['sim_params']['cleaned_halos']
+    #cleaning = config['sim_params']['cleaned_halos']
     if 'halo_lc' in config['sim_params'].keys():
         raise Exception("Lightcones not yet implemented")
         halo_lc = config['sim_params']['halo_lc']
@@ -1195,7 +1196,7 @@ def main(
                 want_AB=want_AB,
                 want_shear=want_shear,
                 shearmark=shearmark,
-                cleaning=cleaning,
+                #cleaning=cleaning,
                 newseed=newseed,
                 halo_lc=halo_lc,
                 nthread=nthread,

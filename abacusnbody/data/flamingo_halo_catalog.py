@@ -14,7 +14,7 @@ class SwiftHaloCatalog(object):
         """
         Initiate halo catalogue but don't look at any halos
 
-        Gets self.run_params (dict of the run parameters), self.ic_params (dict of the ics), self.h, self.UnitMass_in_Msol_h, self.halo_type
+        Gets self.run_params (dict of the run parameters), NOT YET self.ic_params (dict of the ics), YES self.h, self.UnitMass_in_Msol_h, self.halo_type, self.cosmology
         """
 
         with open(path_config_filename, "r") as file:
@@ -25,8 +25,9 @@ class SwiftHaloCatalog(object):
 
         with open(self.param_file_path, "r") as file:
             self.run_params = yaml.safe_load(file)
-        with open(self.ic_file_path, "r") as file:
-            self.ic_params = yaml.safe_load(file)
+        # need to use a config parser if I want the ics; see cosmology.py
+        # with open(self.ic_file_path, "r") as file:
+        #     self.ic_params = yaml.safe_load(file)
 
         self.h = self.run_params["Cosmology"]["h"]
         UnitMass_in_cgs = float(self.run_params["InternalUnitSystem"]["UnitMass_in_cgs"])

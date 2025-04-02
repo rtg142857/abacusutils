@@ -367,11 +367,12 @@ def prepare_slab(
     outfilename_halos = (
         savedir
         + '/'
-        + simname + "_"
-        + str(i)
-        + '_seed'
-        + str(newseed)
-        + '_flamingohod_basic'
+        + simname
+        # + "_" # I don't think this is necessary
+        # + str(i)
+        # + '_seed'
+        # + str(newseed)
+        # + '_flamingohod_basic'
     )
     # Particles not supported yet
     # outfilename_particles = (
@@ -383,13 +384,14 @@ def prepare_slab(
     #     + '_abacushod_oldfenv'
     # )
     print('processing file ', i)
-    if MT: # if tracer_flags ELG or QSO are true:
-        outfilename_halos += '_MT'
+    # if MT: # if tracer_flags ELG or QSO are true:
+    #     outfilename_halos += '_MT'
         #outfilename_particles += '_MT'
     #if want_ranks:
         #outfilename_particles += '_withranks'
     #outfilename_particles += '_new.h5'
-    outfilename_halos += '_new.h5'
+    #outfilename_halos += '_new.h5'
+    outfilename_halos += ".hdf5"
 
     np.random.seed(newseed + i)
     # if file already exists, just skip
@@ -1054,9 +1056,10 @@ def main(
     z_mock = float(config['Params']['redshift'])
     savedir = (
         config['sim_params']['subsample_dir']
+        + "/"
         + simname
-        + '/z'
-        + str(z_mock).ljust(5, '0')
+        # + '/z' # don't need this jazz
+        # + str(z_mock).ljust(5, '0')
     )
     #cleaning = config['sim_params']['cleaned_halos']
     if 'halo_lc' in config['sim_params'].keys():

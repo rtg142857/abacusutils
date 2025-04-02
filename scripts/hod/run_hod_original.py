@@ -13,22 +13,18 @@ import time
 import numpy as np
 import yaml
 
-from abacusnbody.hod.flamingo_hod import FlamingoHOD
+from abacusnbody.hod.abacus_hod import AbacusHOD
 
 DEFAULTS = {}
-DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
+DEFAULTS['path2config'] = 'config/abacus_hod.yaml'
 
 
-def main(path_config_filename):
+def main(path2config):
     # load the yaml parameters
-    config = yaml.load(open(path_config_filename))
+    config = yaml.load(open(path2config))
     sim_params = config['sim_params']
     HOD_params = config['HOD_params']
     clustering_params = config['clustering_params']
-    Paths = config["Paths"]
-    Labels = config["Labels"]
-    Params = config["Params"]
-    Misc = config["Misc"]
 
     # additional parameter choices
     want_rsd = HOD_params['want_rsd']
@@ -40,9 +36,8 @@ def main(path_config_filename):
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
 
-    # create a new FlamingoHOD object
-    #newBall = AbacusHOD(sim_params, HOD_params, clustering_params)
-    newBall = FlamingoHOD(path_config_filename)
+    # create a new abacushod object
+    newBall = AbacusHOD(sim_params, HOD_params, clustering_params)
 
     # throw away run for jit to compile, write to disk
     mock_dict = newBall.run_hod(
@@ -91,7 +86,7 @@ if __name__ == '__main__':
         description=__doc__, formatter_class=ArgParseFormatter
     )
     parser.add_argument(
-        '--path_config_filename', help='Path to the config file', default=DEFAULTS['path_config_filename']
+        '--path2config', help='Path to the config file', default=DEFAULTS['path2config']
     )
     args = vars(parser.parse_args())
     main(**args)

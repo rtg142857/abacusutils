@@ -1,6 +1,3 @@
-""" """
-
-
 # The FlamingoHOD module generates HOD tracers from Flamingo and Peregrinus simulations.
 # Based very heavily upon AbacusHOD.
 # A high-level overview of the latter module can be found in
@@ -37,6 +34,7 @@ from .GRAND_HOD import (
     N_cen_QSO,
     N_sat_generic,
 )
+#from NFW import nfw_draw
 
 # TODO B.H.: staging can be shorter and prettier; perhaps asdf for h5 and ecsv?
 
@@ -703,7 +701,7 @@ class FlamingoHOD:
             !!! NFW profile is unoptimized. It has different velocity bias. It does not support lightcone. !!!
 
         ``NFW_draw``: np.array
-            A long array of random numbers drawn from an NFW profile. P(x) = 1./(x*(1+x)**2)*x**2. default ``None``.
+            A long array of random numbers drawn from an NFW profile. P(x) = (1./(x*(1+x)**2))*x**2. default ``None``.
             Only needed if ``want_nfw == True``.
 
         ``reseed``: int
@@ -737,8 +735,9 @@ class FlamingoHOD:
         """
         if tracers is None:
             tracers = self.tracers
-        if self.z_type == 'secondary':
+        if True: #self.z_type == 'secondary':, i.e. no particles:
             assert want_nfw
+            # Here is where we make the array drawn from the NFW profile
         if reseed:
             start = time.time()
             # np.random.seed(reseed)
@@ -861,7 +860,7 @@ class FlamingoHOD:
                 1 + tracer_hod.get('z_pivot', self.z_mock)
             )
             if etracer == 'LRG':
-                newngal = AbacusHOD._compute_ngal_lrg(
+                newngal = FlamingoHOD._compute_ngal_lrg(
                     self.logMbins,
                     self.deltacbins,
                     self.fenvbins,
@@ -884,7 +883,7 @@ class FlamingoHOD:
                 ngal_dict[etracer] = newngal[0] + newngal[1]
                 fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
             elif etracer == 'ELG':
-                newngal = AbacusHOD._compute_ngal_elg(
+                newngal = FlamingoHOD._compute_ngal_elg(
                     self.logMbins,
                     self.deltacbins,
                     self.fenvbins,
@@ -920,7 +919,7 @@ class FlamingoHOD:
                 ngal_dict[etracer] = newngal[0] + newngal[1]
                 fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
             elif etracer == 'QSO':
-                newngal = AbacusHOD._compute_ngal_qso(
+                newngal = FlamingoHOD._compute_ngal_qso(
                     self.logMbins,
                     self.deltacbins,
                     self.fenvbins,

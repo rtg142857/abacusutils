@@ -30,6 +30,7 @@ def main(path_config_filename):
     Labels = config["Labels"]
     Params = config["Params"]
     Misc = config["Misc"]
+    seed = Misc["random_seed"]
 
     # additional parameter choices
     want_rsd = HOD_params['want_rsd']
@@ -47,7 +48,8 @@ def main(path_config_filename):
     newBall = FlamingoHOD(path_config_filename)
 
     print("Getting NFW draw for satellites")
-    NFW_draw = nfw_draw(10000)
+    max_nfw = 40
+    NFW_draw = nfw_draw(10000, max_nfw, seed)
 
     print("Throwaway run for jit to compile, write to disk")
     # throw away run for jit to compile, write to disk

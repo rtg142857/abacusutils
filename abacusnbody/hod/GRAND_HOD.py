@@ -465,7 +465,7 @@ def compute_fast_NFW(
 ):
     """
     --- Compute NFW positions and velocities for satelitte galaxies
-    c: r98/r25
+    c: r98/r25, or it used to be
     vrms_h: 'sigmav3d_L2com'
     """
     # numba.set_num_threads(Nthread)

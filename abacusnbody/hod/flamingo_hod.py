@@ -116,7 +116,7 @@ class FlamingoHOD:
         self.halo_lc = config["sim_params"].get('halo_lc', False)
         self.force_mt = config["sim_params"].get('force_mt', False)  # use MT subsamples for LRG?
 
-        ztype = "secondary"
+        self.z_type = "secondary"
         # if self.halo_lc:
         #     raise Exception("LC not implemented yet")
         #     ztype = 'lightcone'

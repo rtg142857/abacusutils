@@ -336,7 +336,7 @@ class FlamingoHOD:
 
         # count ther number of halos and particles
         Nhalos = np.zeros(num_subsample_files)
-        #Nparts = np.zeros(params['numslabs'])
+        Nparts = np.zeros(num_subsample_files)
         # Replace with a loop over files
         for i in range(num_subsample_files):
             subsample_file = subsample_files[i]

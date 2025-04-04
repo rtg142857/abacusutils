@@ -103,7 +103,7 @@ class FlamingoHOD:
             Number of chunks to split the input from the halo+particle subsample and number of output files in which to write out the galaxy catalogs following the format ``{tracer}s_{chunk}.dat``.
         """
         self.logger = logging.getLogger('FlamingoHOD')
-        config = yaml.load(open(path_config_filename))
+        config = yaml.safe_load(open(path_config_filename))
         self.config = config
         # simulation details
         self.sim_label = config["Labels"]['sim_label']
@@ -300,7 +300,7 @@ class FlamingoHOD:
         #     )
         # f = asdf.open(halo_info_fns[0], lazy_load=True)
         # header = f['header']
-        sim_params = yaml.load(open(self.params_path))
+        sim_params = yaml.safe_load(open(self.params_path))
 
         # constants
         params = {}

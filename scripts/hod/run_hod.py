@@ -22,7 +22,7 @@ DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
 
 def main(path_config_filename):
     # load the yaml parameters
-    config = yaml.load(open(path_config_filename))
+    config = yaml.safe_load(open(path_config_filename))
     sim_params = config['sim_params']
     HOD_params = config['HOD_params']
     clustering_params = config['clustering_params']

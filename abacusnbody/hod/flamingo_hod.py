@@ -8,6 +8,7 @@ import gc
 import time
 from pathlib import Path
 import logging
+import warnings
 
 import asdf
 import h5py
@@ -38,10 +39,19 @@ from .GRAND_HOD import (
 
 # TODO B.H.: staging can be shorter and prettier; perhaps asdf for h5 and ecsv?
 
+def velz2kms(zcos, Om0, Ol0):
+    """
+    Conversion factor between proper velocity and comoving redshift
+    
+    rsd_comoving_position += rsd_proper_velocity / velz2kms(zcos, Om0, Ol0)
+    """
+    Hz = 100.0*np.sqrt(Om0*(1.0+zcos)**3 + Ol0)
+    return (1+zcos)/Hz
 
 class FlamingoHOD:
     """
     A highly efficient multi-tracer HOD code for the AbacusSummmit simulations.
+    except no longer for the AbacusSummit simulations. I make no claims as to its efficiency.
     """
 
     def __init__(
@@ -309,7 +319,11 @@ class FlamingoHOD:
         params['Lbox'] = self.config["Params"]['L'] * params["h"] # Mpc / h, box size
         self.lbox = params["Lbox"]
         #params['Mpart'] = header['ParticleMassHMsun']  # Msun / h, mass of each particle
-        #params['velz2kms'] = header['VelZSpace_to_kms'] / params['Lbox']
+
+        warnings.warn("Assuming LambdaCDM for redshift space calculation; needs to be changed for w0waCDM")
+        Ol0 = sim_params["Cosmology"]["Omega_lambda"]
+        Om0 = 1 - Ol0
+        params['velz2kms'] = velz2kms(self.z_mock, Om0, Ol0) #header['VelZSpace_to_kms'] / params['Lbox']
         if self.halo_lc:
             raise Exception("Lightcone not implemented yet")
             params['origin'] = np.array(header['LightConeOrigins']).reshape(-1, 3)[0]

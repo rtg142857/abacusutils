@@ -32,6 +32,7 @@ class SwiftHaloCatalog(object):
         self.h = self.run_params["Cosmology"]["h"]
         UnitMass_in_cgs = float(self.run_params["InternalUnitSystem"]["UnitMass_in_cgs"])
         self.UnitMass_in_Msol_h = UnitMass_in_cgs * self.h / 1.98841e33
+        self.boxsize_h = self.path_config["Params"]["L"] * self.h
 
         self.halo_type = path_config["Misc"]["halo_type"]
 
@@ -121,7 +122,7 @@ class SwiftHaloCatalog(object):
 
         halos = {}
         halos["id"] = np.array(halo_cat["InputHalos"]["HBTplus"]['TrackId'])[relevant_field_halos]
-        halos["pos"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * self.h
+        halos["pos"] = (np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * self.h) % self.boxsize_h # some values are just outside the box
         halos["vel"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
         halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h
         halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
@@ -140,7 +141,7 @@ class SwiftHaloCatalog(object):
 
         halos = {}
         halos["id"] = np.array(halo_cat["Subhalos"]['TrackId'])[relevant_field_halos]
-        halos["pos"] = np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos] * self.h
+        halos["pos"] = (np.array(halo_cat["Subhalos"]["ComovingAveragePosition"])[relevant_field_halos] * self.h) % self.boxsize_h
         halos["vel"] = np.array(halo_cat["Subhalos"]["PhysicalAverageVelocity"])[relevant_field_halos]
         halos["M200_crit"] = np.array(halo_cat["Subhalos"]["BoundM200Crit"])[relevant_field_halos] * self.UnitMass_in_Msol_h
         halos["rvmax"] = np.array(halo_cat["Subhalos"]["RmaxComoving"])[relevant_field_halos] * self.h

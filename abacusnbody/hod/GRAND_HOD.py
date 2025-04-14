@@ -148,7 +148,7 @@ def wrap(x, L):
 
 
 
-@njit(parallel=True, fastmath=True)
+#@njit(parallel=True, fastmath=True)
 def gen_cent(
     pos,
     vel,
@@ -457,7 +457,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None):
     return ur
 
 
-@njit(fastmath=True, parallel=True)  # parallel=True,
+#@njit(fastmath=True, parallel=True)  # parallel=True,
 def compute_fast_NFW(
     NFW_draw,
     h_id,
@@ -539,7 +539,7 @@ def compute_fast_NFW(
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M
 
 
-@njit(fastmath=True, parallel=True)
+#@njit(fastmath=True, parallel=True)
 def gen_sats_nfw(
     NFW_draw,
     hpos,
@@ -845,7 +845,7 @@ def gen_sats_nfw(
     return LRG_dict, ELG_dict, QSO_dict, ID_dict
 
 
-@njit(parallel=True, fastmath=True)
+#@njit(parallel=True, fastmath=True)
 def gen_sats(
     ppos,
     pvel,

@@ -18,6 +18,12 @@ float_array = types.float64[:]
 int_array = types.int64[:]
 G = 4.302e-6  # in kpc/Msol (km.s)^2
 
+def assert_nonnan(array, name):
+    """
+    Asserts that no value in an array is nan; prints an error message referring to "name" if it is: "[name] has a NaN in it"
+    """
+    assert not np.isnan(np.sum(array)), name+" has a NaN in it"
+
 
 @njit(fastmath=True)
 def n_sat_LRG_modified(M_h, logM_cut, M_cut, M_1, sigma, alpha, kappa):
@@ -386,6 +392,10 @@ def gen_cent(
                 qso_id[j3] = ids[i]
                 j3 += 1
         # assert j == gstart[tid + 1]
+        assert_nonnan(elg_x, "elg_x central")
+        assert_nonnan(elg_z, "elg_y central")
+        assert_nonnan(elg_y, "elg_z central")
+
 
     LRG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     ELG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
@@ -523,6 +533,9 @@ def compute_fast_NFW(
                 vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
             else:
                 raise ValueError('Wrong vel_sat argument only "rd_normal"')
+        assert_nonnan(x_sat, "x_sat")
+        assert_nonnan(y_sat, "y_sat")
+        assert_nonnan(z_sat, "z_sat")
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M
 
 

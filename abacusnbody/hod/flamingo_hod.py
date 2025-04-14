@@ -46,7 +46,7 @@ def velz2kms(zcos, Om0, Ol0):
     rsd_comoving_position += rsd_proper_velocity / velz2kms(zcos, Om0, Ol0)
     """
     Hz = 100.0*np.sqrt(Om0*(1.0+zcos)**3 + Ol0)
-    return (1+zcos)/Hz
+    return Hz/(1+zcos)
 
 def bounds_checker(x, y, z, lbox, message=""):
     """

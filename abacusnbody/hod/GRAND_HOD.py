@@ -510,7 +510,7 @@ def compute_fast_NFW(
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))
     for tid in numba.prange(Nthread):
         for i in range(int(hstart[tid]), int(hstart[tid + 1])):
-            ind = i
+            ind = i % len(NFW_draw)
             # while (NFW_draw[ind] > c[i]):
             #    ind = np.random.randint(0, len(NFW_draw))
             # etaVir = NFW_draw[ind]/c[i]  # =r/rvir

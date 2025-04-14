@@ -48,6 +48,16 @@ def velz2kms(zcos, Om0, Ol0):
     Hz = 100.0*np.sqrt(Om0*(1.0+zcos)**3 + Ol0)
     return (1+zcos)/Hz
 
+def bounds_checker(x, y, z, lbox, message=""):
+    """
+    Checks if any x, y, or z values are outside the range of a box given by lbox. Prints message.
+    """
+    print("Bounds checking:", message)
+    print("X-values outside bounds:", np.any(np.logical_or(x < 0.0, x >= lbox)))
+    print("Y-values outside bounds:", np.any(np.logical_or(y < 0.0, y >= lbox)))
+    print("Z-values outside bounds:", np.any(np.logical_or(z < 0.0, z >= lbox)))
+
+
 class FlamingoHOD:
     """
     A highly efficient multi-tracer HOD code for the AbacusSummmit simulations.
@@ -332,7 +342,7 @@ class FlamingoHOD:
 
         # settitng up chunking
         # n_chunks = self.n_chunks
-        # params['chunk'] = self.chunk
+        params['chunk'] = self.chunk
         # if self.chunk == -1:
         #     chunk = 0
         # else:
@@ -1231,6 +1241,7 @@ class FlamingoHOD:
             x1 = mock_dict[tr1]['x']
             y1 = mock_dict[tr1]['y']
             z1 = mock_dict[tr1]['z']
+            bounds_checker(x1, y1, z1, self.lbox, message="tracer "+str(i1))
             for i2, tr2 in enumerate(mock_dict.keys()):
                 if i1 > i2:
                     continue  # cross-correlations are symmetric

@@ -54,7 +54,7 @@ def main(path_config_filename):
     print("Throwaway run for jit to compile, write to disk")
     # throw away run for jit to compile, write to disk
     mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=write_to_disk, Nthread=16
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=write_to_disk, Nthread=16, verbose=True
     )
     # mock_dict = newBall.gal_reader()
     start = time.time()

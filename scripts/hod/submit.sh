@@ -15,6 +15,6 @@
 module purge
 module use /cosma/apps/dp004/dc-mene1/desi/cosmodesiconda/my-desiconda/modulefiles
 module load cosmodesiconda/my-desiconda
-module unload Corrfunc
+#source /cosma/apps/dp004/dc-mene1/old_corrfunc/bin/activate
 
 python run_hod.py --path_config_filename /cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/config/test_flamingo_hod.yaml

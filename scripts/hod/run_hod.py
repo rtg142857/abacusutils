@@ -75,7 +75,7 @@ def main(path_config_filename):
         print("alpha = ",newBall.tracers['LRG']['alpha'])
         start = time.time()
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, write_to_disk=False, Nthread=64
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=64
         )
         print('Done hod, took time ', time.time() - start)
         start = time.time()

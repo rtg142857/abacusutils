@@ -464,6 +464,7 @@ def compute_fast_NFW(
     rd_pos,
     num_sat,
     f_sigv,
+    Lbox,
     vel_sat='rd_normal',
     Nthread=16,
     exp_frac=0,
@@ -512,9 +513,9 @@ def compute_fast_NFW(
                 etaVir = NFW_draw[ind] / c[i] * nfw_rescale
 
             p = etaVir * Rvir[i]
-            x_sat[i] = x_h[i] + rd_pos[i, 0] * p
-            y_sat[i] = y_h[i] + rd_pos[i, 1] * p
-            z_sat[i] = z_h[i] + rd_pos[i, 2] * p
+            x_sat[i] = (x_h[i] + rd_pos[i, 0] * p) % Lbox
+            y_sat[i] = (y_h[i] + rd_pos[i, 1] * p) % Lbox
+            z_sat[i] = (z_h[i] + rd_pos[i, 2] * p) % Lbox
             if vel_sat == 'rd_normal':
                 sig = vrms_h[i] * 0.577 * f_sigv
                 vx_sat[i] = np.random.normal(loc=vx_h[i], scale=sig)
@@ -733,6 +734,7 @@ def gen_sats_nfw(
             rd_pos_L,
             num_sats_L,
             f_sigv_L,
+            lbox,
             vel_sat,
             Nthread,
             exp_frac,
@@ -757,6 +759,7 @@ def gen_sats_nfw(
             rd_pos_E,
             num_sats_E,
             f_sigv_E,
+            lbox,
             vel_sat,
             Nthread,
             exp_frac,
@@ -781,6 +784,7 @@ def gen_sats_nfw(
             rd_pos_Q,
             num_sats_Q,
             f_sigv_Q,
+            lbox,
             vel_sat,
             Nthread,
             exp_frac,

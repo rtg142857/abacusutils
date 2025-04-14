@@ -127,12 +127,19 @@ def Gaussian_fun(x, mean, sigma):
 @njit(fastmath=True)
 def wrap(x, L):
     """Fast scalar mod implementation"""
-    L2 = L / 2
-    if x >= L2:
+    # L2 = L / 2
+    # if x >= L2:
+    #     return x - L
+    # elif x < -L2:
+    #     return x + L
+    # return x
+    # # why in the world did it originally do the above, it's not consistent with the draw_NFW where it just does % lbox
+    if x >= L:
         return x - L
-    elif x < -L2:
+    elif x < 0:
         return x + L
     return x
+
 
 
 @njit(parallel=True, fastmath=True)

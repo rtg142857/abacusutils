@@ -58,11 +58,11 @@ def main(path_config_filename):
     )
     # mock_dict = newBall.gal_reader()
     start = time.time()
-    newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
-    print('Done xi, total time ', time.time() - start)
+    # newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+    # print('Done xi, total time ', time.time() - start)
     # print(xirppi)
-    # wp = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size)
-    # print(wp)
+    wp = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size)
+    print(wp)
 
     print("Running the fit 10 times for timing...")
     # run the fit 10 times for timing
@@ -81,9 +81,12 @@ def main(path_config_filename):
         start = time.time()
         ngal_dict = newBall.compute_ngal()
         print("Done ngal, took time ", time.time() - start, ngal_dict)
-        newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+        # newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+        # deltat = time.time() - start
+        # print('Done xi, total time ', deltat)
+        newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         deltat = time.time() - start
-        print('Done xi, total time ', deltat)
+        print('Done wp, total time ', deltat)
         meantime += deltat
     print('meantime ', meantime / Ntest)
 

@@ -1939,6 +1939,27 @@ class FlamingoHOD:
         for tracer in tracers:
             mockdict[tracer] = ascii.read(outdir / (tracer + 's.dat'))
         return mockdict
+    
+    def update_HOD_params(self, params):
+        """
+        Takes in an array of 15 parameters: the LRG, ELG, and QSO main five HOD params in that order:
+        Updates the FlamingoHOD object's HOD parameter values accordingly.
+        """
+        self.tracers["LRG"]["logM_cut"] = params[0]
+        self.tracers["LRG"]["logM1"] = params[1]
+        self.tracers["LRG"]["sigma"] = params[2]
+        self.tracers["LRG"]["alpha"] = params[3]
+        self.tracers["LRG"]["kappa"] = params[4]
+        self.tracers["ELG"]["logM_cut"] = params[5]
+        self.tracers["ELG"]["logM1"] = params[6]
+        self.tracers["ELG"]["sigma"] = params[7]
+        self.tracers["ELG"]["alpha"] = params[8]
+        self.tracers["ELG"]["kappa"] = params[9]
+        self.tracers["QSO"]["logM_cut"] = params[10]
+        self.tracers["QSO"]["logM1"] = params[11]
+        self.tracers["QSO"]["sigma"] = params[12]
+        self.tracers["QSO"]["alpha"] = params[13]
+        self.tracers["QSO"]["kappa"] = params[14]
 
 
 @njit(parallel=True)

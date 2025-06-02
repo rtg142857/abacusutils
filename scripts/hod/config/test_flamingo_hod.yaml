@@ -113,11 +113,18 @@ clustering_params:
 #    power_type: 'wp'
     clustering_type: 'xirppi'
     bin_params:
-        logmin: -0.77288
-        logmax: 1.47712
-        nbins: 8
-    pimax: 30
-    pi_bin_size: 5
+        logmin: -2 #-0.77288
+        logmax: 2 #1.47712
+        nbins: 24 #8
+    pimax: 80 #30
+    pi_bin_size: 1 #5
+
+# ===========================================================================================
+# Specifically for fitting the HOD parameters
+fitting_params:
+    nwalkers: 5
+    num_steps: 100
+    target_dict_path:
 
 # ===========================================================================================
 # The following dictionaries are for using the provided emcee/likelihood templates. They

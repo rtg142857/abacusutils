@@ -9,19 +9,21 @@ import time
 from flamingo_hod import FlamingoHOD
 import emcee
 
-def fit_HOD(newBall: FlamingoHOD, path_config_filename, print_to_files: bool):
+def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw):
     # Initialise the fitting using emcee
     # Use a different function to actually do the fit (modularity)
     # Print to files: the updated parameters, an image of the HODs, the final fit to the wp (text and image), the errors in fitting to the wp (text and image)
     config = yaml.safe_load(open(path_config_filename))
     fitting_params = config["fitting_params"]
 
-    # target_wp = {}
-    # target_jackknife = {}
+    target_dict_path = fitting_params["target_dict_path"]
+    target_wp, target_jackknife = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
 
-    # Get this from the fitting_params
-    # nwalkers = 100
-    # ndim = 15
+    nwalkers = fitting_params["nwalkers"]
+    num_steps = fitting_params["num_steps"]
+    ndim = 15
+
+    clustering_params = config["clustering_params"]
 
     start_time = time.time()
     sampler = sample_chain(newBall=newBall,
@@ -78,6 +80,7 @@ def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackkni
     return total_log_prob
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife: np.ndarray):
+    # TODO: ONLY LOOK AT A SUBSET OF THE DATA POINTS
     return -np.sum(((target_wp - fitting_wp)/target_jackknife)**2)
 
 def plot_sampler(sampler: emcee.EnsembleSampler):
@@ -109,10 +112,27 @@ def max_like_params(sampler):
     #print(np.shape(likelihoods))
     best_param_index1 = np.unravel_index(np.argmax(likelihoods, axis=None), likelihoods.shape)
 
-    best_params = flat_samples[best_param_index1,:]
+    best_params = flat_samples[best_param_index1[0], best_param_index1[1], :]
     print("best param index:",best_param_index1)
     print("best params:",best_params)
     return best_params
+
+def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
+    """
+    Returns dictionaries indexed by "LRG_LRG", "LRG_ELG", etc.
+    One for the wp, one for the jackknife.
+    """
+    wp_dict = {}
+    jackknife_dict = {}
+    for i1, tr1 in enumerate(tracers):
+        for i2, tr2 in enumerate(tracers):
+            if i1 <= i2:
+                #crosscorr or autocorr
+                path = target_dict_path + tr1 + "_" + tr2 + ".txt"
+                rpmid, rpavg, corr, std = np.loadtxt(path, unpack=True)
+                wp_dict[tr1+"_"+tr2] = corr
+                jackknife_dict[tr1+"_"+tr2] = std
+    return wp_dict, jackknife_dict
 
 def initialise_walkers(initial_params_random: bool, num_walkers):
     """

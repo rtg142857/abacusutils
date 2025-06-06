@@ -6,7 +6,7 @@ import yaml
 import numpy as np
 import time
 
-from flamingo_hod import FlamingoHOD
+from abacusnbody.hod.flamingo_hod import FlamingoHOD
 import emcee
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 

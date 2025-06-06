@@ -8,8 +8,9 @@ import time
 
 from flamingo_hod import FlamingoHOD
 import emcee
+from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw):
+def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=False):
     # Initialise the fitting using emcee
     # Use a different function to actually do the fit (modularity)
     # Print to files: the updated parameters, an image of the HODs, the final fit to the wp (text and image), the errors in fitting to the wp (text and image)
@@ -18,7 +19,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw):
 
     target_dict_path = fitting_params["target_dict_path"]
     target_wp, target_jackknife = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
-
+    #TODO: Get the target number density too
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
     ndim = 15
@@ -26,6 +27,10 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw):
     clustering_params = config["clustering_params"]
 
     start_time = time.time()
+    if save_chains:
+        filename = fitting_params["sampler_save_path"]
+        backend = emcee.backends.HDFBackend(filename)
+        backend.reset(nwalkers, ndim)
     sampler = sample_chain(newBall=newBall,
                            target_wp_dict=target_wp,
                            target_jackknife_dict=target_jackknife,
@@ -33,7 +38,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw):
                            NFW_draw=NFW_draw,
                            nwalkers=nwalkers,
                            num_steps=num_steps,
-                           ndim=ndim) # TODO: fill in
+                           ndim=ndim)
     end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds")
 
@@ -46,6 +51,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw):
 
     plot_sampler(sampler)
 
+
     return max_like_params(sampler)
 
 def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, nwalkers: int, num_steps: int, ndim=15):
@@ -57,31 +63,64 @@ def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_di
     return sampler
 
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw):
-    newBall.update_HOD_params(params)
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=False
-    )
+    if params_inside_priors(params):
+        newBall.update_HOD_params(params)
+        mock_dict = newBall.run_hod(
+            newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=False
+        )
 
-    rpbins = np.logspace(clustering_parameters["bin_params"]["logmin"], clustering_parameters["bin_params"]["logmax"], clustering_parameters["bin_params"]["nbins"]+1)
-    pimax = clustering_parameters["pimax"]
-    pi_bin_size = clustering_parameters["pi_bin_size"]
-    wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size)
-    
-    total_log_prob = 0.0
-    for i1, tr1 in enumerate(newBall.tracers.keys()):
-        for i2, tr2 in enumerate(newBall.tracers.keys()):
-            if i1 <= i2:
-                #crosscorr or autocorr
-                fitting_wp = wp_dict[tr1+"_"+tr2]
-                target_wp = target_wp_dict[tr1+"_"+tr2]
-                target_jk = target_jackknife_dict[tr1+"_"+tr2]
-                total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk)
+        rpbins = np.logspace(clustering_parameters["bin_params"]["logmin"], clustering_parameters["bin_params"]["logmax"], clustering_parameters["bin_params"]["nbins"]+1)
+        pimax = clustering_parameters["pimax"]
+        pi_bin_size = clustering_parameters["pi_bin_size"]
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size)
+        
+        total_log_prob = 0.0
+        for i1, tr1 in enumerate(newBall.tracers.keys()):
+            for i2, tr2 in enumerate(newBall.tracers.keys()):
+                if i1 <= i2:
+                    #crosscorr or autocorr
+                    fitting_wp = wp_dict[tr1+"_"+tr2]
+                    target_wp = target_wp_dict[tr1+"_"+tr2]
+                    target_jk = target_jackknife_dict[tr1+"_"+tr2]
+                    total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk)
+    else:
+        total_log_prob = -np.inf
 
     return total_log_prob
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife: np.ndarray):
     # TODO: ONLY LOOK AT A SUBSET OF THE DATA POINTS
-    return -np.sum(((target_wp - fitting_wp)/target_jackknife)**2)
+    i0 = 0
+    i1 = np.size(fitting_wp)
+    mock = fitting_wp[i0:i1]
+    data = target_wp[i0:i1]
+    C_matrix = target_jackknife[i0:i1, i0:i1]
+
+    temp = np.matmul(C_matrix, mock-data)
+    chi2 = np.dot(mock-data, temp)
+    return -chi2
+
+def params_inside_priors(params):
+    priors = np.array([[10,16],
+                [10,16],
+                [0,5],
+                [0,5],
+                [0,5],
+                [10,16],
+                [10,16],
+                [0,5],
+                [0,5],
+                [0,5],
+                [10,16],
+                [10,16],
+                [0,5],
+                [0,5],
+                [0,5]
+    ])
+    for i in range(len(params)):
+        if params[i] <= priors[i][0] or params[i] >= priors[i][1]:
+            return False
+    return True
 
 def plot_sampler(sampler: emcee.EnsembleSampler):
     """
@@ -128,10 +167,17 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
         for i2, tr2 in enumerate(tracers):
             if i1 <= i2:
                 #crosscorr or autocorr
-                path = target_dict_path + tr1 + "_" + tr2 + ".txt"
-                rpmid, rpavg, corr, std = np.loadtxt(path, unpack=True)
-                wp_dict[tr1+"_"+tr2] = corr
-                jackknife_dict[tr1+"_"+tr2] = std
+                # path = target_dict_path + tr1 + "_" + tr2 + ".txt"
+                # rpmid, rpavg, corr, std = np.loadtxt(path, unpack=True)
+                # wp_dict[tr1+"_"+tr2] = corr
+                # jackknife_dict[tr1+"_"+tr2] = std
+
+                path = target_dict_path + tr1 + "_" + tr2 + ".npy"
+                estimator = TwoPointCorrelationFunction.load(path)
+                rebinned_estimator = estimator[:(estimator.shape[0] // 2) * 2:2] # getting it to be 24 bins
+                sep, wp, cov = twopoint_estimator.project_to_wp(rebinned_estimator, return_cov=True)
+                wp_dict[tr1+"_"+tr2] = wp
+                jackknife_dict[tr1+"_"+tr2] = cov
     return wp_dict, jackknife_dict
 
 def initialise_walkers(initial_params_random: bool, num_walkers):

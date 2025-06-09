@@ -31,11 +31,14 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
         filename = fitting_params["sampler_save_path"]
         backend = emcee.backends.HDFBackend(filename)
         backend.reset(nwalkers, ndim)
+    else:
+        backend = None
     sampler = sample_chain(newBall=newBall,
                            target_wp_dict=target_wp,
                            target_jackknife_dict=target_jackknife,
                            clustering_parameters=clustering_params,
                            NFW_draw=NFW_draw,
+                           backend=backend,
                            nwalkers=nwalkers,
                            num_steps=num_steps,
                            ndim=ndim)
@@ -54,11 +57,11 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
     return max_like_params(sampler)
 
-def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, nwalkers: int, num_steps: int, ndim=15):
+def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
 
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(newBall, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw))#, pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(newBall, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw), backend=backend)#, pool=pool)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     return sampler
 

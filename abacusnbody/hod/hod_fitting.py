@@ -59,7 +59,7 @@ def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_di
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(newBall, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw))#, pool=pool)
-    sampler.run_mcmc(walker_init_pos, num_steps)
+    sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=False) # It feels like it likes to throw an error for the initial state check with the standard priors
     return sampler
 
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw):

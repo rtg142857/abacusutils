@@ -56,7 +56,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
 def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, nwalkers: int, num_steps: int, ndim=15):
 
-    walker_init_pos = initialise_walkers(initial_params_random=False,num_walkers=nwalkers)
+    walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(newBall, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw))#, pool=pool)
     sampler.run_mcmc(walker_init_pos, num_steps)
@@ -203,6 +203,42 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
                    [0,5]
     ])
 
+    mean_priors = np.array([ # Yuan et al.
+        13.3,
+        14.4,
+        0.5,
+        1.0,
+        0.5,
+        13.3,
+        14.4,
+        0.5,
+        1.0,
+        0.5,
+        13.3,
+        14.4,
+        0.5,
+        1.0,
+        0.5
+    ])
+
+    std_priors = np.array([ # Yuan et al.
+        0.5,
+        0.5,
+        0.2,
+        0.3,
+        0.2,
+        0.5,
+        0.5,
+        0.2,
+        0.3,
+        0.2,
+        0.5,
+        0.5,
+        0.2,
+        0.3,
+        0.2
+    ])
+
     initial_params = np.array([
         13.3,
         14.4,
@@ -221,11 +257,14 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         0.4
     ])
 
+    rng = np.random.default_rng(seed=0)
+
     pos = np.zeros((num_walkers,np.shape(initial_params)[0]))
     if (initial_params_random):
         for i in range(num_walkers):
             for j in range(np.shape(priors)[0]):
-                pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
+                #pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
+                pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
 
     else:
         #if len(initial_params)!=np.shape(priors)[0]:

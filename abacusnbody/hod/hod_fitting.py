@@ -10,6 +10,8 @@ from abacusnbody.hod.flamingo_hod import FlamingoHOD
 import emcee
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
+nthread = 64 # For debugging
+
 def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=False):
     # Initialise the fitting using emcee
     # Use a different function to actually do the fit (modularity)
@@ -54,7 +56,6 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
     plot_sampler(sampler)
 
-
     return max_like_params(sampler)
 
 def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
@@ -68,14 +69,15 @@ def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_di
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw):
     if params_inside_priors(params):
         newBall.update_HOD_params(params)
+        print(params) # Debugging
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=False
+            newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False
         )
 
         rpbins = np.logspace(clustering_parameters["bin_params"]["logmin"], clustering_parameters["bin_params"]["logmax"], clustering_parameters["bin_params"]["nbins"]+1)
         pimax = clustering_parameters["pimax"]
         pi_bin_size = clustering_parameters["pi_bin_size"]
-        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size)
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
         
         total_log_prob = 0.0
         for i1, tr1 in enumerate(newBall.tracers.keys()):

@@ -28,6 +28,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
     clustering_params = config["clustering_params"]
 
+    print("Setting up backend...", flush=True)
     start_time = time.time()
     if save_chains:
         filename = fitting_params["sampler_save_path"]
@@ -35,6 +36,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
         backend.reset(nwalkers, ndim)
     else:
         backend = None
+
     sampler = sample_chain(newBall=newBall,
                            target_wp_dict=target_wp,
                            target_jackknife_dict=target_jackknife,
@@ -45,7 +47,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
                            num_steps=num_steps,
                            ndim=ndim)
     end_time = time.time()
-    print("fitting took ", end_time - start_time, " seconds")
+    print("fitting took ", end_time - start_time, " seconds", flush=True)
 
     # Print the parameters at the end of the chain to check they are reasonable
     print("Parameters at the end of the fitting chain: (These aren't best fits, just a sanity check)")
@@ -60,16 +62,20 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
 def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
 
+    print("Initialising walkers...", flush=True)
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
+    print("Initialising sampler...", flush=True)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(newBall, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw), backend=backend)#, pool=pool)
+
+    print("Running chain...", flush=True)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     return sampler
 
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw):
     if params_inside_priors(params):
         newBall.update_HOD_params(params)
-        print(params) # Debugging
+        print(params, flush=True) # Debugging
         mock_dict = newBall.run_hod(
             newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False
         )
@@ -132,11 +138,11 @@ def plot_sampler(sampler: emcee.EnsembleSampler):
     Postprocesses a sampler, displays a corner plot of its parameters, and outputs its maximum posterior values
     """
     tau = sampler.get_autocorr_time()
-    print("Sampler autocorrelation time (burn in estimate):",tau)
+    print("Sampler autocorrelation time (burn in estimate):",tau, flush=True)
     discard_value = int(3 * np.average(tau))
     thin_value = int(0.5 * np.average(tau))
     flat_samples = sampler.get_chain(discard=discard_value, thin=thin_value, flat=True)
-    print("Flattened sampler shape:",flat_samples.shape)
+    print("Flattened sampler shape:",flat_samples.shape, flush=True)
 
     # import corner
     # fig = corner.corner(
@@ -157,8 +163,8 @@ def max_like_params(sampler):
     best_param_index1 = np.unravel_index(np.argmax(likelihoods, axis=None), likelihoods.shape)
 
     best_params = flat_samples[best_param_index1[0], best_param_index1[1], :]
-    print("best param index:",best_param_index1)
-    print("best params:",best_params)
+    print("best param index:",best_param_index1, flush=True)
+    print("best params:",best_params, flush=True)
     return best_params
 
 def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
@@ -287,5 +293,5 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too low")
     #        if pos[i,j] > priors[j,1]:
     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
-    print(pos)
+    print(pos, flush=True)
     return pos

@@ -54,7 +54,7 @@ def main(path_config_filename):
     print("Run HOD, write to disk", flush=True)
     # throw away run for jit to compile, write to disk
     mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=write_to_disk, Nthread=16, verbose=True
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=write_to_disk, Nthread=64, verbose=True
     )
     # mock_dict = newBall.gal_reader()
     start = time.time()
@@ -62,7 +62,7 @@ def main(path_config_filename):
     # print('Done xi, total time ', time.time() - start)
     # print(xirppi)
     print("Getting wp", flush=True)
-    wp = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size)
+    wp = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=64)
     print("wp:",wp,flush=True)
 
 

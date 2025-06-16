@@ -568,7 +568,8 @@ def gen_sats_nfw(
     """
 
     if want_LRG:
-        if verbose: print("Getting LRG params", flush=True)
+        if verbose:
+            with numba.objmode(): print("Getting LRG params", flush=True)
         logM_cut_L, logM1_L, sigma_L, alpha_L, kappa_L = (
             LRG_hod_dict['logM_cut'],
             LRG_hod_dict['logM1'],
@@ -586,7 +587,8 @@ def gen_sats_nfw(
         f_sigv_L = LRG_hod_dict['f_sigv']
 
     if want_ELG:
-        if verbose: print("Getting ELG params", flush=True)
+        if verbose:
+            with numba.objmode(): print("Getting ELG params", flush=True)
         logM_cut_E, kappa_E, logM1_E, alpha_E, A_E = (
             ELG_hod_dict['logM_cut'],
             ELG_hod_dict['kappa'],
@@ -623,7 +625,8 @@ def gen_sats_nfw(
         nfw_rescale = ELG_hod_dict['nfw_rescale']
 
     if want_QSO:
-        if verbose: print("Getting QSO params", flush=True)
+        if verbose:
+            with numba.objmode(): print("Getting QSO params", flush=True)
         logM_cut_Q, kappa_Q, logM1_Q, alpha_Q = (
             QSO_hod_dict['logM_cut'],
             QSO_hod_dict['kappa'],
@@ -639,7 +642,8 @@ def gen_sats_nfw(
         )
         f_sigv_Q = QSO_hod_dict['f_sigv']
 
-    if verbose: print("Setting number of threads", flush=True)
+    if verbose:
+        with numba.objmode(): print("Setting number of threads", flush=True)
     numba.set_num_threads(Nthread)
 
     # compute nsate for each halo
@@ -650,7 +654,8 @@ def gen_sats_nfw(
     hstart = np.rint(np.linspace(0, len(hid), Nthread + 1)).astype(
         np.int64
     )  # starting index of each thread
-    if verbose: print("Looping over threads: getting number of satellites and the like", flush=True)
+    if verbose:
+        with numba.objmode(): print("Looping over threads: getting number of satellites and the like", flush=True)
     for tid in range(Nthread):
         for i in range(hstart[tid], hstart[tid + 1]):
             if want_LRG:
@@ -724,13 +729,15 @@ def gen_sats_nfw(
                 )
                 num_sats_Q[i] = np.random.poisson(base_p_Q)
 
-    if verbose: print("Generating points on sphere", flush=True)
+    if verbose:
+        with numba.objmode(): print("Generating points on sphere", flush=True)
     # generate rdpos
     rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread)
     rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread)
     rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread)
 
-    if verbose: print("Putting LRG satellites on NFW profile", flush=True)
+    if verbose:
+        with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)
     # put satellites on NFW
     h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L = (
         compute_fast_NFW(
@@ -757,7 +764,8 @@ def gen_sats_nfw(
             nfw_rescale,
         )
     )
-    if verbose: print("Putting ELG satellites on NFW profile", flush=True)
+    if verbose:
+        with numba.objmode(): print("Putting ELG satellites on NFW profile", flush=True)
     h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E = (
         compute_fast_NFW(
             NFW_draw,
@@ -783,7 +791,8 @@ def gen_sats_nfw(
             nfw_rescale,
         )
     )
-    if verbose: print("Putting QSO satellites on NFW profile", flush=True)
+    if verbose:
+        with numba.objmode(): print("Putting QSO satellites on NFW profile", flush=True)
     h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q = (
         compute_fast_NFW(
             NFW_draw,
@@ -809,14 +818,16 @@ def gen_sats_nfw(
             nfw_rescale,
         )
     )
-    if verbose: print("Doing RSD", flush=True)
+    if verbose:
+        with numba.objmode(): print("Doing RSD", flush=True)
     # do rsd
     if rsd:
         z_sat_L = (z_sat_L + vz_sat_L * inv_velz2kms) % lbox
         z_sat_E = (z_sat_E + vz_sat_E * inv_velz2kms) % lbox
         z_sat_Q = (z_sat_Q + vz_sat_Q * inv_velz2kms) % lbox
 
-    if verbose: print("Putting mock values in the output dicts", flush=True)
+    if verbose:
+        with numba.objmode(): print("Putting mock values in the output dicts", flush=True)
     LRG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     ELG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     QSO_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)

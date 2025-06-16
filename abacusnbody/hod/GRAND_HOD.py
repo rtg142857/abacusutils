@@ -1515,7 +1515,7 @@ def gen_gals(
         origin,
     )
     if verbose:
-        print('generating centrals took ', time.time() - start)
+        print('generating centrals took ', time.time() - start, flush=True)
 
     start = time.time()
     if nfw:
@@ -1579,7 +1579,7 @@ def gen_gals(
             keep_cent[subsample['pinds']],
         )
     if verbose:
-        print('generating satellites took ', time.time() - start)
+        print('generating satellites took ', time.time() - start, flush=True)
 
     # B.H. TODO: need a for loop above so we don't need to do this by hand
     HOD_dict_sat = {'LRG': LRG_dict_sat, 'ELG': ELG_dict_sat, 'QSO': QSO_dict_sat}
@@ -1598,14 +1598,15 @@ def gen_gals(
             ID_dict_cent[tracer], ID_dict_sat[tracer], Nthread
         )
         if verbose:
-            print(tracer, 'number of galaxies ', len(tracer_dict['x']))
+            print(tracer, 'number of galaxies ', len(tracer_dict['x']), flush=True)
             print(
                 'satellite fraction ',
                 len(HOD_dict_sat[tracer]['x']) / len(tracer_dict['x']),
+                flush=True
             )
         HOD_dict[tracer] = tracer_dict
     if verbose:
-        print('organizing outputs took ', time.time() - start)
+        print('organizing outputs took ', time.time() - start, flush=True)
     return HOD_dict
 
 
@@ -1698,11 +1699,12 @@ def gen_gal_cat(
                 len(HOD_dict[tracer]['x']),
                 'satellite fraction ',
                 1 - Ncent / len(HOD_dict[tracer]['x']),
+                flush=True
             )
 
         if write_to_disk:
             if verbose:
-                print('outputting galaxies to disk')
+                print('outputting galaxies to disk', flush=True)
 
             if rsd:
                 rsd_string = '_rsd'

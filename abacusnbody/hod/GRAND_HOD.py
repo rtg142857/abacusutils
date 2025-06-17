@@ -741,10 +741,10 @@ def gen_sats_nfw(
                 )
                 num_sats_Q[i] = np.random.poisson(base_p_Q)
 
-    if verbose:
-        with numba.objmode(): print("Generating points on sphere", flush=True)
+    # if verbose:
+    #     with numba.objmode(): print("Generating points on sphere", flush=True)
     # generate rdpos
-    seed = range(128)
+    seed = np.arange(128)
     rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=seed, verbose=verbose)
     rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, seed=seed, verbose=verbose)
     rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, seed=seed, verbose=verbose)

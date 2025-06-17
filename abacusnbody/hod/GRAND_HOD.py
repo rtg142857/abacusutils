@@ -432,24 +432,30 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     """
     --- Aiding function for NFW computation, generate random points in a sphere
     """
-    if verbose: print("Setting number of threads", flush=True)
+    if verbose:
+        with numba.objmode(): print("Setting number of threads", flush=True)
     numba.set_num_threads(Nthread)
     ind = min(Nthread, nPoints)
     # starting index of each thread
-    if verbose: print("Getting starting index of each thread", flush=True)
+    if verbose:
+        with numba.objmode(): print("Getting starting index of each thread", flush=True)
     hstart = np.rint(np.linspace(0, nPoints, ind + 1))
-    if verbose: print("Starting index of each thread:",hstart,flush=True)
+    if verbose:
+        with numba.objmode(): print("Starting index of each thread:",hstart,flush=True)
     ur = np.zeros((nPoints, 3), dtype=np.float64)
     cmin = -1
     cmax = +1
 
-    if verbose: print("Getting the points", flush=True)
+    if verbose:
+        with numba.objmode(): print("Getting the points", flush=True)
     for tid in numba.prange(Nthread):
         if seed is not None:
-            if verbose: print("Seeding", flush=True)
+            if verbose:
+                with numba.objmode(): print("Seeding", flush=True)
             np.random.seed(seed[tid])
         for i in range(hstart[tid], hstart[tid + 1]):
-            if verbose: print("Getting point on sphere for point",i,flush=True)
+            if verbose:
+                with numba.objmode(): print("Getting point on sphere for point",i,flush=True)
             u1, u2 = np.random.uniform(0, 1), np.random.uniform(0, 1)
             ra = 0 + u1 * (2 * np.pi - 0)
             dec = np.pi - (np.arccos(cmin + u2 * (cmax - cmin)))

@@ -744,9 +744,10 @@ def gen_sats_nfw(
     if verbose:
         with numba.objmode(): print("Generating points on sphere", flush=True)
     # generate rdpos
-    rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, verbose=verbose)
-    rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, verbose=verbose)
-    rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, verbose=verbose)
+    seed = range(128)
+    rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=seed, verbose=verbose)
+    rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, seed=seed, verbose=verbose)
+    rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, seed=seed, verbose=verbose)
 
     if verbose:
         with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)

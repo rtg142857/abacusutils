@@ -427,7 +427,7 @@ def gen_cent(
     return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep
 
 
-#@njit(parallel=True, fastmath=True)
+@njit(parallel=True, fastmath=True)
 def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     """
     --- Aiding function for NFW computation, generate random points in a sphere

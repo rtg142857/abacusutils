@@ -434,12 +434,17 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     """
     # if verbose:
     #     with numba.objmode(): print("Setting number of threads", flush=True)
+
+    # TODO: Account for nPoints < Nthread
+    # Plan: Set number of threads equal to min(Nthread, nPoints, 1)
+    # ind is defined as before?
+
     numba.set_num_threads(Nthread)
     ind = min(Nthread, nPoints)
     # starting index of each thread
     # if verbose:
     #     with numba.objmode(): print("Getting starting index of each thread", flush=True)
-    hstart = np.rint(np.linspace(0, nPoints, ind + 1))
+    hstart = np.rint(np.linspace(0, nPoints, ind + 1)).astype(np.int64)
     # if verbose:
     #     with numba.objmode(): print("Starting index of each thread:",hstart,flush=True)
     ur = np.zeros((nPoints, 3), dtype=np.float64)
@@ -741,8 +746,8 @@ def gen_sats_nfw(
                 )
                 num_sats_Q[i] = np.random.poisson(base_p_Q)
 
-    # if verbose:
-    #     with numba.objmode(): print("Generating points on sphere", flush=True)
+    if verbose:
+        with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)
     # generate rdpos
     seed = np.arange(128)
     rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=seed, verbose=verbose)

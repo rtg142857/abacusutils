@@ -453,21 +453,22 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
 
     # if verbose:
     #     with numba.objmode(): print("Getting the points", flush=True)
-    for tid in numba.prange(Nthread):
-        if seed is not None:
-            # if verbose:
-            #     with numba.objmode(): print("Seeding", flush=True)
-            np.random.seed(seed[tid])
-        for i in range(hstart[tid], hstart[tid + 1]):
-            # if verbose:
-            #     with numba.objmode(): print("Getting point on sphere for point",i,flush=True)
-            u1, u2 = np.random.uniform(0, 1), np.random.uniform(0, 1)
-            ra = 0 + u1 * (2 * np.pi - 0)
-            dec = np.pi - (np.arccos(cmin + u2 * (cmax - cmin)))
+    if nPoints > 0:
+        for tid in numba.prange(Nthread):
+            if seed is not None:
+                # if verbose:
+                #     with numba.objmode(): print("Seeding", flush=True)
+                np.random.seed(seed[tid])
+            for i in range(hstart[tid], hstart[tid + 1]):
+                # if verbose:
+                #     with numba.objmode(): print("Getting point on sphere for point",i,flush=True)
+                u1, u2 = np.random.uniform(0, 1), np.random.uniform(0, 1)
+                ra = 0 + u1 * (2 * np.pi - 0)
+                dec = np.pi - (np.arccos(cmin + u2 * (cmax - cmin)))
 
-            ur[i, 0] = np.sin(dec) * np.cos(ra)
-            ur[i, 1] = np.sin(dec) * np.sin(ra)
-            ur[i, 2] = np.cos(dec)
+                ur[i, 0] = np.sin(dec) * np.cos(ra)
+                ur[i, 1] = np.sin(dec) * np.sin(ra)
+                ur[i, 2] = np.cos(dec)
     return ur
 
 

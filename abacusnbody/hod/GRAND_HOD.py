@@ -435,7 +435,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     # if verbose:
     #     with numba.objmode(): print("Setting number of threads", flush=True)
 
-    # TODO: Account for nPoints < Nthread
+    # Need to account for nPoints < Nthread (edit: done?)
     # Plan: Set number of threads equal to min(Nthread, nPoints, 1)
     # ind is defined as before?
 
@@ -454,7 +454,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     # if verbose:
     #     with numba.objmode(): print("Getting the points", flush=True)
     if nPoints > 0:
-        for tid in numba.prange(Nthread):
+        for tid in numba.prange(ind):
             if seed is not None:
                 # if verbose:
                 #     with numba.objmode(): print("Seeding", flush=True)

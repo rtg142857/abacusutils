@@ -77,7 +77,7 @@ def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackkni
         newBall.update_HOD_params(params)
         print(params, flush=True) # Debugging
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=True
+            newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False
         )
 
         rpbins = np.logspace(clustering_parameters["bin_params"]["logmin"], clustering_parameters["bin_params"]["logmax"], clustering_parameters["bin_params"]["nbins"]+1)

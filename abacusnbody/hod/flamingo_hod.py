@@ -705,6 +705,7 @@ class FlamingoHOD:
         Nthread=16,
         verbose=False,
         fn_ext=None,
+        tabulation_mock=False
     ):
         """
         Runs a custom HOD.
@@ -743,6 +744,9 @@ class FlamingoHOD:
 
         ``fn_ext``: str
             filename extension for saved files. Only relevant when ``write_to_disk = True``.
+
+        ``tabulation_mock``: bool
+            Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
 
         Returns
         -------
@@ -843,6 +847,7 @@ class FlamingoHOD:
             savedir=self.mock_dir,
             verbose=verbose,
             fn_ext=fn_ext,
+            tabulation_mock=tabulation_mock
         )
         self.logger.info(f'HOD generated in elapsed time {time.time() - start:.2f} s.')
 

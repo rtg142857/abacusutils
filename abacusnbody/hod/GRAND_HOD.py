@@ -171,6 +171,7 @@ def gen_cent(
     want_QSO,
     Nthread,
     origin,
+    tabulation_mock=False
 ):
     """
     Generate central galaxies in place in memory with a two pass numba parallel implementation.
@@ -222,46 +223,55 @@ def gen_cent(
     keep = np.empty(H, dtype=np.int8)  # mask array tracking which halos to keep
 
     # figuring out the number of halos kept for each thread
-    for tid in numba.prange(Nthread):
-        for i in range(hstart[tid], hstart[tid + 1]):
-            # first create the markers between 0 and 1 for different tracers
-            LRG_marker = 0
-            if want_LRG:
-                # do assembly bias and secondary bias
-                logM_cut_L_temp = logM_cut_L + Ac_L * deltac[i] + Bc_L * fenv[i]
-                LRG_marker += (
-                    n_cen_LRG(mass[i], logM_cut_L_temp, sigma_L) * ic_L * multis[i]
-                )
-            ELG_marker = LRG_marker
-            if want_ELG:
-                logM_cut_E_temp = (
-                    logM_cut_E + Ac_E * deltac[i] + Bc_E * fenv[i] + Cc_E * shear[i]
-                )
-                ELG_marker += (
-                    N_cen_ELG_v1(
-                        mass[i], pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E
+    if tabulation_mock: # Each halo gets a tracer of each type
+        keep.fill(-1) # -1 represents every tracer at once
+        # get the number of galaxies of each type
+        for tid in numba.prange(Nthread):
+            for i in range(hstart[tid], hstart[tid + 1]):
+                Nout[tid, 0, 0] += 1
+                Nout[tid, 1, 0] += 1
+                Nout[tid, 2, 0] += 1
+    else:
+        for tid in numba.prange(Nthread):
+            for i in range(hstart[tid], hstart[tid + 1]):
+                # first create the markers between 0 and 1 for different tracers
+                LRG_marker = 0
+                if want_LRG:
+                    # do assembly bias and secondary bias
+                    logM_cut_L_temp = logM_cut_L + Ac_L * deltac[i] + Bc_L * fenv[i]
+                    LRG_marker += (
+                        n_cen_LRG(mass[i], logM_cut_L_temp, sigma_L) * ic_L * multis[i]
                     )
-                    * ic_E
-                    * multis[i]
-                )
-            QSO_marker = ELG_marker
-            if want_QSO:
-                logM_cut_Q_temp = logM_cut_Q + Ac_Q * deltac[i] + Bc_Q * fenv[i]
-                QSO_marker += (
-                    N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q) * ic_Q * multis[i]
-                )
+                ELG_marker = LRG_marker
+                if want_ELG:
+                    logM_cut_E_temp = (
+                        logM_cut_E + Ac_E * deltac[i] + Bc_E * fenv[i] + Cc_E * shear[i]
+                    )
+                    ELG_marker += (
+                        N_cen_ELG_v1(
+                            mass[i], pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E
+                        )
+                        * ic_E
+                        * multis[i]
+                    )
+                QSO_marker = ELG_marker
+                if want_QSO:
+                    logM_cut_Q_temp = logM_cut_Q + Ac_Q * deltac[i] + Bc_Q * fenv[i]
+                    QSO_marker += (
+                        N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q) * ic_Q * multis[i]
+                    )
 
-            if randoms[i] <= LRG_marker:
-                Nout[tid, 0, 0] += 1  # counting
-                keep[i] = 1
-            elif randoms[i] <= ELG_marker:
-                Nout[tid, 1, 0] += 1  # counting
-                keep[i] = 2
-            elif randoms[i] <= QSO_marker:
-                Nout[tid, 2, 0] += 1  # counting
-                keep[i] = 3
-            else:
-                keep[i] = 0
+                if randoms[i] <= LRG_marker:
+                    Nout[tid, 0, 0] += 1  # counting
+                    keep[i] = 1
+                elif randoms[i] <= ELG_marker:
+                    Nout[tid, 1, 0] += 1  # counting
+                    keep[i] = 2
+                elif randoms[i] <= QSO_marker:
+                    Nout[tid, 2, 0] += 1  # counting
+                    keep[i] = 3
+                else:
+                    keep[i] = 0
 
     # compose galaxy array, first create array of galaxy starting indices for the threads
     gstart = np.empty((Nthread + 1, 3), dtype=np.int64)
@@ -575,6 +585,7 @@ def gen_sats_nfw(
     lbox,
     keep_cent,
     vel_sat='rd_normal',
+    tabulation_mock=False,
     Nthread=16,
     verbose=False
 ):
@@ -582,6 +593,8 @@ def gen_sats_nfw(
     Generate satellite galaxies on an NFW profile, with option for an extended profile. See Rocher et al. 2023.
 
     Not yet on lightcone!! Different velocity bias treatment!! Not built for performance!!
+
+    If tabulation_mock is set to True, exactly 3 satellites are given per halo (otherwise it'll be the ordinary distribution given by the HOD)
 
     """
 
@@ -674,78 +687,83 @@ def gen_sats_nfw(
     )  # starting index of each thread
     # if verbose:
     #     with numba.objmode(): print("Looping over threads: getting number of satellites and the like", flush=True)
-    for tid in range(Nthread):
-        for i in range(hstart[tid], hstart[tid + 1]):
-            if want_LRG:
-                M1_L_temp = 10 ** (logM1_L + As_L * hdeltac[i] + Bs_L * hfenv[i])
-                logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
-                base_p_L = (
-                    n_sat_LRG_modified(
-                        hmass[i],
-                        logM_cut_L_temp,
-                        10**logM_cut_L_temp,
-                        M1_L_temp,
-                        sigma_L,
-                        alpha_L,
-                        kappa_L,
-                    )
-                    * ic_L
-                )
-                num_sats_L[i] = np.random.poisson(base_p_L)
-            if want_ELG:
-                M1_E_temp = 10 ** (
-                    logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                )
-                logM_cut_E_temp = (
-                    logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
-                )
-                base_p_E = (
-                    N_sat_elg(
-                        hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
-                    )
-                    * ic_E
-                )
-                # elg conformity
-                if keep_cent[i] == 1:
-                    M1_E_temp = 10 ** (logM1_EL + As_E * hdeltac[i] + Bs_E * hfenv[i])
-                    base_p_E = (
-                        N_sat_elg(
+    if tabulation_mock: # exactly 3 satellite tracers in every halo
+        num_sats_L.fill(3)
+        num_sats_E.fill(3)
+        num_sats_Q.fill(3)
+    else:
+        for tid in range(Nthread):
+            for i in range(hstart[tid], hstart[tid + 1]):
+                if want_LRG:
+                    M1_L_temp = 10 ** (logM1_L + As_L * hdeltac[i] + Bs_L * hfenv[i])
+                    logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
+                    base_p_L = (
+                        n_sat_LRG_modified(
                             hmass[i],
-                            10**logM_cut_E_temp,
-                            kappa_E,
-                            M1_E_temp,
-                            alpha_EL,
-                            A_E,
+                            logM_cut_L_temp,
+                            10**logM_cut_L_temp,
+                            M1_L_temp,
+                            sigma_L,
+                            alpha_L,
+                            kappa_L,
                         )
-                        * ic_E
+                        * ic_L
                     )
-                elif keep_cent[i] == 2:
+                    num_sats_L[i] = np.random.poisson(base_p_L)
+                if want_ELG:
                     M1_E_temp = 10 ** (
-                        logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
-                    )  # M1_E_temp*10**delta_M1
+                        logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                    )
+                    logM_cut_E_temp = (
+                        logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                    )
                     base_p_E = (
                         N_sat_elg(
-                            hmass[i],
-                            10**logM_cut_E_temp,
-                            kappa_E,
-                            M1_E_temp,
-                            alpha_EE,
-                            A_E,
+                            hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
                         )
                         * ic_E
                     )
-                num_sats_E[i] = np.random.poisson(base_p_E)
+                    # elg conformity
+                    if keep_cent[i] == 1:
+                        M1_E_temp = 10 ** (logM1_EL + As_E * hdeltac[i] + Bs_E * hfenv[i])
+                        base_p_E = (
+                            N_sat_elg(
+                                hmass[i],
+                                10**logM_cut_E_temp,
+                                kappa_E,
+                                M1_E_temp,
+                                alpha_EL,
+                                A_E,
+                            )
+                            * ic_E
+                        )
+                    elif keep_cent[i] == 2:
+                        M1_E_temp = 10 ** (
+                            logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
+                        )  # M1_E_temp*10**delta_M1
+                        base_p_E = (
+                            N_sat_elg(
+                                hmass[i],
+                                10**logM_cut_E_temp,
+                                kappa_E,
+                                M1_E_temp,
+                                alpha_EE,
+                                A_E,
+                            )
+                            * ic_E
+                        )
+                    num_sats_E[i] = np.random.poisson(base_p_E)
 
-            if want_QSO:
-                M1_Q_temp = 10 ** (logM1_Q + As_Q * hdeltac[i] + Bs_Q * hfenv[i])
-                logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
-                base_p_Q = (
-                    N_sat_generic(
-                        hmass[i], 10**logM_cut_Q_temp, kappa_Q, M1_Q_temp, alpha_Q
+                if want_QSO:
+                    M1_Q_temp = 10 ** (logM1_Q + As_Q * hdeltac[i] + Bs_Q * hfenv[i])
+                    logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
+                    base_p_Q = (
+                        N_sat_generic(
+                            hmass[i], 10**logM_cut_Q_temp, kappa_Q, M1_Q_temp, alpha_Q
+                        )
+                        * ic_Q
                     )
-                    * ic_Q
-                )
-                num_sats_Q[i] = np.random.poisson(base_p_Q)
+                    num_sats_Q[i] = np.random.poisson(base_p_Q)
 
     # if verbose:
     #     with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)
@@ -912,10 +930,13 @@ def gen_sats(
     Nthread,
     origin,
     keep_cent,
+    tabulation_mock = False
 ):
     """
     Generate satellite galaxies in place in memory with a two pass numba parallel implementation.
     """
+    if tabulation_mock:
+        raise Exception("Tabulation mock functionality not yet implemented for particles")
 
     if want_LRG:
         logM_cut_L, logM1_L, sigma_L, alpha_L, kappa_L = (
@@ -1369,6 +1390,7 @@ def gen_gals(
     verbose,
     nfw,
     NFW_draw=None,
+    tabulation_mock=False
 ):
     """
     parse hod parameters, pass them on to central and satellite generators
@@ -1394,6 +1416,9 @@ def gen_gals(
 
     params : dict
         Dictionary of various simulation parameters.
+
+    ``tabulation_mock``: bool
+        Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
 
     """
 
@@ -1555,6 +1580,7 @@ def gen_gals(
         want_QSO,
         Nthread,
         origin,
+        tabulation_mock=tabulation_mock
     )
     if verbose:
         print('generating centrals took ', time.time() - start, flush=True)
@@ -1587,7 +1613,8 @@ def gen_gals(
             lbox,
             keep_cent,
             Nthread=Nthread,
-            verbose=verbose
+            verbose=verbose,
+            tabulation_mock=tabulation_mock
         )
     else:
         LRG_dict_sat, ELG_dict_sat, QSO_dict_sat, ID_dict_sat = gen_sats(
@@ -1667,6 +1694,7 @@ def gen_gal_cat(
     savedir='./',
     verbose=False,
     fn_ext=None,
+    tabulation_mock=False
 ):
     """
     pass on inputs to the gen_gals function and takes care of I/O
@@ -1707,6 +1735,9 @@ def gen_gal_cat(
     fn_ext: str
         filename extension for saved files. Only relevant when ``write_to_disk = True``.
 
+    ``tabulation_mock``: bool
+        Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
+
     Output
     ------
 
@@ -1731,6 +1762,7 @@ def gen_gal_cat(
         verbose,
         nfw,
         NFW_draw,
+        tabulation_mock=tabulation_mock
     )
 
     # how many galaxies were generated and write them to disk

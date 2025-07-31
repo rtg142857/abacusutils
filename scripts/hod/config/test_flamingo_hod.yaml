@@ -126,6 +126,7 @@ fitting_params:
     num_steps: 100
     target_dict_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/"
     sampler_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/samplers/test.hdf5"
+    paircount_save_path: "//cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/paircounts/"
 
 # ===========================================================================================
 # The following dictionaries are for using the provided emcee/likelihood templates. They

@@ -11,6 +11,7 @@ import yaml
 from likelihood import PowerData
 
 from abacusnbody.hod.abacus_hod import AbacusHOD
+from abacusnbody.hod.flamingo_hod import FlamingoHOD
 
 DEFAULTS = {}
 DEFAULTS['path2config'] = 'config/abacus_hod.yaml'
@@ -139,9 +140,9 @@ def lnprob(p, params, param_mapping, param_tracer, Data, Ball):
     return lnP
 
 
-def main(path2config, time_likelihood):
+def main(path_config_filename, time_likelihood):
     # load the yaml parameters
-    config = yaml.load(open(path2config))
+    config = yaml.load(open(path_config_filename))
     sim_params = config['sim_params']
     HOD_params = config['HOD_params']
     clustering_params = config['clustering_params']
@@ -150,7 +151,7 @@ def main(path2config, time_likelihood):
     fit_params = config['fit_params']
 
     # create a new abacushod object and load the subsamples
-    newBall = AbacusHOD(sim_params, HOD_params, clustering_params)
+    newBall = FlamingoHOD(path_config_filename=path_config_filename) # AbacusHOD(sim_params, HOD_params, clustering_params)
 
     # read data parameters
     newData = PowerData(data_params, HOD_params)
@@ -258,11 +259,11 @@ if __name__ == '__main__':
         description=__doc__, formatter_class=ArgParseFormatter
     )
     parser.add_argument(
-        '--path2config',
-        dest='path2config',
+        '--path_config_filename',
+        dest='path_config_filename',
         type=str,
         help='Path to config file.',
-        default=DEFAULTS['path2config'],
+        default=DEFAULTS['path_config_filename'],
     )
     parser.add_argument(
         '--time_likelihood',

@@ -317,7 +317,7 @@ def get_paircounts(path_config_filename, tracer_mock, save=False, verbose=False)
         Each value in _those_ dicts is a 3d numpy array of the following form:
         paircounts["LRG_ELG"]["satsat"][i, j, k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
     """
-    tracer_list = ["LRG", "ELG", "QSO"]
+    #tracer_list = ["LRG", "ELG", "QSO"]
 
     paircounts = {}
 

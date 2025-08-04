@@ -2,6 +2,7 @@ from abacusnbody.hod.flamingo_hod import FlamingoHOD
 import yaml
 import numpy as np
 import time
+from pathlib import Path
 
 def split_cen_sat(mock_galaxies):
     """
@@ -282,6 +283,8 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
             print("Saving...")
 
         save_path = config["fitting_params"]["paircounts_save_path"] + config["Labels"]["sim_label"] + "/"
+        path = Path(save_path)
+        path.mkdir(parents=True, exist_ok=True)
 
         np.save(save_path+f"{type}.npy",npairs_mass_r_bins_test)
 

@@ -4,7 +4,7 @@ import numpy as np
 import time
 from pathlib import Path
 
-def split_cen_sat(mock_galaxies):
+def split_cen_sat(mock_galaxies: dict):
     """
     Splits a given mock into central and satellite galaxies.
     Also sorts the satellite arrays according to the parent halo ID.
@@ -212,6 +212,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
     mock1 = tracer_mock[tracer1] # x, y, z, vx, vy, vz, mass, id, Ncent
     if verbose:
         print("Total number of tracers:",len(mock1["mass"]), flush=True)
+        print("Stored number of central tracers:", mock1["Ncent"])
 
     x_cen1, y_cen1, z_cen1, M_cen1, x_sat1, y_sat1, z_sat1, M_sat1 = split_cen_sat(mock1)
 
@@ -328,6 +329,9 @@ def get_paircounts(path_config_filename, tracer_mock: dict, save=False, verbose=
         paircounts["LRG_ELG"]["satsat"][i, j, k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
     """
     #tracer_list = ["LRG", "ELG", "QSO"]
+
+    if verbose:
+        print("Tracer mock LRG keys:", tracer_mock["LRG"].keys(), flush=True)
 
     paircounts = {}
 

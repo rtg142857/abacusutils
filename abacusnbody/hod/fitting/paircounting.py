@@ -210,7 +210,14 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
     tracer2 = "LRG"
 
     mock1 = tracer_mock[tracer1] # x, y, z, vx, vy, vz, mass, id, Ncent
+    if verbose:
+        print("Total number of tracers:",len(mock1["mass"]), flush=True)
+
     x_cen1, y_cen1, z_cen1, M_cen1, x_sat1, y_sat1, z_sat1, M_sat1 = split_cen_sat(mock1)
+
+    if verbose:
+        print("Number of central tracers:",len(x_cen1), flush=True)
+        print("Number of satellite tracers:", len(x_sat1), flush=True)
 
     if tracer2 != tracer1:
         mock2 = tracer_mock[tracer2]

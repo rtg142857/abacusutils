@@ -292,7 +292,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
         if verbose:
             print("Saving took",time3-time2,"seconds")
 
-    return npairs_test
+    return npairs_mass_r_bins_test
 
 def get_paircounts(path_config_filename, tracer_mock: dict, save=False, verbose=False):
     """

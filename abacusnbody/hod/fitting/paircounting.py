@@ -175,7 +175,7 @@ def correct_doublecounting(npairs, type):
             return npairs/2
 
 
-def count_npairs(path_config_filename, tracer_mock, type, save=False, verbose=False):
+def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verbose=False):
     """
     Returns a 3D Numpy array of the paircounts of tracers, binned by both halo masses and distance
     
@@ -291,14 +291,14 @@ def count_npairs(path_config_filename, tracer_mock, type, save=False, verbose=Fa
 
     return npairs_test
 
-def get_paircounts(path_config_filename, tracer_mock, save=False, verbose=False):
+def get_paircounts(path_config_filename, tracer_mock: dict, save=False, verbose=False):
     """
     Returns a dict of paircounts, binned by M1, M2, and rp
     where M1 is the mass of the first halo and M2 is the mass of the second
 
     Args:
         path_config_filename: path to the config file
-        tracer_mock: mock dict of tracers
+        tracer_mock: mock dict of tracers built from the newBall
         save: Boolean, whether to save the output to a file
         verbose: Boolean, whether to print logs to stdout
     Returns:

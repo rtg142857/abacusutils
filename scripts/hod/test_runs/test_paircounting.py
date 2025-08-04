@@ -59,7 +59,7 @@ def main(path_config_filename):
     )
 
     print("Doing paircounting...", flush=True)##################################################################
-    paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock=newBall, save=True, verbose=True)
+    paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, save=True, verbose=True)
 
 
 class ArgParseFormatter(

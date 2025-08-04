@@ -3,6 +3,7 @@ import yaml
 import numpy as np
 import time
 from pathlib import Path
+from Corrfunc.theory.DDrppi import DDrppi
 
 def split_cen_sat(mock_galaxies: dict):
     """

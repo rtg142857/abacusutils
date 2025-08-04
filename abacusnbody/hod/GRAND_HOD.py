@@ -223,14 +223,12 @@ def gen_cent(
     keep = np.empty(H, dtype=np.int8)  # mask array tracking which halos to keep
 
     # figuring out the number of halos kept for each thread
-    if tabulation_mock: # Each halo gets a tracer of each type
-        keep.fill(-1) # -1 represents every tracer at once
+    if tabulation_mock: # Each halo gets an LRG tracer
+        keep.fill(1) # all and only LRG tracers
         # get the number of galaxies of each type
         for tid in numba.prange(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
                 Nout[tid, 0, 0] += 1
-                Nout[tid, 1, 0] += 1
-                Nout[tid, 2, 0] += 1
     else:
         for tid in numba.prange(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):

@@ -505,7 +505,7 @@ def compute_fast_NFW(
     nfw_rescale=1,
 ):
     """
-    --- Compute NFW positions and velocities for satelitte galaxies
+    --- Compute NFW positions and velocities for satellite galaxies
     c: r98/r25, or it used to be
     vrms_h: 'sigmav3d_L2com'
     """
@@ -685,10 +685,8 @@ def gen_sats_nfw(
     )  # starting index of each thread
     # if verbose:
     #     with numba.objmode(): print("Looping over threads: getting number of satellites and the like", flush=True)
-    if tabulation_mock: # exactly 3 satellite tracers in every halo
+    if tabulation_mock: # exactly 3 satellite tracers in the LRG halos
         num_sats_L.fill(3)
-        num_sats_E.fill(3)
-        num_sats_Q.fill(3)
     else:
         for tid in range(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
@@ -1458,7 +1456,7 @@ def gen_gals(
         LRG_hod_dict['Bsat'] = LRG_HOD.get('Bsat', 0.0)
         LRG_hod_dict['ic'] = LRG_HOD.get('ic', 1.0)
 
-        LRG_hod_dict['f_sigv'] = LRG_HOD.get('f_sigv', 0)
+        LRG_hod_dict['f_sigv'] = LRG_HOD.get('f_sigv', 1)
 
     else:
         want_LRG = False
@@ -1502,7 +1500,7 @@ def gen_gals(
         ELG_hod_dict['logM1_EL'] = ELG_HOD.get('logM1_EL', ELG_hod_dict['logM1'])
         ELG_hod_dict['alpha_EL'] = ELG_HOD.get('alpha_EL', ELG_hod_dict['alpha'])
 
-        ELG_hod_dict['f_sigv'] = ELG_HOD.get('f_sigv', 0)
+        ELG_hod_dict['f_sigv'] = ELG_HOD.get('f_sigv', 1)
         ELG_hod_dict['exp_frac'] = ELG_HOD.get('exp_frac', 0)
         ELG_hod_dict['exp_scale'] = ELG_HOD.get('exp_scale', 1)
         ELG_hod_dict['nfw_rescale'] = ELG_HOD.get('nfw_rescale', 1)
@@ -1541,7 +1539,7 @@ def gen_gals(
         QSO_hod_dict['Bsat'] = QSO_HOD.get('Bsat', 0.0)
         QSO_hod_dict['ic'] = QSO_HOD.get('ic', 1.0)
 
-        QSO_hod_dict['f_sigv'] = QSO_HOD.get('f_sigv', 0)
+        QSO_hod_dict['f_sigv'] = QSO_HOD.get('f_sigv', 1)
 
     else:
         want_QSO = False

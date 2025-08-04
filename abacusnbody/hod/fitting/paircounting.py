@@ -270,7 +270,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
 
         case "satsat_onehalo":
             # Want all 3 sat particles per halo
-            npairs_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1,M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
+            npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1,M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
         
     time2 = time.time()
     if verbose:

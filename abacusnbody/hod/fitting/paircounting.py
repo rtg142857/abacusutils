@@ -178,15 +178,16 @@ def correct_doublecounting(npairs, type):
             return npairs/2
 
 
-def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verbose=False):
+def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=False, verbose=False):
     """
     Returns a 3D Numpy array of the paircounts of tracers, binned by both halo masses and distance
     
-    path_config_filename:
+    path_config_filename: the usual
     tracer_mock: mock dict of tracers, with one central and three satellite tracers per halo
     type: "cencen", "censat", "satcen" (only for crosscorr), "satsat", "satsat_onehalo"
     tracer1: str e.g. "LRG" (currently not implemented)
     tracer2: str: 2nd list of tracers, for cross-correlation (optional) (currently not implemented)
+    Nthread: Number of threads to use
     save: Boolean, whether to save to disk
     verbose: Boolean, whether to print logs to stdout
     """
@@ -241,7 +242,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
         case "cencen":
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_cen2, y_cen2, z_cen2, M_cen2, mass_bin_edges)
-            num_threads = 1
+            num_threads = Nthread
 
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
@@ -253,7 +254,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, M_sat2, mass_bin_edges)
 
-            num_threads = 1
+            num_threads = Nthread
 
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
@@ -273,7 +274,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
             samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, M_sat1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, M_sat2, mass_bin_edges)
 
-            num_threads = 1
+            num_threads = Nthread
 
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
@@ -304,7 +305,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, save=False, verb
 
     return npairs_mass_r_bins_test
 
-def get_paircounts(path_config_filename, tracer_mock: dict, save=False, verbose=False):
+def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=False, verbose=False):
     """
     Returns a dict of paircounts, binned by M1, M2, and rp
     where M1 is the mass of the first halo and M2 is the mass of the second
@@ -312,6 +313,7 @@ def get_paircounts(path_config_filename, tracer_mock: dict, save=False, verbose=
     Args:
         path_config_filename: path to the config file
         tracer_mock: mock dict of tracers built from the newBall
+        Nthread: number of threads to use
         save: Boolean, whether to save the output to a file
         verbose: Boolean, whether to print logs to stdout
     Returns:
@@ -364,6 +366,6 @@ def get_paircounts(path_config_filename, tracer_mock: dict, save=False, verbose=
     for pair in pairs_list:
         if verbose:
             print(f"Paircounting {pair}")
-        paircounts[pair] = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, save=save, verbose=verbose)
+        paircounts[pair] = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, Nthread=Nthread, save=save, verbose=verbose)
 
     return paircounts

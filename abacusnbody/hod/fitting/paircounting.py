@@ -175,15 +175,15 @@ def correct_doublecounting(npairs, type):
             return npairs/2
 
 
-def count_npairs(path_config_filename, tracer_mock, type, tracer1, tracer2=None, save=False, verbose=False):
+def count_npairs(path_config_filename, tracer_mock, type, save=False, verbose=False):
     """
     Returns a 3D Numpy array of the paircounts of tracers, binned by both halo masses and distance
     
     path_config_filename:
     tracer_mock: mock dict of tracers, with one central and three satellite tracers per halo
     type: "cencen", "censat", "satcen" (only for crosscorr), "satsat", "satsat_onehalo"
-    tracer1: str e.g. "LRG"
-    tracer2: str: 2nd list of tracers, for cross-correlation (optional)
+    tracer1: str e.g. "LRG" (currently not implemented)
+    tracer2: str: 2nd list of tracers, for cross-correlation (optional) (currently not implemented)
     save: Boolean, whether to save to disk
     verbose: Boolean, whether to print logs to stdout
     """

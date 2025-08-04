@@ -1808,5 +1808,6 @@ def gen_gal_cat(
                     overwrite=True,
                     format='ecsv',
                 )
+            HOD_dict[tracer]["Ncent"] = Ncent
 
     return HOD_dict

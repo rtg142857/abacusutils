@@ -55,7 +55,7 @@ def main(path_config_filename):
     print("Throwaway run for jit to compile, don't write to disk", flush=True)##############################################
     # throw away run for jit to compile, don't write to disk
     mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=True
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True, tabulation_mock=True
     )
 
     print("Doing paircounting...", flush=True)##################################################################

@@ -189,7 +189,7 @@ def count_npairs(path_config_filename, tracer_mock, type, save=False, verbose=Fa
     """
     config = yaml.safe_load(open(path_config_filename))
     clustering_params = config["clustering_params"]
-    pi_max = clustering_params["pi_max"]
+    pi_max = clustering_params["pimax"]
     d_pi = clustering_params["pi_bin_size"]
     rpbins = np.logspace(clustering_params["bin_params"]["logmin"], clustering_params["bin_params"]["logmax"], clustering_params["bin_params"]["nbins"]+1)
     mass_bin_edges = np.logspace(0,6,31)

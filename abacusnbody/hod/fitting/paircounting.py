@@ -215,7 +215,6 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
     mock1 = tracer_mock[tracer1] # x, y, z, vx, vy, vz, mass, id, Ncent
     if verbose:
         print("Total number of tracers:",len(mock1["mass"]), flush=True)
-        print("Stored number of central tracers:", mock1["Ncent"])
 
     x_cen1, y_cen1, z_cen1, M_cen1, x_sat1, y_sat1, z_sat1, M_sat1 = split_cen_sat(mock1)
 
@@ -237,7 +236,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
         print("Splitting took",time1-time0, "seconds")
 
     if verbose:
-        print("Doing the paircounting...")
+        print("Doing the paircounting...", flush=True)
     match type:
         case "cencen":
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
@@ -333,9 +332,6 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
         paircounts["LRG_ELG"]["satsat"][i, j, k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
     """
     #tracer_list = ["LRG", "ELG", "QSO"]
-
-    if verbose:
-        print("Tracer mock LRG keys:", tracer_mock["LRG"].keys(), flush=True)
 
     paircounts = {}
 

@@ -105,7 +105,15 @@ class SwiftHaloCatalog(object):
             return r200 * (1.+zcos)
         else:
             return r200
-    
+        
+    def calc_hmf(self, mass_bin_edges):
+        """
+        Calculates the halo mass function of central halos, given a set of mass bin edges
+        Returns a histogram of the halo masses given the bins
+        Uses M200_crit for mass
+        """
+        halo_hist = np.histogram(self.halos["M200_crit"],bins = mass_bin_edges)[0]
+        return halo_hist
     
     def read_soap_file(self, file_path):
         halo_cat = h5py.File(file_path, "r")

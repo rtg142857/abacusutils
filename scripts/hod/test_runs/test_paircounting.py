@@ -9,11 +9,15 @@ $ python ./run_hod.py --help
 
 import argparse
 import time
+import os
+import math
+from pathlib import Path
 
 import numpy as np
 import yaml
 import matplotlib.pyplot as plt
-import math
+
+import h5py
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
@@ -114,10 +118,44 @@ def create_weighting_factor(mass_pair_array,hod1,hod2):
     weighting_factor = np.tensordot(np.outer(hod1,hod2),mass_pair_array,axes=([0,1],[0,1]))
     return weighting_factor
 
+def create_randoms_for_wp(npart,r_bin_edges,pi_max,boxsize):
+    """
+    Calculate the analytic randoms for npart particles in a box with
+    side length boxsize.  This code is based on the calculation done 
+    either in corrfunc but the formula is pretty simple.
+    """
+    NR = npart
+    pis = np.arange(1,pi_max+1)
+    RR_out = np.zeros((len(r_bin_edges)-1)*pi_max)
+    for p in range(pi_max):
+        # do volume calculations
+        v = 2*np.pi*r_bin_edges**2 # Volume of cylinders
+
+        dv = np.diff(v)  # difference between r volumes
+        
+        global_volume = boxsize**3  # volume of simulation
+
+        # calculate the random-random pairs using density * volume
+        rhor = (NR*(NR-1))/global_volume
+        RR = (dv*rhor)
+        #print(RR)
+        RR_out[p::pi_max] = RR
+    return RR_out
+
+def xi_to_wps(xis,r_bin_edges,pi_max):
+    """
+    Integrate over pi bins to get wp from xi
+    """
+    dpi = 1
+    
+    wp_out = 2.0 * dpi * np.sum(xis, axis=1)
+    return(wp_out)
+
 
 def main(path_config_filename):
     # load the yaml parameters
     config = yaml.safe_load(open(path_config_filename))
+    run_params = yaml.safe_load(open(config["Paths"]["params_path"]))
     sim_params = config['sim_params']
     HOD_params = config['HOD_params']
     clustering_params = config['clustering_params']
@@ -136,6 +174,10 @@ def main(path_config_filename):
     )
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
+    boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
+
+    subsample_dir = sim_params["subsample_dir"]
+    sim_label = Labels["sim_label"]
 
     print("Making new FlamingoHOD object", flush=True)###############################################################
     # create a new FlamingoHOD object
@@ -154,14 +196,6 @@ def main(path_config_filename):
     # print("Doing paircounting...", flush=True)##################################################################
     #paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
-    print("Getting true mock to compare wp against", flush=True)#############################################################
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=False
-    )
-
-    print("Getting wp from the true mock", flush=True)#############################################################
-    wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
-
     print("Loading paircounts from the tabulation mock", flush=True)###############################################
     paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/Debugging_fitting/"
     cencen = np.load(paircount_path+"cencen.npy")
@@ -173,6 +207,21 @@ def main(path_config_filename):
 
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
     mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
+
+    meta_subsample_dir = Path(subsample_dir)
+    full_subsample_dir = meta_subsample_dir / sim_label
+
+    subsample_files = [full_subsample_dir / subsample_file for subsample_file in os.listdir(full_subsample_dir)]
+    subsample_files.sort()
+    num_subsample_files = len(subsample_files)
+    if num_subsample_files == 0:
+        raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
+    hmf = np.zeros(len(mass_bin_centres))
+    for i in range(num_subsample_files):
+        subsample_file = subsample_files[i]
+        masked_halos = h5py.File(subsample_file)
+        halo_mass = masked_halos["M200_crit"]
+        hmf = np.histogram(halo_mass, bins = mass_bin_edges)[0]
 
     newball_HOD_params = newBall.tracers["LRG"]
     logM_cut = newball_HOD_params["logM_cut"]
@@ -191,17 +240,24 @@ def main(path_config_filename):
     SS = create_weighting_factor(satsat,hod_sat,hod_sat)
     SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat)
 
-    npart_cen = np.sum(cen_halos_big * hod_cen)
-    npart_sat = np.sum(sat_halos_big * hod_sat / 3)
+    npart_cen = np.sum(hmf * hod_cen)
+    npart_sat = np.sum(hmf * hod_sat)
     npart_total = npart_cen + npart_sat
 
     rands = create_randoms_for_wp(npart = npart_total,r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
     wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
 
-
     GG = CC + CS + SS + SS1
     xi_pair = np.divide(GG, wp_rands) - 1
     wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
+
+    print("Getting true mock to compare wp against", flush=True)#############################################################
+    mock_dict = newBall.run_hod(
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=False
+    )
+
+    print("Getting wp from the true mock", flush=True)#############################################################
+    wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
 
     print("Comparing wps", flush=True)###########################################################################
 

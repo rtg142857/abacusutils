@@ -222,7 +222,7 @@ def main(path_config_filename):
         print("    Loading halo",i,flush=True)
         subsample_file = subsample_files[i]
         masked_halos = h5py.File(subsample_file)
-        halo_mass = masked_halos["M200_crit"]
+        halo_mass = masked_halos["halos"]["M200_crit"]
         hmf += np.histogram(halo_mass, bins = mass_bin_edges)[0]
 
     print("Done loading halos, calculating weighting factors",flush=True)

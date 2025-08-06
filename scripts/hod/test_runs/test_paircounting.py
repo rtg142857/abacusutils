@@ -272,6 +272,8 @@ def main(path_config_filename):
 
     plt.loglog(rpcent, wp_mock)
     plt.loglog(rpcent, wp_pair)
+    plt.legend()
+    plt.savefig("fig_paircounts")
     plt.show()
 
 

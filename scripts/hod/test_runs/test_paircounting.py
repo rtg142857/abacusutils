@@ -208,6 +208,7 @@ def main(path_config_filename):
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
     mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
 
+    print("   Loading halos for hmf...", flush=True)
     meta_subsample_dir = Path(subsample_dir)
     full_subsample_dir = meta_subsample_dir / sim_label
 
@@ -218,11 +219,13 @@ def main(path_config_filename):
         raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
     hmf = np.zeros(len(mass_bin_centres))
     for i in range(num_subsample_files):
+        print("    Loading halo",i,flush=True)
         subsample_file = subsample_files[i]
         masked_halos = h5py.File(subsample_file)
         halo_mass = masked_halos["M200_crit"]
-        hmf = np.histogram(halo_mass, bins = mass_bin_edges)[0]
+        hmf += np.histogram(halo_mass, bins = mass_bin_edges)[0]
 
+    print("Done loading halos, calculating weighting factors",flush=True)
     newball_HOD_params = newBall.tracers["LRG"]
     logM_cut = newball_HOD_params["logM_cut"]
     logM1 = newball_HOD_params["logM1"]
@@ -240,13 +243,16 @@ def main(path_config_filename):
     SS = create_weighting_factor(satsat,hod_sat,hod_sat)
     SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat)
 
+    print("Calculating number of particles", flush=True)
     npart_cen = np.sum(hmf * hod_cen)
     npart_sat = np.sum(hmf * hod_sat)
     npart_total = npart_cen + npart_sat
 
+    print("Calculating randoms", flush=True)
     rands = create_randoms_for_wp(npart = npart_total,r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
     wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
 
+    print("Finalising wp calc", flush=True)
     GG = CC + CS + SS + SS1
     xi_pair = np.divide(GG, wp_rands) - 1
     wp_pair = xi_to_wps(xi_pair,rpbins,pimax)

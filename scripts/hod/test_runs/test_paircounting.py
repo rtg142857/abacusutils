@@ -108,6 +108,7 @@ def AbacusSat_HOD(params, cen_hod, mass_bins):
                 hod[i] = 0
             else:
                 hod[i] = ((M_h - kappa * M_cut) / M_1) ** alpha * cen_hod[i]
+    return hod
 
 def create_weighting_factor(mass_pair_array,hod1,hod2):
     """

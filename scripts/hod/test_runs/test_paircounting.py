@@ -180,13 +180,19 @@ def main(path_config_filename):
     subsample_dir = sim_params["subsample_dir"]
     sim_label = Labels["sim_label"]
 
-    print("Making new FlamingoHOD object", flush=True)###############################################################
-    # create a new FlamingoHOD object
-    newBall = FlamingoHOD(path_config_filename)
+    temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
+    mock_wp_exists = os.path.isfile(temp_stuff + "mock_wp.npy")
+    pair_wp_exists = os.path.isfile(temp_stuff + "pair_wp.npy")
 
-    print("Getting NFW draw for satellites", flush=True)#############################################################
-    max_nfw = 40
-    NFW_draw = nfw_draw(10000, max_nfw, seed)
+    if not mock_wp_exists or not pair_wp_exists:
+
+        print("Making new FlamingoHOD object", flush=True)###############################################################
+        # create a new FlamingoHOD object
+        newBall = FlamingoHOD(path_config_filename)
+
+        print("Getting NFW draw for satellites", flush=True)#############################################################
+        max_nfw = 40
+        NFW_draw = nfw_draw(10000, max_nfw, seed)
 
     # print("Throwaway run for jit to compile, don't write to disk", flush=True)##############################################
     # throw away run for jit to compile, don't write to disk
@@ -197,82 +203,92 @@ def main(path_config_filename):
     # print("Doing paircounting...", flush=True)##################################################################
     #paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
-    print("Loading paircounts from the tabulation mock", flush=True)###############################################
-    paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/Debugging_fitting/"
-    cencen = np.load(paircount_path+"cencen.npy")
-    censat = np.load(paircount_path+"censat.npy")
-    satsat = np.load(paircount_path+"satsat.npy")
-    satsat_onehalo = np.load(paircount_path+"satsat_onehalo.npy")
+    if not pair_wp_exists:
 
-    print("Getting wp from tabulation mock", flush=True)###########################################################
+        print("Loading paircounts from the tabulation mock", flush=True)###############################################
+        paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/Debugging_fitting/"
+        cencen = np.load(paircount_path+"cencen.npy")
+        censat = np.load(paircount_path+"censat.npy")
+        satsat = np.load(paircount_path+"satsat.npy")
+        satsat_onehalo = np.load(paircount_path+"satsat_onehalo.npy")
 
-    mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
+        print("Getting wp from tabulation mock", flush=True)###########################################################
 
-    print("   Loading halos for hmf...", flush=True)
-    meta_subsample_dir = Path(subsample_dir)
-    full_subsample_dir = meta_subsample_dir / sim_label
+        mass_bin_edges = 10**10 * np.logspace(0,6,31)
+        mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
 
-    subsample_files = [full_subsample_dir / subsample_file for subsample_file in os.listdir(full_subsample_dir)]
-    subsample_files.sort()
-    num_subsample_files = len(subsample_files)
-    if num_subsample_files == 0:
-        raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
-    hmf = np.zeros(len(mass_bin_centres))
-    for i in range(num_subsample_files):
-        print("    Loading halo",i,flush=True)
-        subsample_file = subsample_files[i]
-        masked_halos = h5py.File(subsample_file)
-        halo_mass = masked_halos["halos"]["M200_crit"]
-        hmf += np.histogram(halo_mass, bins = mass_bin_edges)[0]
+        print("   Loading halos for hmf...", flush=True)
+        meta_subsample_dir = Path(subsample_dir)
+        full_subsample_dir = meta_subsample_dir / sim_label
 
-    print("Done loading halos, calculating weighting factors",flush=True)
-    newball_HOD_params = newBall.tracers["LRG"]
-    logM_cut = newball_HOD_params["logM_cut"]
-    logM1 = newball_HOD_params["logM1"]
-    sigma = newball_HOD_params["sigma"]
-    alpha = newball_HOD_params["alpha"]
-    kappa = newball_HOD_params["kappa"]
+        subsample_files = [full_subsample_dir / subsample_file for subsample_file in os.listdir(full_subsample_dir)]
+        subsample_files.sort()
+        num_subsample_files = len(subsample_files)
+        if num_subsample_files == 0:
+            raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
+        hmf = np.zeros(len(mass_bin_centres))
+        for i in range(num_subsample_files):
+            print("    Loading halo",i,flush=True)
+            subsample_file = subsample_files[i]
+            masked_halos = h5py.File(subsample_file)
+            halo_mass = masked_halos["halos"]["M200_crit"]
+            hmf += np.histogram(halo_mass, bins = mass_bin_edges)[0]
 
-    hod_params = [logM_cut, logM1, sigma, alpha, kappa]
+        print("Done loading halos, calculating weighting factors",flush=True)
+        newball_HOD_params = newBall.tracers["LRG"]
+        logM_cut = newball_HOD_params["logM_cut"]
+        logM1 = newball_HOD_params["logM1"]
+        sigma = newball_HOD_params["sigma"]
+        alpha = newball_HOD_params["alpha"]
+        kappa = newball_HOD_params["kappa"]
 
-    hod_cen = AbacusCen_HOD(hod_params, mass_bin_centres)
-    hod_sat = AbacusSat_HOD(hod_params, hod_cen, mass_bin_centres)
+        hod_params = [logM_cut, logM1, sigma, alpha, kappa]
 
-    CC = create_weighting_factor(cencen,hod_cen,hod_cen)
-    CS = create_weighting_factor(censat,hod_cen,hod_sat)
-    SS = create_weighting_factor(satsat,hod_sat,hod_sat)
-    SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat)
+        hod_cen = AbacusCen_HOD(hod_params, mass_bin_centres)
+        hod_sat = AbacusSat_HOD(hod_params, hod_cen, mass_bin_centres)
 
-    print("Calculating number of particles", flush=True)
-    npart_cen = np.sum(hmf * hod_cen)
-    npart_sat = np.sum(hmf * hod_sat)
-    npart_total = npart_cen + npart_sat
+        CC = create_weighting_factor(cencen,hod_cen,hod_cen)
+        CS = create_weighting_factor(censat,hod_cen,hod_sat)
+        SS = create_weighting_factor(satsat,hod_sat,hod_sat)
+        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat)
 
-    print("Calculating randoms", flush=True)
-    rands = create_randoms_for_wp(npart = npart_total,r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
-    wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
+        print("Calculating number of particles", flush=True)
+        npart_cen = np.sum(hmf * hod_cen)
+        npart_sat = np.sum(hmf * hod_sat)
+        npart_total = npart_cen + npart_sat
 
-    print("Finalising wp calc", flush=True)
-    GG = CC + CS + SS + SS1
-    xi_pair = np.divide(GG, wp_rands) - 1
-    wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
+        print("Calculating randoms", flush=True)
+        rands = create_randoms_for_wp(npart = npart_total,r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
+        wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
 
-    print("Getting true mock to compare wp against", flush=True)#############################################################
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=False
-    )
+        print("Finalising wp calc", flush=True)
+        GG = CC + CS + SS + SS1
+        xi_pair = np.divide(GG, wp_rands) - 1
+        wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
+        np.save(temp_stuff + "pair_wp.npy", wp_pair)
+    else:
+        wp_pair = np.load(temp_stuff + "pair_wp.npy")
 
-    print("Getting wp from the true mock", flush=True)#############################################################
-    wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+    if not mock_wp_exists:
+
+        print("Getting true mock to compare wp against", flush=True)#############################################################
+        mock_dict = newBall.run_hod(
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=False
+        )
+
+        print("Getting wp from the true mock", flush=True)#############################################################
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+        wp_mock = wp_dict["LRG_LRG"]
+        np.save(temp_stuff + "mock_wp.npy", wp_mock)
+    else:
+        wp_mock = np.load(temp_stuff + "mock_wp.npy")
 
     print("Comparing wps", flush=True)###########################################################################
 
     rpcent = (rpbins[1:] + rpbins[:-1])/2
-    wp_mock = wp_dict["LRG_LRG"]
 
-    plt.loglog(rpcent, wp_mock)
-    plt.loglog(rpcent, wp_pair)
+    plt.loglog(rpcent, wp_mock, label="'True' wp from mock")
+    plt.loglog(rpcent, wp_pair, label="wp from paircounting")
     plt.legend()
     plt.savefig("fig_paircounts")
     plt.show()

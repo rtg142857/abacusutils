@@ -795,9 +795,9 @@ def gen_sats_nfw(
             lbox,
             vel_sat,
             Nthread,
-            exp_frac,
-            exp_scale,
-            nfw_rescale,
+            #exp_frac,
+            #exp_scale,
+            #nfw_rescale,
         )
     )
     # if verbose:
@@ -849,9 +849,9 @@ def gen_sats_nfw(
             lbox,
             vel_sat,
             Nthread,
-            exp_frac,
-            exp_scale,
-            nfw_rescale,
+            #exp_frac,
+            #exp_scale,
+            #nfw_rescale,
         )
     )
     # if verbose:

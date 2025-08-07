@@ -194,14 +194,13 @@ def main(path_config_filename):
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
 
-    # print("Throwaway run for jit to compile, don't write to disk", flush=True)##############################################
-    # throw away run for jit to compile, don't write to disk
-    # mock_dict = newBall.run_hod(
-    #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=True
-    # )
+        print("Get mock dict by running HOD; change write to disk as necessary", flush=True)##############################################
+        mock_dict = newBall.run_hod(
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True, tabulation_mock=True
+        )
 
-    # print("Doing paircounting...", flush=True)##################################################################
-    #paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
+        print("Doing paircounting...", flush=True)##################################################################
+        paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
     if not pair_wp_exists:
 
@@ -255,11 +254,11 @@ def main(path_config_filename):
 
         CC = create_weighting_factor(cencen,hod_cen,hod_cen)
         print("CC weight factor:", CC)
-        CS = create_weighting_factor(censat,hod_cen,hod_sat)
+        CS = create_weighting_factor(censat,hod_cen,hod_sat) * 2
         print("CS weighting factor:", CS)
         SS = create_weighting_factor(satsat,hod_sat,hod_sat)
         print("SS weighting factor:", SS)
-        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat)
+        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((3*(3-1))/2)
         print("SS1 weighting factor:", SS1)
 
         print("Calculating number of particles", flush=True)
@@ -283,6 +282,7 @@ def main(path_config_filename):
         print("WP from paircounting:", wp_pair)
         np.save(temp_stuff + "pair_wp.npy", wp_pair)
     else:
+        print("pair_wp already saved, skipping")
         wp_pair = np.load(temp_stuff + "pair_wp.npy")
 
 
@@ -297,6 +297,7 @@ def main(path_config_filename):
         wp_mock = wp_dict["LRG_LRG"]
         np.save(temp_stuff + "mock_wp.npy", wp_mock)
     else:
+        print("mock_wp already saved, skipping")
         wp_mock = np.load(temp_stuff + "mock_wp.npy")
 
     print("Comparing wps", flush=True)###########################################################################

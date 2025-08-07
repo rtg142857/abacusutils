@@ -559,7 +559,7 @@ def compute_fast_NFW(
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M
 
 
-@njit(fastmath=True, parallel=True)
+#@njit(fastmath=True, parallel=True)
 def gen_sats_nfw(
     NFW_draw,
     hpos,
@@ -766,6 +766,9 @@ def gen_sats_nfw(
     # generate rdpos
     seed = np.arange(128)
     rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=seed, verbose=verbose)
+    temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
+    np.save(temp_stuff + "rd_pos_L.npy", rd_pos_L)
+    np.save(temp_stuff + "hrvir.npy", hrvir)
     rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, seed=seed, verbose=verbose)
     rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, seed=seed, verbose=verbose)
 

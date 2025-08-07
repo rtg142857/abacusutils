@@ -167,6 +167,9 @@ def npairs_satsat_onehalo_wp(x,y,z,Ms,num_sat_parts,mass_bin_edges,r_bin_edges,p
     return n_pairs_mass_r_bins
 
 def correct_doublecounting(npairs, type):
+    """
+    UNUSED: currently implemented after paircounting is done, to match Alex's
+    """
     match type:
         case "cencen":
             return npairs/2
@@ -286,7 +289,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
     if verbose:
         print("Paircounting took",time2-time1,"seconds")
 
-    npairs_mass_r_bins_test = correct_doublecounting(npairs_mass_r_bins_test, type)
+    #npairs_mass_r_bins_test = correct_doublecounting(npairs_mass_r_bins_test, type)
 
     if save:
         if verbose:

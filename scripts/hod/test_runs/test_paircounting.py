@@ -216,6 +216,8 @@ def main(path_config_filename):
 
         mass_bin_edges = 10**10 * np.logspace(0,6,31)
         mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
+        print("Mass bin edges:",mass_bin_edges)
+        print("Mass bin centres:",mass_bin_centres)
 
         print("   Loading halos for hmf...", flush=True)
         meta_subsample_dir = Path(subsample_dir)
@@ -233,6 +235,7 @@ def main(path_config_filename):
             masked_halos = h5py.File(subsample_file)
             halo_mass = masked_halos["halos"]["M200_crit"]
             hmf += np.histogram(halo_mass, bins = mass_bin_edges)[0]
+            print("Halo mass function from the files that have been loaded so far:",hmf)
 
         print("Done loading halos, calculating weighting factors",flush=True)
         newball_HOD_params = newBall.tracers["LRG"]
@@ -243,34 +246,47 @@ def main(path_config_filename):
         kappa = newball_HOD_params["kappa"]
 
         hod_params = [logM_cut, logM1, sigma, alpha, kappa]
+        print("HOD parameters (logmcut, logm1, sigma, alpha, kappa):",hod_params)
 
         hod_cen = AbacusCen_HOD(hod_params, mass_bin_centres)
+        print("Central HOD:",hod_cen)
         hod_sat = AbacusSat_HOD(hod_params, hod_cen, mass_bin_centres)
+        print("Satellite HOD:", hod_sat)
 
         CC = create_weighting_factor(cencen,hod_cen,hod_cen)
+        print("CC weight factor:", CC)
         CS = create_weighting_factor(censat,hod_cen,hod_sat)
+        print("CS weighting factor:", CS)
         SS = create_weighting_factor(satsat,hod_sat,hod_sat)
+        print("SS weighting factor:", SS)
         SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat)
+        print("SS1 weighting factor:", SS1)
 
         print("Calculating number of particles", flush=True)
         npart_cen = np.sum(hmf * hod_cen)
         npart_sat = np.sum(hmf * hod_sat)
         npart_total = npart_cen + npart_sat
+        print(f"Central particles: {npart_cen}, satellite particles: {npart_sat}, total particles: {npart_total}")
 
         print("Calculating randoms", flush=True)
         rands = create_randoms_for_wp(npart = npart_total,r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
+        print("Randoms (unshaped):", rands)
         wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
+        print("Randoms (reshaped:)", wp_rands)
 
         print("Finalising wp calc", flush=True)
         GG = CC + CS + SS + SS1
+        print("Total GG pairs:", GG)
         xi_pair = np.divide(GG, wp_rands) - 1
+        print("Xi from paircounting:", xi_pair)
         wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
+        print("WP from paircounting:", wp_pair)
         np.save(temp_stuff + "pair_wp.npy", wp_pair)
     else:
         wp_pair = np.load(temp_stuff + "pair_wp.npy")
 
-    if not mock_wp_exists:
 
+    if not mock_wp_exists:
         print("Getting true mock to compare wp against", flush=True)#############################################################
         mock_dict = newBall.run_hod(
             newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True, tabulation_mock=False

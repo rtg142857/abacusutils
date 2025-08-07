@@ -596,6 +596,14 @@ def gen_sats_nfw(
 
     """
 
+    # defaults in case want_ELG = False, so the function call compute_fast_NFW doesn't break anything
+    f_sigv_L = 1
+    f_sigv_E = 1
+    exp_frac = 0
+    exp_scale = 1
+    nfw_rescale = 1
+    f_sigv_Q = 1
+
     if want_LRG:
         # if verbose:
         #     with numba.objmode(): print("Getting LRG params", flush=True)
@@ -614,12 +622,6 @@ def gen_sats_nfw(
             LRG_hod_dict['ic'],
         )
         f_sigv_L = LRG_hod_dict['f_sigv']
-
-    # defaults in case want_ELG = False, so the function call compute_fast_NFW doesn't break anything
-    f_sigv_E = 1
-    exp_frac = 0
-    exp_scale = 1
-    nfw_rescale = 1
 
     if want_ELG:
         # if verbose:

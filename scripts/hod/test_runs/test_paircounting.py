@@ -237,6 +237,11 @@ def main(path_config_filename):
         mass_bin_edges = 10**10 * np.logspace(0,6,31)
         mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
         num_mass_bins_big = 18000
+        mass_min = mass_bin_edges[0]
+        mass_max = mass_bin_edges[-1]
+        # Large number of sub bins for accuracy
+        mass_bins_big = np.logspace(np.log10(mass_min),np.log10(mass_max),num_mass_bins_big + 1)
+        mass_bin_centres_big = np.sqrt(mass_bins_big[1:] * mass_bins_big[:-1])
         print("Mass bin edges:",mass_bin_edges)
         print("Mass bin centres:",mass_bin_centres)
 
@@ -249,22 +254,15 @@ def main(path_config_filename):
         num_subsample_files = len(subsample_files)
         if num_subsample_files == 0:
             raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
-        hmf_big = np.zeros(len(mass_bin_centres))
+        hmf_big = np.zeros(len(mass_bin_centres_big))
         for i in range(num_subsample_files):
             print("    Loading halo file",i,flush=True)
             subsample_file = subsample_files[i]
             masked_halos = h5py.File(subsample_file)
             halo_mass = masked_halos["halos"]["M200_crit"]
 
-            mass_min = mass_bin_edges[0]
-            mass_max = mass_bin_edges[-1]
-            # Large number of sub bins for accuracy
-            mass_bins_big = np.logspace(np.log10(mass_min),np.log10(mass_max),num_mass_bins_big + 1)
-
             hmf_big += np.histogram(halo_mass, bins = mass_bins_big)[0]
             print("Halo mass function from the files that have been loaded so far:",hmf_big)
-
-        mass_bin_centres_big = np.sqrt(mass_bins_big[1:] * mass_bins_big[:-1])
 
         print("Done loading halos, calculating weighting factors",flush=True)
         newball_HOD_params = newBall.tracers["LRG"]

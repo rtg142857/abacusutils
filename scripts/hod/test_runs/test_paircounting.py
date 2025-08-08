@@ -152,6 +152,22 @@ def xi_to_wps(xis,r_bin_edges,pi_max):
     wp_out = 2.0 * dpi * np.sum(xis, axis=1)
     return(wp_out)
 
+def create_accurate_HOD(hod,halos,mass_bin_edges,num_mass_bins_big):
+    """
+    Using just 100-400 mass bins for the HOD isn't accurate enough. Take much smaller
+    mass subdivisions and use these to create an accurate HOD for only 100-400 mass bins.
+    """
+    num_mass_bins_small = int(len(mass_bin_edges) -1)
+    mass_bins_factor = int(num_mass_bins_big/num_mass_bins_small)
+    if num_mass_bins_big % num_mass_bins_small != 0:
+        raise ValueError("finer grained mass bins do not evenly divide coarser mass bins:",num_mass_bins_small," is not a factor of ",num_mass_bins_big)
+    hod[np.isnan(hod)] = 0
+    HOD_halo_product = halos * hod
+    HOD_recalc = np.sum(np.reshape(HOD_halo_product,(num_mass_bins_small,mass_bins_factor)),axis=1) / (
+                 np.sum(np.reshape(halos,(num_mass_bins_small,mass_bins_factor)),axis=1))
+    HOD_recalc[np.isnan(HOD_recalc)] = 0
+    return HOD_recalc
+
 
 def main(path_config_filename):
     # load the yaml parameters
@@ -184,7 +200,9 @@ def main(path_config_filename):
     mock_wp_exists = os.path.isfile(temp_stuff + "mock_wp.npy")
     pair_wp_exists = os.path.isfile(temp_stuff + "pair_wp.npy")
 
-    if not mock_wp_exists or not pair_wp_exists:
+    paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/Debugging_fitting/"
+    paircounts_exist = os.path.isfile(paircount_path + "cencen.npy")
+    if not mock_wp_exists or not pair_wp_exists or not paircounts_exist:
 
         print("Making new FlamingoHOD object", flush=True)###############################################################
         # create a new FlamingoHOD object
@@ -193,6 +211,8 @@ def main(path_config_filename):
         print("Getting NFW draw for satellites", flush=True)#############################################################
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
+
+    if not paircounts_exist:
 
         print("Get mock dict by running HOD; change write to disk as necessary", flush=True)##############################################
         mock_dict = newBall.run_hod(
@@ -210,11 +230,13 @@ def main(path_config_filename):
         censat = np.load(paircount_path+"censat.npy")
         satsat = np.load(paircount_path+"satsat.npy")
         satsat_onehalo = np.load(paircount_path+"satsat_onehalo.npy")
+        num_sat_parts = 3
 
         print("Getting wp from tabulation mock", flush=True)###########################################################
 
         mass_bin_edges = 10**10 * np.logspace(0,6,31)
         mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
+        num_mass_bins_big = 18000
         print("Mass bin edges:",mass_bin_edges)
         print("Mass bin centres:",mass_bin_centres)
 
@@ -227,14 +249,22 @@ def main(path_config_filename):
         num_subsample_files = len(subsample_files)
         if num_subsample_files == 0:
             raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
-        hmf = np.zeros(len(mass_bin_centres))
+        hmf_big = np.zeros(len(mass_bin_centres))
         for i in range(num_subsample_files):
-            print("    Loading halo",i,flush=True)
+            print("    Loading halo file",i,flush=True)
             subsample_file = subsample_files[i]
             masked_halos = h5py.File(subsample_file)
             halo_mass = masked_halos["halos"]["M200_crit"]
-            hmf += np.histogram(halo_mass, bins = mass_bin_edges)[0]
-            print("Halo mass function from the files that have been loaded so far:",hmf)
+
+            mass_min = mass_bin_edges[0]
+            mass_max = mass_bin_edges[-1]
+            # Large number of sub bins for accuracy
+            mass_bins_big = np.logspace(np.log10(mass_min),np.log10(mass_max),num_mass_bins_big + 1)
+
+            hmf_big += np.histogram(halo_mass, bins = mass_bins_big)[0]
+            print("Halo mass function from the files that have been loaded so far:",hmf_big)
+
+        mass_bin_centres_big = np.sqrt(mass_bins_big[1:] * mass_bins_big[:-1])
 
         print("Done loading halos, calculating weighting factors",flush=True)
         newball_HOD_params = newBall.tracers["LRG"]
@@ -247,23 +277,28 @@ def main(path_config_filename):
         hod_params = [logM_cut, logM1, sigma, alpha, kappa]
         print("HOD parameters (logmcut, logm1, sigma, alpha, kappa):",hod_params)
 
-        hod_cen = AbacusCen_HOD(hod_params, mass_bin_centres)
+        hod_cen_big = AbacusCen_HOD(hod_params, mass_bin_centres_big)
+        
+        hod_sat_big = AbacusSat_HOD(hod_params, hod_cen_big, mass_bin_centres_big)
+        
+
+        hod_cen = create_accurate_HOD(hod_cen_big,hmf_big,mass_bin_edges,num_mass_bins_big)
+        hod_sat = create_accurate_HOD(hod_sat_big,hmf_big,mass_bin_edges,num_mass_bins_big)
         print("Central HOD:",hod_cen)
-        hod_sat = AbacusSat_HOD(hod_params, hod_cen, mass_bin_centres)
         print("Satellite HOD:", hod_sat)
 
         CC = create_weighting_factor(cencen,hod_cen,hod_cen)
         print("CC weight factor:", CC)
-        CS = create_weighting_factor(censat,hod_cen,hod_sat) * 2
+        CS = create_weighting_factor(censat,hod_cen,hod_sat) * 2 # not doublecounted, but the others (including the randoms) are
         print("CS weighting factor:", CS)
         SS = create_weighting_factor(satsat,hod_sat,hod_sat)
         print("SS weighting factor:", SS)
-        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((3*(3-1))/2)
+        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2)
         print("SS1 weighting factor:", SS1)
 
         print("Calculating number of particles", flush=True)
-        npart_cen = np.sum(hmf * hod_cen)
-        npart_sat = np.sum(hmf * hod_sat)
+        npart_cen = np.sum(hmf_big * hod_cen_big)
+        npart_sat = np.sum(hmf_big * hod_sat_big)
         npart_total = npart_cen + npart_sat
         print(f"Central particles: {npart_cen}, satellite particles: {npart_sat}, total particles: {npart_total}")
 
@@ -302,7 +337,7 @@ def main(path_config_filename):
 
     print("Comparing wps", flush=True)###########################################################################
 
-    rpcent = (rpbins[1:] + rpbins[:-1])/2
+    rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
     plt.loglog(rpcent, wp_mock, label="'True' wp from mock")
     plt.loglog(rpcent, wp_pair, label="wp from paircounting")

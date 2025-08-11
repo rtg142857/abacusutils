@@ -334,16 +334,34 @@ def main(path_config_filename):
         print("mock_wp already saved, skipping")
         wp_mock = np.load(temp_stuff + "mock_wp.npy")
 
-    print("Comparing wps", flush=True)###########################################################################
+    print("Plotting", flush=True)###########################################################################
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
     plt.loglog(rpcent, wp_mock, label="'True' wp from mock")
     plt.loglog(rpcent, wp_pair, label="wp from paircounting")
     plt.legend()
-    plt.savefig("fig_paircounts")
+    plt.title("wp(rp)")
+    plt.savefig("fig_wprp")
     plt.show()
 
+    plt.close()
+
+    plt.loglog(mass_bin_centres_big, hod_cen_big, label="Central HOD")
+    plt.loglog(mass_bin_centres_big, hod_sat_big, label="Satellite HOD")
+    plt.loglog(mass_bin_centres_big, hod_cen_big + hod_sat_big, label="Total HOD")
+    plt.title("HOD")
+    plt.legend()
+    plt.savefig("fig_hods")
+    plt.show()
+    
+    plt.close()
+
+    plt.loglog(mass_bin_centres_big, hmf_big * hod_cen_big + hmf_big * hod_sat_big, label="Paircounted")
+    plt.title("Halo mass function, weighted by HOD")
+    plt.legend()
+    plt.savefig("fig_hmf_weighted")
+    plt.show()
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

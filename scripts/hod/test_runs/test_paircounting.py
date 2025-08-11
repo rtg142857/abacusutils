@@ -64,46 +64,46 @@ def cumulative_spline_kernel(x, mean=0, sig=1):
 
 # Now change Cen_HOD definition
 
-def Cen_HOD(params,mass_bins):
-    """
-    takes params: [M_cut, sigma_logm, something, something, something]
-    """
-    Mmin, sigma_logm = params[:2]
-    result = cumulative_spline_kernel(np.log10(mass_bins), mean = Mmin, sig=sigma_logm/np.sqrt(2))
-    return(result)
+# def Cen_HOD(params,mass_bins):
+#     """
+#     takes params: [M_cut, sigma_logm, something, something, something]
+#     """
+#     Mmin, sigma_logm = params[:2]
+#     result = cumulative_spline_kernel(np.log10(mass_bins), mean = Mmin, sig=sigma_logm/np.sqrt(2))
+#     return(result)
 
-def Sat_HOD(params,cen_hod,mass_bins):
-    """
-    takes params: [Mmin, sigma_logm, logM0, logM1, alpha]
-    """
-    M0, M1, alpha = params[2:].copy()
-    M0 = 10**M0
-    M1 = 10**M1
-    result = cen_hod * (((mass_bins-M0)/M1)**alpha)
-    return(result)
+# def Sat_HOD(params,cen_hod,mass_bins):
+#     """
+#     takes params: [Mmin, sigma_logm, logM0, logM1, alpha]
+#     """
+#     M0, M1, alpha = params[2:].copy()
+#     M0 = 10**M0
+#     M1 = 10**M1
+#     result = cen_hod * (((mass_bins-M0)/M1)**alpha)
+#     return(result)
 
-def AbacusCen_HOD(params, mass_bins):
+def AbacusCen_HOD(params, masses):
     """
     takes params: [logM_cut, logM1, sigma, alpha, kappa]
     """
     logM_cut = params[0]
     sigma = params[2]
 
-    hod = np.empty(len(mass_bins))
-    for i, M_h in enumerate(mass_bins):
+    hod = np.empty(len(masses))
+    for i, M_h in enumerate(masses):
         hod[i] = 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
 
     return hod
 
-def AbacusSat_HOD(params, cen_hod, mass_bins):
+def AbacusSat_HOD(params, cen_hod, masses):
     """
     takes params: [logM_cut, logM1, sigma, alpha, kappa]
     """
     logM_cut, logM1, sigma, alpha, kappa = params[:]
     M_cut = 10 ** logM_cut
     M_1 = 10 ** logM1
-    hod = np.empty(len(mass_bins))
-    for i, M_h in enumerate(mass_bins):
+    hod = np.empty(len(masses))
+    for i, M_h in enumerate(masses):
             if M_h - kappa * M_cut < 0:
                 hod[i] = 0
             else:
@@ -264,6 +264,7 @@ def main(path_config_filename):
             hmf_big += np.histogram(halo_mass, bins = mass_bins_big)[0]
             print("Halo mass function from the files that have been loaded so far:",hmf_big)
 
+        print("Total number of halos:", np.sum(hmf_big), flush=True)
         print("Done loading halos, calculating weighting factors",flush=True)
         newball_HOD_params = newBall.tracers["LRG"]
         logM_cut = newball_HOD_params["logM_cut"]

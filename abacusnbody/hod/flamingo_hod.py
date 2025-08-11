@@ -226,6 +226,8 @@ class FlamingoHOD:
                 self.staging()
             )
 
+            print(len(self.halo_data["hmass"]),"halos loaded", flush=True)
+
             # determine the halo mass function
             self.logMbins = np.linspace(
                 np.log10(np.min(self.halo_data['hmass'])),

@@ -347,14 +347,22 @@ def main(path_config_filename):
 
     plt.close()
 
+    plt.loglog(mass_bin_centres_big, hmf_big)
+    plt.title("HMF")
+    plt.savefig("fig_hmf")
+    plt.show()
+    
+    plt.close()
+
     plt.loglog(mass_bin_centres_big, hod_cen_big, label="Central HOD")
     plt.loglog(mass_bin_centres_big, hod_sat_big, label="Satellite HOD")
     plt.loglog(mass_bin_centres_big, hod_cen_big + hod_sat_big, label="Total HOD")
+    plt.ylim(bottom=10**-3)
     plt.title("HOD")
     plt.legend()
     plt.savefig("fig_hods")
     plt.show()
-    
+
     plt.close()
 
     plt.loglog(mass_bin_centres_big, hmf_big * hod_cen_big + hmf_big * hod_sat_big, label="Paircounted")

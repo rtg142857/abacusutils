@@ -260,7 +260,7 @@ def main(path_config_filename):
             subsample_file = subsample_files[i]
             masked_halos = h5py.File(subsample_file)
             halo_mass = masked_halos["halos"]["M200_crit"]
-            halo_weights = masked_halos["halos"]["hmultis"]
+            halo_weights = masked_halos["halos"]["multi_halos"]
 
             hmf_big += np.histogram(halo_mass, bins = mass_bins_big, weights=halo_weights)[0]
             print("Halo mass function from the files that have been loaded so far:",hmf_big)

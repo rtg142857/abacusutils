@@ -432,6 +432,9 @@ def gen_cent(
     QSO_dict['vz'] = qso_vz
     QSO_dict['mass'] = qso_mass
     ID_dict['QSO'] = qso_id
+
+    if tabulation_mock:
+        LRG_dict["hmultis"] = multis
     return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep
 
 
@@ -584,6 +587,7 @@ def gen_sats_nfw(
     keep_cent,
     vel_sat='rd_normal',
     tabulation_mock=False,
+    hmultis=None,
     Nthread=16,
     verbose=False
 ):
@@ -902,6 +906,9 @@ def gen_sats_nfw(
     QSO_dict['vz'] = vz_sat_Q
     QSO_dict['mass'] = M_Q
     ID_dict['QSO'] = h_id_Q
+
+    if tabulation_mock:
+        LRG_dict["hmultis"] = np.repeat(hmultis, 3)
 
     return LRG_dict, ELG_dict, QSO_dict, ID_dict
 
@@ -1620,6 +1627,7 @@ def gen_gals(
             lbox,
             keep_cent,
             Nthread=Nthread,
+            hmultis=halos_array["hmultis"],
             verbose=verbose,
             tabulation_mock=tabulation_mock
         )

@@ -16,6 +16,7 @@ def split_cen_sat(mock_galaxies: dict):
     y = mock_galaxies["y"]
     z = mock_galaxies["z"]
     id = mock_galaxies["id"]
+    weight = mock_galaxies["hmultis"]
     # Split into centrals and satellites
 
     #mask1 = np.array(is_central)
@@ -23,6 +24,7 @@ def split_cen_sat(mock_galaxies: dict):
     x_sat = x[Ncent:]
     y_sat = y[Ncent:]
     z_sat = z[Ncent:]
+    weight_sat = weight[Ncent:]
     halo_id_sat = id[Ncent:]
 
     halo_id_sat_sorted = np.argsort(halo_id_sat)
@@ -33,25 +35,27 @@ def split_cen_sat(mock_galaxies: dict):
     x_sat = x_sat[halo_id_sat_sorted[:]]
     y_sat = y_sat[halo_id_sat_sorted[:]]
     z_sat = z_sat[halo_id_sat_sorted[:]]
+    weight_sat = weight_sat[halo_id_sat_sorted[:]]
 
     Mvir = Mvir[:Ncent]
     x = x[:Ncent]
     y = y[:Ncent]
     z = z[:Ncent]
+    weight = weight[:Ncent]
 
-    return x, y, z, Mvir, x_sat, y_sat, z_sat, Mvir_sat
+    return x, y, z, Mvir, weight, x_sat, y_sat, z_sat, Mvir_sat, weight_sat
 
-def mass_mask(x,y,z,Mvir,mass_bin_edges):
+def mass_mask(x,y,z,weight,Mvir,mass_bin_edges):
     """
     Takes arrays of the coordinates and masses of haloes and returns a list
-    where the list elements are arrays of halo coordinates filtered into the 
+    where the list elements are arrays of halo coordinates and weights filtered into the 
     mass bins provided
     """
     samples_ = []
     for i in range(len(mass_bin_edges)-1):
         mass_mask = (np.array(Mvir>=mass_bin_edges[i]) 
                   & np.array(Mvir<mass_bin_edges[i+1]))
-        samples_.append(np.vstack((x[mass_mask],y[mass_mask],z[mass_mask])).T)
+        samples_.append(np.vstack((x[mass_mask],y[mass_mask],z[mass_mask],weight[mass_mask])).T)
     return samples_
 
 def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,pi_max,d_pi=1):
@@ -75,8 +79,8 @@ def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,
             if len(samples1[i])>=1 and len(samples2[j])>=1:
                 n_pairs.append(DDrppi(autocorr=0, nthreads=num_threads, pimax=pi_max, #npibins=(pi_max//d_pi),
                          binfile=r_bin_edges,
-                         X1=samples1[i][:,0],Y1=samples1[i][:,1],Z1=samples1[i][:,2],X2=samples2[j][:,0],
-                         Y2=samples2[j][:,1],Z2 = samples2[j][:,2],periodic=True,verbose=False, boxsize=boxsize))
+                         X1=samples1[i][:,0],Y1=samples1[i][:,1],Z1=samples1[i][:,2], weights1=samples1[i][:,4], X2=samples2[j][:,0],
+                         Y2=samples2[j][:,1],Z2 = samples2[j][:,2],weights2=samples2[i][:,4],periodic=True,verbose=False, boxsize=boxsize))
                 # We only use Corrfunc if both mass bins are populated, otherwise
                 # return 0 for this combination
             else:
@@ -105,7 +109,7 @@ def npairs_conversion_wp(samples1,samples2,n_pairs,r_bin_edges,pi_max, d_pi=1):
                         n_pairs_mass_r_bins_wp[i,j,k,l] = 0
     return n_pairs_mass_r_bins_wp
 
-def npairs_satsat_onehalo_wp(x,y,z,Ms,num_sat_parts,mass_bin_edges,r_bin_edges,pi_max, d_pi=1):
+def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_bin_edges,pi_max, d_pi=1):
     """
     We cannot use corrfunc for the one halo satellite-satellite term.
     This is because it would be too inefficient to split by
@@ -128,6 +132,9 @@ def npairs_satsat_onehalo_wp(x,y,z,Ms,num_sat_parts,mass_bin_edges,r_bin_edges,p
 
     distances_pi = np.zeros((len(Ms[::num_sat_parts]),
                           int(num_sat_parts*(num_sat_parts-1)/2)))
+    
+    weights_reduced = np.zeros((len(Ms[::num_sat_parts]),
+                           int(num_sat_parts*(num_sat_parts-1)/2)))
 
     k = 0
     # For any number of satellite particles can take every combination of ith and 
@@ -141,6 +148,8 @@ def npairs_satsat_onehalo_wp(x,y,z,Ms,num_sat_parts,mass_bin_edges,r_bin_edges,p
 
             distances_pi[:,k] = ((z[i::num_sat_parts]-z[j::num_sat_parts])**2)**0.5
 
+            weights_reduced[:,k] = weights[::num_sat_parts]
+
             # This works as all halos have the same number of sat particles so 
             # [::num_sat_parts] is actually looping the specific paircount 
             # (particles i and j) over every halo
@@ -153,7 +162,7 @@ def npairs_satsat_onehalo_wp(x,y,z,Ms,num_sat_parts,mass_bin_edges,r_bin_edges,p
     distances_rp = np.reshape(distances_rp,(1,-1))[0]
     distances_pi = np.reshape(distances_pi,(1,-1))[0]
 
-    final_data = np.histogramdd(sample = np.array([Ms_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)])
+    final_data = np.histogramdd(sample = np.array([Ms_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weights_reduced)
     final_data = final_data[0]
     # Finally transform into the usual format with 2 separate M bins so that it easily fits into the rest of my existing code
 
@@ -219,7 +228,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
     if verbose:
         print("Total number of tracers:",len(mock1["mass"]), flush=True)
 
-    x_cen1, y_cen1, z_cen1, M_cen1, x_sat1, y_sat1, z_sat1, M_sat1 = split_cen_sat(mock1)
+    x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1  = split_cen_sat(mock1)
 
     if verbose:
         print("Number of central tracers:",len(x_cen1), flush=True)
@@ -227,10 +236,10 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
 
     if tracer2 != tracer1:
         mock2 = tracer_mock[tracer2]
-        x_cen2, y_cen2, z_cen2, M_cen2, x_sat2, y_sat2, z_sat2, M_sat2 = split_cen_sat(mock2)
+        x_cen2, y_cen2, z_cen2, M_cen2, weight_cen2, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = split_cen_sat(mock2)
         #autocorr = False
     else:
-        x_cen2, y_cen2, z_cen2, M_cen2, x_sat2, y_sat2, z_sat2, M_sat2 = x_cen1, y_cen1, z_cen1, M_cen1, x_sat1, y_sat1, z_sat1, M_sat1
+        x_cen2, y_cen2, z_cen2, M_cen2, weight_cen2, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1
         #samples_test2 = tracer_mock[tracer1_dict]
         #autocorr = True
 
@@ -242,8 +251,8 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
         print("Doing the paircounting...", flush=True)
     match type:
         case "cencen":
-            samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
-            samples_2 = mass_mask(x_cen2, y_cen2, z_cen2, M_cen2, mass_bin_edges)
+            samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
+            samples_2 = mass_mask(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges)
             num_threads = Nthread
 
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
@@ -253,8 +262,8 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
             for i in [x_sat2, y_sat2, z_sat2, M_sat2]:
                 i = i[::num_sat_parts]
 
-            samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
-            samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, M_sat2, mass_bin_edges)
+            samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
+            samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)
 
             num_threads = Nthread
 
@@ -273,8 +282,8 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
             for i in [x_sat1, y_sat1, z_sat1, M_sat1, x_sat2, y_sat2, z_sat2, M_sat2]:
                 i = i[::num_sat_parts]
 
-            samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, M_sat1, mass_bin_edges)
-            samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, M_sat2, mass_bin_edges)
+            samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)
+            samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)
 
             num_threads = Nthread
 
@@ -283,7 +292,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
 
         case "satsat_onehalo":
             # Want all 3 sat particles per halo
-            npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1,M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
+            npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
         
     time2 = time.time()
     if verbose:

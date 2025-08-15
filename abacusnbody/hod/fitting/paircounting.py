@@ -79,8 +79,8 @@ def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,
             if len(samples1[i])>=1 and len(samples2[j])>=1:
                 n_pairs.append(DDrppi(autocorr=0, nthreads=num_threads, pimax=pi_max, #npibins=(pi_max//d_pi),
                          binfile=r_bin_edges,
-                         X1=samples1[i][:,0],Y1=samples1[i][:,1],Z1=samples1[i][:,2], weights1=samples1[i][:,4], X2=samples2[j][:,0],
-                         Y2=samples2[j][:,1],Z2 = samples2[j][:,2],weights2=samples2[i][:,4],periodic=True,verbose=False, boxsize=boxsize))
+                         X1=samples1[i][:,0],Y1=samples1[i][:,1],Z1=samples1[i][:,2], weights1=samples1[i][:,3], X2=samples2[j][:,0],
+                         Y2=samples2[j][:,1],Z2 = samples2[j][:,2],weights2=samples2[i][:,3],periodic=True,verbose=False, boxsize=boxsize))
                 # We only use Corrfunc if both mass bins are populated, otherwise
                 # return 0 for this combination
             else:

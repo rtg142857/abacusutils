@@ -161,6 +161,7 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
     Ms_reduced = np.reshape(Ms_reduced,(1,-1))[0]
     distances_rp = np.reshape(distances_rp,(1,-1))[0]
     distances_pi = np.reshape(distances_pi,(1,-1))[0]
+    weights_reduced = np.reshape(weights_reduced,(1,-1))[0]
 
     final_data = np.histogramdd(sample = np.array([Ms_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weights_reduced)
     final_data = final_data[0]

@@ -236,7 +236,7 @@ def main(path_config_filename):
 
         mass_bin_edges = 10**10 * np.logspace(0,6,31)
         mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
-        num_mass_bins_big = 450
+        num_mass_bins_big = 90
         mass_min = mass_bin_edges[0]
         mass_max = mass_bin_edges[-1]
         # Large number of sub bins for accuracy

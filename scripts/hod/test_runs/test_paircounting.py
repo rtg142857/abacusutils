@@ -328,7 +328,7 @@ def main(path_config_filename):
         )
         print("Calculating number of galaxies from the in-built function, just as a sanity check", flush=True)
         ngal_dict = newBall.compute_ngal()
-        print("Number of LRGs according to compute_ngal:", ngal_dict["LRG"])
+        print("Number of LRGs according to compute_ngal:", ngal_dict)
 
         print("Getting wp from the true mock", flush=True)#############################################################
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)

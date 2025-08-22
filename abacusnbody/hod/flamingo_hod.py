@@ -916,6 +916,7 @@ class FlamingoHOD:
                     Delta_a,
                     Nthread,
                 )
+                print("Number of LRG centrals:",newngal[0],"\nNumber of LRG sats:",newngal[1])
                 ngal_dict[etracer] = newngal[0] + newngal[1]
                 fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
             elif etracer == 'ELG':
@@ -950,7 +951,7 @@ class FlamingoHOD:
                     Delta_a,
                     Nthread,
                 )
-                print('newngal', newngal)
+                # print('newngal', newngal)
 
                 ngal_dict[etracer] = newngal[0] + newngal[1]
                 fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])

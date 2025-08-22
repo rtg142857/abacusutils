@@ -291,14 +291,14 @@ def main(path_config_filename):
         print("Central HOD:",hod_cen)
         print("Satellite HOD:", hod_sat)
 
-        # CC = create_weighting_factor(cencen,hod_cen,hod_cen)
-        # print("CC weight factor:", CC)
-        # CS = create_weighting_factor(censat,hod_cen,hod_sat) * 2 # not doublecounted, but the others (including the randoms) are
-        # print("CS weighting factor:", CS)
-        # SS = create_weighting_factor(satsat,hod_sat,hod_sat)
-        # print("SS weighting factor:", SS)
-        # SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2)
-        # print("SS1 weighting factor:", SS1)
+        CC = create_weighting_factor(cencen,hod_cen,hod_cen)
+        print("CC weight factor:", CC)
+        CS = create_weighting_factor(censat,hod_cen,hod_sat) * 2 # not doublecounted, but the others (including the randoms) are
+        print("CS weighting factor:", CS)
+        SS = create_weighting_factor(satsat,hod_sat,hod_sat)
+        print("SS weighting factor:", SS)
+        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2)
+        print("SS1 weighting factor:", SS1)
 
         print("Calculating number of particles", flush=True)
         npart_cen = np.sum(hmf_big * hod_cen_big)
@@ -312,14 +312,14 @@ def main(path_config_filename):
         wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
         print("Randoms (reshaped:)", wp_rands)
 
-        # print("Finalising wp calc", flush=True)
-        # GG = CC + CS + SS + SS1
-        # print("Total GG pairs:", GG)
-        # xi_pair = np.divide(GG, wp_rands) - 1
-        # print("Xi from paircounting:", xi_pair)
-        # wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
-        # print("WP from paircounting:", wp_pair)
-        # np.save(temp_stuff + "pair_wp.npy", wp_pair)
+        print("Finalising wp calc", flush=True)
+        GG = CC + CS + SS + SS1
+        print("Total GG pairs:", GG)
+        xi_pair = np.divide(GG, wp_rands) - 1
+        print("Xi from paircounting:", xi_pair)
+        wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
+        print("WP from paircounting:", wp_pair)
+        np.save(temp_stuff + "pair_wp.npy", wp_pair)
     else:
         print("pair_wp already saved, skipping")
         wp_pair = np.load(temp_stuff + "pair_wp.npy")
@@ -335,10 +335,10 @@ def main(path_config_filename):
         ngal_dict = newBall.compute_ngal(Nthread=1)
         print("Number of LRGs according to compute_ngal:", ngal_dict)
 
-        # print("Getting wp from the true mock", flush=True)#############################################################
-        # wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
-        # wp_mock = wp_dict["LRG_LRG"]
-        # np.save(temp_stuff + "mock_wp.npy", wp_mock)
+        print("Getting wp from the true mock", flush=True)#############################################################
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+        wp_mock = wp_dict["LRG_LRG"]
+        np.save(temp_stuff + "mock_wp.npy", wp_mock)
     else:
         print("mock_wp already saved, skipping")
         wp_mock = np.load(temp_stuff + "mock_wp.npy")
@@ -347,12 +347,12 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    # plt.loglog(rpcent, wp_mock, label="'True' wp from mock")
-    # plt.loglog(rpcent, wp_pair, label="wp from paircounting")
-    # plt.legend()
-    # plt.title("wp(rp)")
-    # plt.savefig("fig_wprp")
-    # plt.show()
+    plt.loglog(rpcent, wp_mock, label="'True' wp from mock")
+    plt.loglog(rpcent, wp_pair, label="wp from paircounting")
+    plt.legend()
+    plt.title("wp(rp)")
+    plt.savefig("fig_wprp")
+    plt.show()
 
     plt.close()
 

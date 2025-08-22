@@ -51,7 +51,7 @@ HOD_params:
         logM1: 14.24 # 14.4
         sigma: 0.3 #0.6 # 0.6 # 0.8
         alpha: 0.4 # 1.0
-        kappa: 100000 # 0.98 # 0.4
+        kappa: 0.98 # 0.4
         alpha_c: 0
         alpha_s: 1
         s: 0

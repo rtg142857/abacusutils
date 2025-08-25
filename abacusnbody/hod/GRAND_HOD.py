@@ -34,7 +34,7 @@ def n_sat_LRG_modified(M_h, logM_cut, M_cut, M_1, sigma, alpha, kappa):
         return 0
     return (
         ((M_h - kappa * M_cut) / M_1) ** alpha
-        * 0.5
+        #* 0.5
         #* math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
     )
 

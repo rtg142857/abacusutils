@@ -35,7 +35,7 @@ def n_sat_LRG_modified(M_h, logM_cut, M_cut, M_1, sigma, alpha, kappa):
     return (
         ((M_h - kappa * M_cut) / M_1) ** alpha
         * 0.5
-        * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
+        #* math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
     )
 
 
@@ -44,7 +44,7 @@ def n_cen_LRG(M_h, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
     """
-    return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
+    return 0# 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
 
 
 @njit(fastmath=True)

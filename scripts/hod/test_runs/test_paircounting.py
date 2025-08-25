@@ -91,7 +91,7 @@ def AbacusCen_HOD(params, masses):
 
     hod = np.empty(len(masses))
     for i, M_h in enumerate(masses):
-        hod[i] = 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
+        hod[i] = 0# 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
 
     return hod
 
@@ -107,7 +107,7 @@ def AbacusSat_HOD(params, cen_hod, masses):
             if M_h - kappa * M_cut < 0:
                 hod[i] = 0
             else:
-                hod[i] = ((M_h - kappa * M_cut) / M_1) ** alpha * cen_hod[i]
+                hod[i] = ((M_h - kappa * M_cut) / M_1) ** alpha #* cen_hod[i]
     return hod
 
 def create_weighting_factor(mass_pair_array,hod1,hod2):

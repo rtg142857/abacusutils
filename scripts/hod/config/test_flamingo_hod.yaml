@@ -50,7 +50,7 @@ HOD_params:
         logM_cut: 13.0 #13.3
         logM1: 14.24 # 14.4
         sigma: 0.25 #0.6 # 0.6 # 0.8
-        alpha: 0.0 #0.4 # 1.0
+        alpha: 0.4 # 1.0
         kappa: 0.98 # 0.4
         alpha_c: 0
         alpha_s: 1

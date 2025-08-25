@@ -297,7 +297,7 @@ def main(path_config_filename):
         print("CS weighting factor:", CS)
         SS = create_weighting_factor(satsat,hod_sat,hod_sat)
         print("SS weighting factor:", SS)
-        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2)
+        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2) / 2 # TRYING SOMETHING
         print("SS1 weighting factor:", SS1)
 
         print("Calculating number of particles", flush=True)

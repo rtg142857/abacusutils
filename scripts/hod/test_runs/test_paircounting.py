@@ -297,7 +297,7 @@ def main(path_config_filename):
         print("CS weighting factor:", CS)
         SS = create_weighting_factor(satsat,hod_sat,hod_sat)
         print("SS weighting factor:", SS)
-        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2) / 2 # TRYING SOMETHING
+        SS1 = create_weighting_factor(satsat_onehalo,hod_sat,hod_sat) / ((num_sat_parts*(num_sat_parts-1))/2) * 2 # TRYING SOMETHING
         print("SS1 weighting factor:", SS1)
 
         print("Calculating number of particles", flush=True)
@@ -317,6 +317,7 @@ def main(path_config_filename):
         print("Total GG pairs:", GG)
         xi_pair = np.divide(GG, wp_rands) - 1
         print("Xi from paircounting:", xi_pair)
+        np.save(temp_stuff + "pair_xi.npy", xi_pair)
         wp_pair = xi_to_wps(xi_pair,rpbins,pimax)
         print("WP from paircounting:", wp_pair)
         np.save(temp_stuff + "pair_wp.npy", wp_pair)
@@ -339,6 +340,10 @@ def main(path_config_filename):
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         wp_mock = wp_dict["LRG_LRG"]
         np.save(temp_stuff + "mock_wp.npy", wp_mock)
+        print("Getting xi from the true mock", flush=True)##############################################################
+        xi_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+        xi_mock = xi_dict["LRG_LRG"]
+        np.save(temp_stuff + "mock_xi.npy", xi_mock)
     else:
         print("mock_wp already saved, skipping")
         wp_mock = np.load(temp_stuff + "mock_wp.npy")

@@ -293,7 +293,7 @@ def main(path_config_filename):
 
         CC = create_weighting_factor(cencen,hod_cen,hod_cen)
         print("CC weight factor:", CC)
-        CS = create_weighting_factor(censat,hod_cen,hod_sat) * 2 # not doublecounted, but the others (including the randoms) are
+        CS = create_weighting_factor(censat,hod_cen,hod_sat) #* 2 # not doublecounted, but the others (including the randoms) are
         print("CS weighting factor:", CS)
         SS = create_weighting_factor(satsat,hod_sat,hod_sat)
         print("SS weighting factor:", SS)

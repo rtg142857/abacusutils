@@ -7,6 +7,7 @@ import numpy as np
 import time
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
+from wp_paircounting import get_wp, get_numberdensity
 import emcee
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
@@ -85,7 +86,8 @@ def log_probability(hod_params, newBall: FlamingoHOD, target_wp_dict, target_jac
         # pi_bin_size = clustering_parameters["pi_bin_size"]
         # wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
 
-        wp_dict = get_wp_paircounting(hod_params, other_stuff_dict, clustering_parameters)
+        numden = get_numberdensity(hod_params, other_stuff_dict_here)
+        wp_dict = get_wp(hod_params, numden, other_stuff_dict_here, clustering_parameters)
         
         total_log_prob = 0.0
         for i1, tr1 in enumerate(newBall.tracers.keys()):

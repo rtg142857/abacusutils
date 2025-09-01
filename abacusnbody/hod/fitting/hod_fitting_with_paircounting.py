@@ -16,7 +16,7 @@ import h5py
 
 nthread = 64 # For debugging
 
-def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=False):
+def fit_HOD(path_config_filename, save_chains=False):
     # Initialise the fitting using emcee
     # Use a different function to actually do the fit (modularity)
     # Print to files: the updated parameters, an image of the HODs, the final fit to the wp (text and image), the errors in fitting to the wp (text and image)

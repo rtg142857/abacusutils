@@ -28,7 +28,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     subsample_dir = sim_params["subsample_dir"]
     sim_label = Labels["sim_label"]
     target_dict_path = fitting_params["target_dict_path"]
-    paircount_path = fitting_params["paircounts_save_path"]
+    paircount_path = fitting_params["paircounts_save_path"] + sim_label + "/"
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
     target_wp, target_jackknife = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])

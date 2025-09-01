@@ -31,6 +31,7 @@ def main(path_config_filename):
     clustering_params = config['clustering_params']
     Paths = config["Paths"]
     Labels = config["Labels"]
+    sim_label = Labels["sim_label"]
     Params = config["Params"]
     Misc = config["Misc"]
     seed = Misc["random_seed"]
@@ -61,7 +62,7 @@ def main(path_config_filename):
     #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
     # )
 
-    if not os.path.exists(paircount_path + "cencen.npy"):
+    if not os.path.exists(paircount_path + sim_label + "/cencen.npy"):
         print("No paircounts found; computing them now", flush=True)
         print("Making tracer mock...", flush=True)
         max_nfw = 40

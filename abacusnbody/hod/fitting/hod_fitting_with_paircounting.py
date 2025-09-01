@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
-from wp_paircounting import get_wp, get_npart
+from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart
 import emcee
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 import h5py

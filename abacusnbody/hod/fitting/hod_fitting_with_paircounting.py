@@ -5,11 +5,14 @@
 import yaml
 import numpy as np
 import time
+import os
+from pathlib import Path
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
-from wp_paircounting import get_wp, get_numberdensity
+from wp_paircounting import get_wp, get_npart
 import emcee
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
+import h5py
 
 nthread = 64 # For debugging
 
@@ -18,16 +21,31 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
     # Use a different function to actually do the fit (modularity)
     # Print to files: the updated parameters, an image of the HODs, the final fit to the wp (text and image), the errors in fitting to the wp (text and image)
     config = yaml.safe_load(open(path_config_filename))
+    run_params = yaml.safe_load(open(config["Paths"]["params_path"]))
     fitting_params = config["fitting_params"]
-
+    sim_params = config['sim_params']
+    Labels = config["Labels"]
+    subsample_dir = sim_params["subsample_dir"]
+    sim_label = Labels["sim_label"]
     target_dict_path = fitting_params["target_dict_path"]
+    paircount_path = fitting_params["paircounts_save_path"]
+    boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
+
     target_wp, target_jackknife = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
     #TODO: Get the target number density too
+
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
-    ndim = 15
+    ndim = 18
 
     clustering_params = config["clustering_params"]
+
+    print("Loading precomputed things...")
+    paircounts = {}
+    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
+        filename = paircount_path + pair + ".npy"
+        paircounts[pair] = np.load(filename)
+    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
     print("Setting up backend...", flush=True)
     start_time = time.time()
@@ -38,11 +56,12 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
     else:
         backend = None
 
-    sampler = sample_chain(newBall=newBall,
-                           target_wp_dict=target_wp,
+    sampler = sample_chain(target_wp_dict=target_wp,
                            target_jackknife_dict=target_jackknife,
+                           paircounts=paircounts,
+                           tracer_list=["LRG", "ELG", "QSO"],
                            clustering_parameters=clustering_params,
-                           NFW_draw=NFW_draw,
+                           other_stuff_dict_here=other_stuff_dict_here,
                            backend=backend,
                            nwalkers=nwalkers,
                            num_steps=num_steps,
@@ -61,19 +80,19 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
     return max_like_params(sampler)
 
-def sample_chain(newBall: FlamingoHOD, target_wp_dict: dict, target_jackknife_dict: dict, clustering_parameters: dict, NFW_draw: np.ndarray, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
+def sample_chain(target_wp_dict: dict, target_jackknife_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     print("Initialising sampler...", flush=True)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(newBall, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw), backend=backend)#, pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, tracer_list, target_wp_dict, target_jackknife_dict, other_stuff_dict_here, clustering_parameters), backend=backend)#, pool=pool)
 
     print("Running chain...", flush=True)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     return sampler
 
-def log_probability(hod_params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_dict, clustering_parameters, NFW_draw):
+def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_dict, other_stuff_dict_here, clustering_parameters):
     if params_inside_priors(hod_params):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
@@ -86,18 +105,19 @@ def log_probability(hod_params, newBall: FlamingoHOD, target_wp_dict, target_jac
         # pi_bin_size = clustering_parameters["pi_bin_size"]
         # wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
 
-        numden = get_numberdensity(hod_params, other_stuff_dict_here)
-        wp_dict = get_wp(hod_params, numden, other_stuff_dict_here, clustering_parameters)
+        npart = get_npart(hod_params, tracer_list, other_stuff_dict_here)
+        wp_dict = get_wp(hod_params, paircounts, tracer_list, npart, other_stuff_dict_here, clustering_parameters)
         
         total_log_prob = 0.0
-        for i1, tr1 in enumerate(newBall.tracers.keys()):
-            for i2, tr2 in enumerate(newBall.tracers.keys()):
+        for i1, tr1 in enumerate(tracer_list):
+            for i2, tr2 in enumerate(tracer_list):
                 if i1 <= i2:
                     #crosscorr or autocorr
                     fitting_wp = wp_dict[tr1+"_"+tr2]
                     target_wp = target_wp_dict[tr1+"_"+tr2]
                     target_jk = target_jackknife_dict[tr1+"_"+tr2]
                     total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk)
+        # TODO: Include number density factor
     else:
         total_log_prob = -np.inf
 
@@ -117,20 +137,23 @@ def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.nda
 
 def params_inside_priors(params):
     priors = np.array([[10,16],
-                [10,16],
-                [0,5],
-                [0,5],
-                [0,5],
-                [10,16],
-                [10,16],
-                [0,5],
-                [0,5],
-                [0,5],
-                [10,16],
-                [10,16],
-                [0,5],
-                [0,5],
-                [0,5]
+                   [10,16],
+                   [0,5],
+                   [0,5],
+                   [0,5],
+                   [0,1],
+                   [0,100],
+                   [10,16],
+                   [0,5],
+                   [0,5],
+                   [10,16],
+                   [0,5],
+                   [0,100],
+                   [10,16],
+                   [10,16],
+                   [0,5],
+                   [0,5],
+                   [0,5]
     ])
     for i in range(len(params)):
         if params[i] <= priors[i][0] or params[i] >= priors[i][1]:
@@ -195,22 +218,82 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
                 jackknife_dict[tr1+"_"+tr2] = cov
     return wp_dict, jackknife_dict
 
+def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
+    """
+    Creates a dict with:
+        boxsize
+        num_sat_parts
+        num_mass_bins_big
+        mass_bin_centres_big
+        mass_bin_edges
+        hmf_big
+    """
+
+    # These must match the ones used in paircounting
+    mass_bin_edges = 10**10 * np.logspace(0,6,31)
+    mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
+
+    # This is hardcoded here and can be changed
+    num_mass_bins_big = 90
+
+    mass_min = mass_bin_edges[0]
+    mass_max = mass_bin_edges[-1]
+    mass_bins_big = np.logspace(np.log10(mass_min),np.log10(mass_max),num_mass_bins_big + 1)
+    mass_bin_centres_big = np.sqrt(mass_bins_big[1:] * mass_bins_big[:-1])
+
+    print("Loading halos for hmf...", flush=True)
+    meta_subsample_dir = Path(subsample_dir)
+    full_subsample_dir = meta_subsample_dir / sim_label
+
+    subsample_files = [full_subsample_dir / subsample_file for subsample_file in os.listdir(full_subsample_dir)]
+    subsample_files.sort()
+    num_subsample_files = len(subsample_files)
+    if num_subsample_files == 0:
+        raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
+    hmf_big = np.zeros(len(mass_bin_centres_big))
+    for i in range(num_subsample_files):
+        print("    Loading halo file",i,flush=True)
+        subsample_file = subsample_files[i]
+        masked_halos = h5py.File(subsample_file)
+        halo_mass = masked_halos["halos"]["M200_crit"]
+        halo_weights = masked_halos["halos"]["multi_halos"]
+
+        hmf_big += np.histogram(halo_mass, bins = mass_bins_big, weights=halo_weights)[0]
+        #print("Halo mass function from the files that have been loaded so far:",hmf_big)
+
+    stuff = {}
+    stuff["boxsize"] = boxsize
+    stuff["num_sat_parts"] = num_sat_parts
+    stuff["mass_bin_edges"] = mass_bin_edges
+    stuff["mass_bin_centres_big"] = mass_bin_centres_big
+    stuff["num_mass_bins_big"] = num_mass_bins_big
+    stuff["hmf_big"] = hmf_big
+    return stuff
+
 def initialise_walkers(initial_params_random: bool, num_walkers):
     """
     Initialise the positions of the walkers for fitting the HOD parameters
     Do this randomly within the prior space if initial_params_random=True
     Else populate in a small region around some provided params
+
+    Params:
+    np.array([(LRGs:) logM_cut, logM1, sigma, alpha, kappa,
+        (ELGs): p_max, Q, logM_cut, kappa, sigma, logM1, alpha, gamma,
+        (QSOs): logM_cut, logM1, sigma, alpha, kappa])
     """
     priors = np.array([[10,16],
                    [10,16],
                    [0,5],
                    [0,5],
                    [0,5],
+                   [0,1],
+                   [0,100],
                    [10,16],
+                   [0,5],
+                   [0,5],
                    [10,16],
                    [0,5],
-                   [0,5],
-                   [0,5],
+                   [0,100],
                    [10,16],
                    [10,16],
                    [0,5],
@@ -224,11 +307,14 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         0.5,
         1.0,
         0.5,
+        0.7,
+        20.0,
         13.3,
+        0.8,
+        0.5,
         14.4,
-        0.5,
-        1.0,
-        0.5,
+        0.7,
+        6.0,
         13.3,
         14.4,
         0.5,
@@ -246,7 +332,9 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         0.5,
         0.2,
         0.3,
+        0.5,
         0.2,
+        1.0,
         0.5,
         0.5,
         0.2,
@@ -260,11 +348,14 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         0.8,
         1.0,
         0.4,
+        0.7,
+        20.0,
         13.3,
-        14.4,
         0.8,
-        1.0,
-        0.4,
+        0.5,
+        14.4,
+        0.7,
+        6.0,
         13.3,
         14.4,
         0.8,

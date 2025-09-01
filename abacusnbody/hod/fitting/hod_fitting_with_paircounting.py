@@ -125,7 +125,7 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife: np.ndarray):
     # TODO: ONLY LOOK AT A SUBSET OF THE DATA POINTS
-    i0 = 0
+    i0 = 3 # 0
     i1 = np.size(fitting_wp)
     mock = fitting_wp[i0:i1]
     data = target_wp[i0:i1]

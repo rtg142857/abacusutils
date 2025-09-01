@@ -31,7 +31,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     paircount_path = fitting_params["paircounts_save_path"] + sim_label + "/"
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
-    target_wp, target_jackknife = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
+    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
     #TODO: Get the target number density too
 
     nwalkers = fitting_params["nwalkers"]
@@ -57,7 +57,7 @@ def fit_HOD(path_config_filename, save_chains=False):
         backend = None
 
     sampler = sample_chain(target_wp_dict=target_wp,
-                           target_jackknife_dict=target_jackknife,
+                           target_jackknife_inverse_dict=target_jackknife_inverse,
                            paircounts=paircounts,
                            tracer_list=["LRG", "ELG", "QSO"],
                            clustering_parameters=clustering_params,
@@ -80,19 +80,19 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return max_like_params(sampler)
 
-def sample_chain(target_wp_dict: dict, target_jackknife_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     print("Initialising sampler...", flush=True)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, tracer_list, target_wp_dict, target_jackknife_dict, other_stuff_dict_here, clustering_parameters), backend=backend)#, pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, other_stuff_dict_here, clustering_parameters), backend=backend)#, pool=pool)
 
     print("Running chain...", flush=True)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     return sampler
 
-def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_dict, other_stuff_dict_here, clustering_parameters):
+def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, other_stuff_dict_here, clustering_parameters):
     if params_inside_priors(hod_params):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
@@ -115,21 +115,21 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
                     #crosscorr or autocorr
                     fitting_wp = wp_dict[tr1+"_"+tr2]
                     target_wp = target_wp_dict[tr1+"_"+tr2]
-                    target_jk = target_jackknife_dict[tr1+"_"+tr2]
-                    total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk)
+                    target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
+                    total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk_inv)
         # TODO: Include number density factor
     else:
         total_log_prob = -np.inf
 
     return total_log_prob
 
-def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife: np.ndarray):
+def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray):
     # TODO: ONLY LOOK AT A SUBSET OF THE DATA POINTS
-    i0 = 3 # 0
+    i0 = 5 # 0
     i1 = np.size(fitting_wp)
     mock = fitting_wp[i0:i1]
     data = target_wp[i0:i1]
-    C_matrix = target_jackknife[i0:i1, i0:i1]
+    C_matrix = target_jackknife_inverse[i0:i1, i0:i1]
 
     temp = np.matmul(C_matrix, mock-data)
     chi2 = np.dot(mock-data, temp)
@@ -200,7 +200,7 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
     One for the wp, one for the jackknife.
     """
     wp_dict = {}
-    jackknife_dict = {}
+    inverse_jackknife_dict = {}
     for i1, tr1 in enumerate(tracers):
         for i2, tr2 in enumerate(tracers):
             if i1 <= i2:
@@ -214,9 +214,10 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
                 estimator = TwoPointCorrelationFunction.load(path)
                 rebinned_estimator = estimator[:(estimator.shape[0] // 2) * 2:2] # getting it to be 24 bins
                 sep, wp, cov = twopoint_estimator.project_to_wp(rebinned_estimator, return_cov=True)
+                cov_inv = np.linalg.inv(cov)
                 wp_dict[tr1+"_"+tr2] = wp
-                jackknife_dict[tr1+"_"+tr2] = cov
-    return wp_dict, jackknife_dict
+                inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv
+    return wp_dict, inverse_jackknife_dict
 
 def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     """

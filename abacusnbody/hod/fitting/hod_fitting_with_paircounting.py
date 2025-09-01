@@ -302,12 +302,12 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
     ])
 
     mean_priors = np.array([ # Yuan et al.
-        13.3,
+        13.3, # LRGs
         14.4,
         0.5,
         1.0,
         0.5,
-        0.7,
+        0.7, # ELGs
         20.0,
         13.3,
         0.8,
@@ -315,7 +315,7 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         14.4,
         0.7,
         6.0,
-        13.3,
+        13.3, # QSOs
         14.4,
         0.5,
         1.0,
@@ -323,11 +323,12 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
     ])
 
     std_priors = np.array([ # Yuan et al.
-        0.5,
+        0.5, #LRGs
         0.5,
         0.2,
         0.3,
         0.2,
+        0.5, # ELGs
         0.5,
         0.5,
         0.2,
@@ -335,7 +336,7 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         0.5,
         0.2,
         1.0,
-        0.5,
+        0.5, # QSOs
         0.5,
         0.2,
         0.3,

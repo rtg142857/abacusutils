@@ -16,7 +16,7 @@ import yaml
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusnbody.hod.fitting.hod_fitting_with_paircounting import fit_HOD
+from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import fit_HOD
 from abacusnbody.hod.fitting.paircounting import get_paircounts
 
 DEFAULTS = {}

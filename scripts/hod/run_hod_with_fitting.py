@@ -15,7 +15,7 @@ import yaml
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusnbody.hod.fitting.hod_fitting import fit_HOD
+from abacusutils.abacusnbody.hod.fitting.hod_fitting_old import fit_HOD
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'

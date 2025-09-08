@@ -21,7 +21,7 @@ import h5py
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusnbody.hod.fitting.hod_fitting import fit_HOD
+from abacusutils.abacusnbody.hod.fitting.hod_fitting_old import fit_HOD
 import abacusnbody.hod.fitting.paircounting as paircounting
 
 DEFAULTS = {}

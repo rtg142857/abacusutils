@@ -59,7 +59,6 @@ def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     """
     M_cut = 10 ** logM_cut
     M_1 = 10 ** logM_1
-
     below_cut = M_h - kappa * M_cut < 0
     hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
     hod_value[below_cut] = 0

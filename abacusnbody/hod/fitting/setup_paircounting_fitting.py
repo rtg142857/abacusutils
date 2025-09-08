@@ -3,7 +3,7 @@ import h5py
 import os
 from pathlib import Path
 
-from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart
+from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart, get_hods_given_tracer_and_params
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
 def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False):
@@ -291,3 +291,19 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
     print(pos, flush=True)
     return pos
+
+def get_hod_values_given_parameters(M_h: np.ndarray, params, tracers, other_stuff_dict_here):
+    """
+    Returns a dict with "LRG_cen", "LRG_sat", ...
+    """
+    target_numden = get_target_number_density(tracers)
+    npart = get_npart(params, tracers, other_stuff_dict_here)
+    hod_dict = {}
+    for tracer in tracers:
+        incompleteness = (npart[tracer] / other_stuff_dict_here["boxsize"]**3) / target_numden[tracer]
+
+        cen_hod, sat_hod = get_hods_given_tracer_and_params(M_h, params, tracer)
+        hod_dict[tracer+"_cen"] = cen_hod * incompleteness
+        hod_dict[tracer+"_sat"] = sat_hod * incompleteness
+
+    return hod_dict

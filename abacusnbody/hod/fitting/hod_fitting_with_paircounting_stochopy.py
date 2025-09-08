@@ -29,8 +29,10 @@ def fit_HOD(path_config_filename, save_chains=False):
     paircount_path = fitting_params["paircounts_save_path"] + sim_label + "/"
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
-    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
-    target_ngal = get_target_number_density(tracers=["LRG", "ELG", "QSO"])
+    tracer_list = ["LRG", "ELG", "QSO"]
+
+    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list)
+    target_ngal = get_target_number_density(tracers=tracer_list)
 
     clustering_params = config["clustering_params"]
 
@@ -50,7 +52,7 @@ def fit_HOD(path_config_filename, save_chains=False):
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
                            paircounts=paircounts,
-                           tracer_list=["LRG", "ELG", "QSO"],
+                           tracer_list=tracer_list,
                            clustering_parameters=clustering_params,
                            other_stuff_dict_here=other_stuff_dict_here,
                            nwalkers=nwalkers,
@@ -59,16 +61,26 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 
     print("Optimization done", flush=True)
-    print("Best params:", OptimizeResult["x"], flush=True)
+    best_fit = OptimizeResult["x"]
+    print("Best params:", best_fit, flush=True)
     print("Chi squared:", OptimizeResult["fun"], flush=True)
+    print("Iterations:", OptimizeResult["nit"], flush=True)
     print("Successful:", OptimizeResult["success"], flush=True)
     print("Output message:", OptimizeResult["message"], flush=True)
 
     print("Saving output...", flush=True)
-    np.save(fitting_params["sampler_save_path"]+"stoch_xall.npy", OptimizeResult["xall"])
-    np.save(fitting_params["sampler_save_path"]+"stoch_funall.npy", OptimizeResult["funall"])
+    save_path = fitting_params["sampler_save_path"]
+    np.save(save_path+"stoch_xall.npy", OptimizeResult["xall"])
+    np.save(save_path+"stoch_funall.npy", OptimizeResult["funall"])
 
-    return OptimizeResult["x"]
+    print("Saving HOD values...")
+    M_h = np.logspace(10, 16, 90)
+    hod_values = get_hod_values_given_parameters(M_h, best_fit, tracer_list, other_stuff_dict_here)
+    for key, val in hod_values:
+        np.save(save_path + key + ".npy", val)
+    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)    
+
+    return best_fit
 
 def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int):
 
@@ -79,3 +91,13 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     OptimizeResult = minimize(log_probability, bounds, method="cmaes", args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum), options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True})
 
     return OptimizeResult
+
+def plot_HODs(save_path, M_h, hod_values, tracers):
+    import matplotlib.pyplot as plt
+    tracer_cols = {"LRG": "black", "ELG": "green", "QSO": "orange"}
+    for tracer in tracers:
+        cen = hod_values[tracer+"_cen"]
+        sat = hod_values[tracer+"_sat"]
+        plt.loglog(M_h, cen, color=tracer_cols[tracer], label=tracer+" cen")
+        plt.loglog(M_h, sat, color=tracer_cols[tracer], linestyle='dashed', label=tracer+" sat")
+    plt.savefig(save_path)

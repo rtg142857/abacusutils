@@ -52,10 +52,6 @@ def main(path_config_filename):
     # create a new FlamingoHOD object
     newBall = FlamingoHOD(path_config_filename)
 
-    # print("Getting NFW draw for satellites", flush=True)#############################################################
-    # max_nfw = 40
-    # NFW_draw = nfw_draw(10000, max_nfw, seed)
-
     # print("Getting mock dict, write to disk", flush=True)##############################################
     # # throw away run for jit to compile, don't write to disk
     # mock_dict = newBall.run_hod(
@@ -78,6 +74,10 @@ def main(path_config_filename):
 
     print("Done HOD fitting!", flush=True)
     newBall.update_HOD_params(max_like_params)
+
+    print("Getting NFW draw for satellites", flush=True)#############################################################
+    max_nfw = 40
+    NFW_draw = nfw_draw(10000, max_nfw, seed)
 
     print("Making final mock...", flush=True)##########################################################################
     mock_dict = newBall.run_hod(

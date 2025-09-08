@@ -300,7 +300,7 @@ def get_hod_values_given_parameters(M_h: np.ndarray, params, tracers, other_stuf
     npart = get_npart(params, tracers, other_stuff_dict_here)
     hod_dict = {}
     for tracer in tracers:
-        incompleteness = (npart[tracer] / other_stuff_dict_here["boxsize"]**3) / target_numden[tracer]
+        incompleteness = target_numden[tracer] / (npart[tracer] / other_stuff_dict_here["boxsize"]**3)
 
         cen_hod, sat_hod = get_hods_given_tracer_and_params(M_h, params, tracer)
         hod_dict[tracer+"_cen"] = cen_hod * incompleteness

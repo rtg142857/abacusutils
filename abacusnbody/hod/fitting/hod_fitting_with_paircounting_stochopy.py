@@ -100,4 +100,6 @@ def plot_HODs(save_path, M_h, hod_values, tracers):
         sat = hod_values[tracer+"_sat"]
         plt.loglog(M_h, cen, color=tracer_cols[tracer], label=tracer+" cen")
         plt.loglog(M_h, sat, color=tracer_cols[tracer], linestyle='dashed', label=tracer+" sat")
+        plt.ylim(10**-3, 10**3)
+        plt.legend()
     plt.savefig(save_path)

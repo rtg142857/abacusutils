@@ -76,7 +76,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("Saving HOD values...")
     M_h = np.logspace(10, 16, 90)
     hod_values = get_hod_values_given_parameters(M_h, best_fit, tracer_list, other_stuff_dict_here)
-    for key, val in hod_values:
+    for key, val in hod_values.items():
         np.save(save_path + key + ".npy", val)
     plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)    
 

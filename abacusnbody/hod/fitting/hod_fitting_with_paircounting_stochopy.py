@@ -73,9 +73,9 @@ def fit_HOD(path_config_filename, save_chains=False):
 def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int):
 
     bounds = get_priors()
-    minimize = True
+    minimum = True
 
     print("Running optimisation...", flush=True)
-    OptimizeResult = minimize(log_probability, bounds, method="cmaes", args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimize), options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True})
+    OptimizeResult = minimize(log_probability, bounds, method="cmaes", args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum), options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True})
 
     return OptimizeResult

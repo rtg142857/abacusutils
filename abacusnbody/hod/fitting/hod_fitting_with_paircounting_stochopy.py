@@ -10,7 +10,7 @@ from abacusnbody.hod.flamingo_hod import FlamingoHOD
 
 from abacusnbody.hod.fitting.setup_paircounting_fitting import *
 
-from stochopy import minimize
+from stochopy.optimize import minimize
 
 nthread = 64 # For debugging
 

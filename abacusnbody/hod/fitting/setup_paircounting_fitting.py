@@ -101,18 +101,28 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
                 inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv
     return wp_dict, inverse_jackknife_dict
 
-def get_target_number_density(tracers=["LRG", "ELG", "QSO"]):
+def get_target_number_density(tracers=["LRG", "ELG", "QSO"], source="DESI"):
     """
-    Values from eBOSS
+    Values from eBOSS:
     See page 13 of https://arxiv.org/pdf/2110.11412
+    Values from DESI dr3:
+    page 10 of https://arxiv.org/pdf/2503.14738 
     """
     numden_dict = {}
-    if "LRG" in tracers:
-        numden_dict["LRG"] = 1 * 10**(-4)
-    if "ELG" in tracers:
-        numden_dict["ELG"] = 4 * 10**(-4)
-    if "QSO" in tracers:
-        numden_dict["QSO"] = 2 * 10**(-5)
+    if source == "eBOSS":
+        if "LRG" in tracers:
+            numden_dict["LRG"] = 1 * 10**(-4)
+        if "ELG" in tracers:
+            numden_dict["ELG"] = 4 * 10**(-4)
+        if "QSO" in tracers:
+            numden_dict["QSO"] = 2 * 10**(-5)
+    elif source == "DESI":
+        if "LRG" in tracers:
+            numden_dict["LRG"] = 4 * 10**(-4)
+        if "ELG" in tracers:
+            numden_dict["ELG"] = 4 * 10**(-4)
+        if "QSO" in tracers:
+            numden_dict["QSO"] = 2 * 10**(-5)
     return numden_dict
 
 def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):

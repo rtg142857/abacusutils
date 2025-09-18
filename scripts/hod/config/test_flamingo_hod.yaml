@@ -17,7 +17,7 @@ Paths:
   ics_path: '/cosma8/data/dp004/flamingo/InitialConditions/L1000N3600/HYDRO_FIDUCIAL/gen.conf'
 
 Labels:
-  sim_label: "Debugging_fitting" # just for labelling output files
+  sim_label: "Debugging_goodHODs" # just for labelling output files
 
 Params:
   N: 3600

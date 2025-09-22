@@ -58,7 +58,8 @@ class SwiftHaloCatalog(object):
         Use read_XXXX_file() beforehand to get id, pos, vel, M200_crit
         """
         self.halos["R200_crit"] = self.get_r200(zcos)
-        self.halos["concentration"] = self.get_concentration()
+        if "concentration" not in self.halos.keys():
+            self.halos["concentration"] = self.get_concentration()
         self.halos["sigmav3d"] = self.get_sigmav3d(zcos)
 
     def get_sigmav3d(self, zcos):
@@ -76,6 +77,8 @@ class SwiftHaloCatalog(object):
         R200 and RVmax
 
         Uses the calculation given by Alex Smith's HOD_Mock_Pipeline
+
+        WARNING: This seems to return very weird values (distribution over halos looks almost uniform up to c=80).
 
         Returns:
             array of halo concentrations
@@ -135,6 +138,7 @@ class SwiftHaloCatalog(object):
         halos["vel"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
         halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h
         halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
+        halos["concentration"] = np.array(halo_cat["SO"]["200_crit"]["Concentration"])[relevant_field_halos]
 
         self.halos = halos
         #self.halos = Table(halos, copy=False)

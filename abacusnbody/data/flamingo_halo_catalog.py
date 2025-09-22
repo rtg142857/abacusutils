@@ -119,12 +119,16 @@ class SwiftHaloCatalog(object):
         halo_cat = h5py.File(file_path, "r")
 
         is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
-        rvmax_threshold = halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
-        is_above_rvmax_threshold = np.array(halo_cat["SO"]["200_crit"]["NumberOfDarkMatterParticles"]) >= rvmax_threshold
-        is_nonzero_rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) != 0
 
-        relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
-        relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
+        # rvmax_threshold = halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        # is_above_rvmax_threshold = np.array(halo_cat["SO"]["200_crit"]["NumberOfDarkMatterParticles"]) >= rvmax_threshold
+        # is_nonzero_rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) != 0
+
+        # is_nonzero_SORadius = np.array(halo_cat["SO"]["200_crit"]["SORadius"])!=0 SORadius is a "basic" quantity computed for all field halos
+
+        # relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
+        # relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
+        relevant_field_halos = is_not_subhalo
 
         number_of_halos = np.count_nonzero(relevant_field_halos)
 
@@ -133,7 +137,7 @@ class SwiftHaloCatalog(object):
         halos["pos"] = (np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * self.h) % self.boxsize_h # some values are just outside the box
         halos["vel"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
         halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h
-        halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
+        halos["rvir"] = np.array(halo_cat["SO"]["200_crit"]["SORadius"])[relevant_field_halos] * self.h
 
         self.halos = halos
         #self.halos = Table(halos, copy=False)

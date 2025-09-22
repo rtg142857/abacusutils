@@ -71,21 +71,21 @@ class SwiftHaloCatalog(object):
         return np.sqrt(2.151e-9 * (self.halos["M200_crit"]*\
                           (1.+zcos)/self.halos["R200_crit"]))
 
-    def get_concentration(self):
-        """
-        Returns NFW concentration of each halo, calculated from
-        R200 and RVmax
+    # def get_concentration(self):
+    #     """
+    #     Returns NFW concentration of each halo, calculated from
+    #     R200 and RVmax
 
-        Uses the calculation given by Alex Smith's HOD_Mock_Pipeline
+    #     Uses the calculation given by Alex Smith's HOD_Mock_Pipeline
 
-        WARNING: This seems to return very weird values (distribution over halos looks almost uniform up to c=80).
+    #     WARNING: This seems to return very weird values (distribution over halos looks almost uniform up to c=80).
 
-        Returns:
-            array of halo concentrations
-        """
-        conc = 2.16 * self.halos["R200_crit"] / self.halos["rvmax"]
+    #     Returns:
+    #         array of halo concentrations
+    #     """
+    #     conc = 2.16 * self.halos["R200_crit"] / self.halos["rvmax"]
 
-        return np.clip(conc, 0.1, 1e4)
+    #     return np.clip(conc, 0.1, 1e4)
 
     def get_r200(self, zcos, comoving=True, rho_type="crit"):
         """
@@ -137,7 +137,7 @@ class SwiftHaloCatalog(object):
         halos["pos"] = (np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * self.h) % self.boxsize_h # some values are just outside the box
         halos["vel"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
         halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h
-        halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
+        #halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
         halos["concentration"] = np.array(halo_cat["SO"]["200_crit"]["Concentration"])[relevant_field_halos]
 
         self.halos = halos

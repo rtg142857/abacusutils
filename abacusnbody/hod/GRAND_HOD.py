@@ -1604,7 +1604,7 @@ def gen_gals(
     lbox = params['Lbox']
     origin = params['origin']
 
-    LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict = gen_cent(
+    LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict_cent = gen_cent(
         halos_array['hpos'],
         halos_array['hvel'],
         halos_array['hmass'],
@@ -1637,7 +1637,7 @@ def gen_gals(
         warnings.warn(
             'NFW profile is unoptimized. It has different velocity bias. It does not support lightcone.'
         )
-        LRG_dict_sat, ELG_dict_sat, QSO_dict_sat, ID_dict_sat = gen_sats_nfw(
+        LRG_dict_sat, ELG_dict_sat, QSO_dict_sat, ID_dict_sat, hrvir_dict_sat = gen_sats_nfw(
             NFW_draw,
             halos_array['hpos'],
             halos_array['hvel'],
@@ -1714,6 +1714,9 @@ def gen_gals(
             )
         tracer_dict['id'] = fast_concatenate(
             ID_dict_cent[tracer], ID_dict_sat[tracer], Nthread
+        )
+        tracer_dict["hrvir"] = fast_concatenate(
+            hrvir_dict_cent[tracer], hrvir_dict_sat[tracer], Nthread
         )
         if verbose:
             print(tracer, 'number of galaxies ', len(tracer_dict['x']), flush=True)

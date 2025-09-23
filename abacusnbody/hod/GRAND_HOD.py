@@ -455,7 +455,7 @@ def gen_cent(
     if tabulation_mock:
         LRG_dict["hmultis"] = multis
     if hrvir is not None:
-        return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, hrvir
+        return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, hrvir_dict
     else:
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, None
 

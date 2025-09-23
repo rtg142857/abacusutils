@@ -171,7 +171,8 @@ def gen_cent(
     want_QSO,
     Nthread,
     origin,
-    tabulation_mock=False
+    tabulation_mock=False,
+    hrvir=None
 ):
     """
     Generate central galaxies in place in memory with a two pass numba parallel implementation.
@@ -311,6 +312,12 @@ def gen_cent(
     qso_mass = np.empty(N_qso, dtype=mass.dtype)
     qso_id = np.empty(N_qso, dtype=ids.dtype)
 
+    if hrvir is not None:
+        lrg_hrvir = np.empty(N_lrg, dtype=mass.dtype)
+        elg_hrvir = np.empty(N_elg, dtype=mass.dtype)
+        qso_hrvir = np.empty(N_qso, dtype=mass.dtype)
+
+
     # fill in the galaxy arrays
     for tid in numba.prange(Nthread):
         j1, j2, j3 = gstart[tid]
@@ -342,6 +349,8 @@ def gen_cent(
                     lrg_z[j1] = wrap(pos[i, 2] + lrg_vz[j1] * inv_velz2kms, lbox)
                 lrg_mass[j1] = mass[i]
                 lrg_id[j1] = ids[i]
+                if hrvir is not None:
+                    lrg_hrvir[j1] = hrvir[i]
                 j1 += 1
             elif keep[i] == 2:
                 # loop thru three directions to assign galaxy velocities and positions
@@ -370,6 +379,8 @@ def gen_cent(
                     elg_z[j2] = wrap(pos[i, 2] + elg_vz[j2] * inv_velz2kms, lbox)
                 elg_mass[j2] = mass[i]
                 elg_id[j2] = ids[i]
+                if hrvir is not None:
+                    elg_hrvir[j2] = hrvir[i]
                 j2 += 1
             elif keep[i] == 3:
                 # loop thru three directions to assign galaxy velocities and positions
@@ -398,6 +409,8 @@ def gen_cent(
                     qso_z[j3] = wrap(pos[i, 2] + qso_vz[j3] * inv_velz2kms, lbox)
                 qso_mass[j3] = mass[i]
                 qso_id[j3] = ids[i]
+                if hrvir is not None:
+                    qso_hrvir[j3] = hrvir[i]
                 j3 += 1
         # assert j == gstart[tid + 1]
 
@@ -406,6 +419,12 @@ def gen_cent(
     ELG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     QSO_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     ID_dict = Dict.empty(key_type=types.unicode_type, value_type=int_array)
+    if hrvir is not None:
+        hrvir_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
+        hrvir_dict['LRG'] = lrg_hrvir
+        hrvir_dict['ELG'] = elg_hrvir
+        hrvir_dict['QSO'] = qso_hrvir
+
     LRG_dict['x'] = lrg_x
     LRG_dict['y'] = lrg_y
     LRG_dict['z'] = lrg_z
@@ -435,7 +454,10 @@ def gen_cent(
 
     if tabulation_mock:
         LRG_dict["hmultis"] = multis
-    return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep
+    if hrvir is not None:
+        return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, hrvir
+    else:
+        return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, None
 
 
 @njit(parallel=True, fastmath=True)
@@ -505,7 +527,7 @@ def compute_fast_NFW(
     Nthread=16,
     exp_frac=0,
     exp_scale=1,
-    nfw_rescale=1,
+    nfw_rescale=2, # FOR TESTING
 ):
     """
     --- Compute NFW positions and velocities for satellite galaxies
@@ -545,7 +567,7 @@ def compute_fast_NFW(
                 etaVir = tt / c[i]
             else:
                 while NFW_draw[ind] > c[i]:
-                    ind = np.random.randint(0, len(NFW_draw))
+                    ind = np.random.randint(low=0, high=len(NFW_draw))
                 etaVir = NFW_draw[ind] / c[i] * nfw_rescale
 
             p = etaVir * Rvir[i]
@@ -559,7 +581,7 @@ def compute_fast_NFW(
                 vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
             else:
                 raise ValueError('Wrong vel_sat argument only "rd_normal"')
-    return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M
+    return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
 
 
 @njit(fastmath=True, parallel=True)
@@ -589,7 +611,8 @@ def gen_sats_nfw(
     tabulation_mock=False,
     hmultis=None,
     Nthread=16,
-    verbose=False
+    verbose=False,
+    want_hrvir=False
 ):
     """
     Generate satellite galaxies on an NFW profile, with option for an extended profile. See Rocher et al. 2023.
@@ -787,7 +810,7 @@ def gen_sats_nfw(
     # if verbose:
     #     with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)
     # put satellites on NFW
-    h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L = (
+    h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L, h_hrvir_L = (
         compute_fast_NFW(
             NFW_draw,
             hid,
@@ -814,7 +837,7 @@ def gen_sats_nfw(
     )
     # if verbose:
     #     with numba.objmode(): print("Putting ELG satellites on NFW profile", flush=True)
-    h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E = (
+    h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E, h_hrvir_E = (
         compute_fast_NFW(
             NFW_draw,
             hid,
@@ -841,7 +864,7 @@ def gen_sats_nfw(
     )
     # if verbose:
     #     with numba.objmode(): print("Putting QSO satellites on NFW profile", flush=True)
-    h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q = (
+    h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q, h_hrvir_Q = (
         compute_fast_NFW(
             NFW_draw,
             hid,
@@ -880,6 +903,7 @@ def gen_sats_nfw(
     ELG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     QSO_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
     ID_dict = Dict.empty(key_type=types.unicode_type, value_type=int_array)
+
     LRG_dict['x'] = x_sat_L
     LRG_dict['y'] = y_sat_L
     LRG_dict['z'] = z_sat_L
@@ -907,10 +931,18 @@ def gen_sats_nfw(
     QSO_dict['mass'] = M_Q
     ID_dict['QSO'] = h_id_Q
 
+    if want_hrvir:
+        hrvir_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)
+        hrvir_dict["LRG"] = h_hrvir_L
+        hrvir_dict["ELG"] = h_hrvir_E
+        hrvir_dict["QSO"] = h_hrvir_Q
+    else:
+        hrvir_dict = None
+
     if tabulation_mock:
         LRG_dict["hmultis"] = np.repeat(hmultis, 3)
 
-    return LRG_dict, ELG_dict, QSO_dict, ID_dict
+    return LRG_dict, ELG_dict, QSO_dict, ID_dict, hrvir_dict
 
 
 @njit(parallel=True, fastmath=True)
@@ -1572,7 +1604,7 @@ def gen_gals(
     lbox = params['Lbox']
     origin = params['origin']
 
-    LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent = gen_cent(
+    LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict = gen_cent(
         halos_array['hpos'],
         halos_array['hvel'],
         halos_array['hmass'],
@@ -1594,7 +1626,8 @@ def gen_gals(
         want_QSO,
         Nthread,
         origin,
-        tabulation_mock=tabulation_mock
+        tabulation_mock=tabulation_mock,
+        hrvir = halos_array['hrvir']
     )
     if verbose:
         print('generating centrals took ', time.time() - start, flush=True)

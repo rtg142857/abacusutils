@@ -1662,7 +1662,8 @@ def gen_gals(
             Nthread=Nthread,
             hmultis=halos_array["hmultis"],
             verbose=verbose,
-            tabulation_mock=tabulation_mock
+            tabulation_mock=tabulation_mock,
+            want_hrvir=True
         )
     else:
         LRG_dict_sat, ELG_dict_sat, QSO_dict_sat, ID_dict_sat = gen_sats(

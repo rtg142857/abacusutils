@@ -68,8 +68,9 @@ class SwiftHaloCatalog(object):
 
         Uses Eq. 12 of Skibba+2006 (in proper km/s) as presented in Alex Smith's HOD_Mock_Pipeline
         """
-        return np.sqrt(2.151e-9 * (self.halos["M200_crit"]*\
+        sigmav = np.sqrt(2.151e-9 * (self.halos["M200_crit"]*\
                           (1.+zcos)/self.halos["R200_crit"]))
+        return sigmav/0.577
 
     # def get_concentration(self):
     #     """

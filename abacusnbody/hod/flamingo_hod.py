@@ -505,7 +505,7 @@ class FlamingoHOD:
             halo_c = (
                 maskedhalos["concentration"]
                 #maskedhalos['r98_L2com'] / maskedhalos['r25_L2com']
-            )  # concentration
+            ) * 4 # FOR TESTING  # concentration
             halo_rvir = maskedhalos["R200_crit"] #maskedhalos['r98_L2com']  # Original is "rvir but using r98"; here using r200crit
             halo_mass = maskedhalos["M200_crit"] #maskedhalos['N'] * params['Mpart']  # halo mass, Msun / h, 200b
 

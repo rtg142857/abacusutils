@@ -527,7 +527,7 @@ def compute_fast_NFW(
     Nthread=16,
     exp_frac=0,
     exp_scale=1,
-    nfw_rescale=4, # FOR TESTING
+    nfw_rescale=1,
 ):
     """
     --- Compute NFW positions and velocities for satellite galaxies

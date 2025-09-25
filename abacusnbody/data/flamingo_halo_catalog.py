@@ -1,13 +1,25 @@
 import numpy as np
 import yaml
 import h5py
-import astropy.table
-from astropy.table import Table
+# import astropy.table
+# from astropy.table import Table
 #from cosmology import CosmologyFlamingo
 from abacusnbody.data.cosmology import CosmologyFlamingo
 
 # This is a halo catalog loading module designed to 
 # imitate the compaso halo catalog for Flamingo and Peregrinus.
+
+from scipy.optimize import fsolve
+
+def frac_of_mass_in_radius_nfw(etavir: np.ndarray, c: np.ndarray):
+    """
+    etavir: fractional distance to the virial radius
+    c: concentration
+    """
+    num = np.log(1+etavir * c) - c/(1/etavir + c)
+    den = np.log(1+c) - c/(1+c)
+    return num/den
+
 
 class SwiftHaloCatalog(object):
     def __init__(self, path_config_filename):
@@ -50,7 +62,30 @@ class SwiftHaloCatalog(object):
         
         zcos = self.path_config["Params"]["redshift"]
         self.compute_additional_halo_data(zcos)
-    
+        # self.compute_concentration_abacus_style(zcos)
+
+    def compute_concentration_abacus_style(self):
+        """
+        Gets the "concentration" of the halo via the abacus method:
+        c = r98_L2com / r25_L2com
+        Requires the concentration to be set first (via the flamingo method)
+        """
+        r98_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.98
+        r25_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.25
+        initial_ones = np.full(np.size(self.halos["concentration"]), fill_value=1.0)
+
+        r98_solver = fsolve(r98_minimiser, x0=initial_ones*0.98, full_output=True)
+        r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, full_output=True)
+
+        if r98_solver[2] != 1:
+            raise Exception(r98_solver[3])
+        if r25_solver[2] != 1:
+            raise Exception(r25_solver[3])
+        
+        r98_over_r25 = r98_solver[0] / r25_solver[0] # both the top and bottom are divided by rvir, so they cancel out
+        self.halos["concentration_abacus"] = r98_over_r25
+
+
     def compute_additional_halo_data(self, zcos):
         """
         Gets the 3d velocity dispersion, concentration, and "virial radius" (here just r200 crit)
@@ -137,7 +172,7 @@ class SwiftHaloCatalog(object):
         halos["id"] = np.array(halo_cat["InputHalos"]["HBTplus"]['TrackId'])[relevant_field_halos]
         halos["pos"] = (np.array(halo_cat["SO"]["200_crit"]["CentreOfMass"])[relevant_field_halos] * self.h) % self.boxsize_h # some values are just outside the box
         halos["vel"] = np.array(halo_cat["SO"]["200_crit"]["CentreOfMassVelocity"])[relevant_field_halos]
-        halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["DarkMatterMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h
+        halos["M200_crit"] = np.array(halo_cat["SO"]["200_crit"]["TotalMass"])[relevant_field_halos] * self.UnitMass_in_Msol_h
         #halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
         halos["concentration"] = np.array(halo_cat["SO"]["200_crit"]["Concentration"])[relevant_field_halos]
 

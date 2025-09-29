@@ -130,7 +130,7 @@ class SwiftHaloCatalog(object):
         
         zcos = self.path_config["Params"]["redshift"]
         self.compute_additional_halo_data(zcos)
-        # self.compute_concentration_abacus_style(zcos)
+        self.compute_concentration_abacus_style()
 
     def compute_concentration_abacus_style(self):
         """

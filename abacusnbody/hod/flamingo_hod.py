@@ -503,9 +503,10 @@ class FlamingoHOD:
                 ).reshape(-1, 3)
             halo_sigma3d = maskedhalos['sigmav3d']  # 3d velocity dispersion
             halo_c = (
-                maskedhalos["concentration"]
+                maskedhalos["concentration_abacus"]
+                #maskedhalos["concentration"]
                 #maskedhalos['r98_L2com'] / maskedhalos['r25_L2com']
-            ) / 2 # FOR TESTING  # concentration
+            )   # concentration
             halo_rvir = maskedhalos["R200_crit"] #maskedhalos['r98_L2com']  # Original is "rvir but using r98"; here using r200crit
             halo_mass = maskedhalos["M200_crit"] #maskedhalos['N'] * params['Mpart']  # halo mass, Msun / h, 200b
 

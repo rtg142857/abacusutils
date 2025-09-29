@@ -46,7 +46,6 @@ def jacobian_fracm_nfw(etavir: np.ndarray, c: np.ndarray, matrix: bool):
 
 def newton(f,Df,x0,epsilon=0.01,max_iter=10):
     '''Approximate solution of f(x)=0 by Newton's method.
-
     Parameters
     ----------
     f : function
@@ -59,7 +58,6 @@ def newton(f,Df,x0,epsilon=0.01,max_iter=10):
         Stopping criteria is abs(f(x)) < epsilon.
     max_iter : integer
         Maximum number of iterations of Newton's method.
-
     Returns
     -------
     xn : number
@@ -69,7 +67,6 @@ def newton(f,Df,x0,epsilon=0.01,max_iter=10):
         Continue until abs(f(xn)) < epsilon and return xn.
         If Df(xn) == 0, return None. If the number of iterations
         exceeds max_iter, then return None.
-
     Examples
     --------
     >>> f = lambda x: x**2 - x - 1

@@ -9,7 +9,7 @@ from abacusnbody.data.cosmology import CosmologyFlamingo
 # This is a halo catalog loading module designed to 
 # imitate the compaso halo catalog for Flamingo and Peregrinus.
 
-from scipy.optimize import root
+from scipy.optimize import fsolve
 
 def frac_of_mass_in_radius_nfw(etavir: np.ndarray, c: np.ndarray):
     """
@@ -30,6 +30,16 @@ def frac_of_mass_in_radius_nfw(etavir: np.ndarray, c: np.ndarray):
     # result[etavir_negative_mask] = etavir[etavir_negative_mask]
     return result
 
+def jacobian_fracm_nfw(etavir: np.ndarray, c: np.ndarray):
+    etavir_negative_mask = etavir <= 0
+    pos_mask = etavir = 0
+    etavir_pos = etavir[pos_mask]
+    c_pos = c[pos_mask]
+    result = np.empty(len(etavir))
+    result[etavir_negative_mask] = 1
+    result[pos_mask] = c_pos**2 * etavir_pos / (c_pos * etavir_pos + 1) **2
+    result[pos_mask] /= np.log(1 + c_pos) - c_pos/(1+c_pos)
+    return np.diag(result)
 
 class SwiftHaloCatalog(object):
     def __init__(self, path_config_filename):
@@ -83,9 +93,13 @@ class SwiftHaloCatalog(object):
         r98_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.98
         r25_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.25
         initial_ones = np.full(np.size(self.halos["concentration"]), fill_value=1.0)
+        jac = lambda x: jacobian_fracm_nfw(x, self.halos["concentration"])
 
-        r98_solver = root(r98_minimiser, x0=initial_ones*0.98, method="diagbroyden")
-        r25_solver = root(r25_minimiser, x0=initial_ones*0.25, method="diagbroyden")
+        # r98_solver = root(r98_minimiser, x0=initial_ones*0.98, method="diagbroyden")
+        # r25_solver = root(r25_minimiser, x0=initial_ones*0.25, method="diagbroyden")
+
+        r98_solver = fsolve(r98_minimiser, x0=initial_ones*0.98, fprime = jac, full_output=True)
+        r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, fprime = jac, full_output=True)
 
         if r98_solver[2] != 1:
             raise Exception(r98_solver[3])

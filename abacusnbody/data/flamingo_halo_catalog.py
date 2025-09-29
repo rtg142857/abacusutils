@@ -150,9 +150,9 @@ class SwiftHaloCatalog(object):
         # r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, fprime = jac, full_output=True)
         
         r98 = newton(r98_minimiser, jac, x0=initial_ones*0.98)
-        r25 = newton(r25_minimiser, jac, x0=initial_ones*0.25)
+        r25 = newton(r25_minimiser, jac, x0=initial_ones*0.25, max_iter=100)
 
-        if r98 == None or r25 == None:
+        if np.any(r98 == None) or np.any(r25 == None):
             raise Exception()
 
         # if r98_solver[2] != 1:

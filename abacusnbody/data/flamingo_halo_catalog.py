@@ -9,16 +9,26 @@ from abacusnbody.data.cosmology import CosmologyFlamingo
 # This is a halo catalog loading module designed to 
 # imitate the compaso halo catalog for Flamingo and Peregrinus.
 
-from scipy.optimize import fsolve
+from scipy.optimize import root
 
 def frac_of_mass_in_radius_nfw(etavir: np.ndarray, c: np.ndarray):
     """
     etavir: fractional distance to the virial radius
     c: concentration
     """
-    num = np.log(1+etavir * c) - c/(1/etavir + c)
-    den = np.log(1+c) - c/(1+c)
-    return num/den
+    etavir_negative_mask = etavir < 0
+    pos_mask = etavir >= 0
+    etavir_pos = etavir[pos_mask]
+    c_pos = c[pos_mask]
+    result = np.empty(len(etavir))
+    result[etavir_negative_mask] = etavir[etavir_negative_mask]
+    result[pos_mask] = np.log(1 + etavir_pos * c_pos) - c_pos / (1/etavir_pos + c_pos)
+    result[pos_mask] /= np.log(1 + c_pos) - c_pos/(1+c_pos)
+    # num = np.log(1+etavir * c) - c/(1/etavir + c)
+    # den = np.log(1+c) - c/(1+c)
+    # result = num/den
+    # result[etavir_negative_mask] = etavir[etavir_negative_mask]
+    return result
 
 
 class SwiftHaloCatalog(object):
@@ -74,8 +84,8 @@ class SwiftHaloCatalog(object):
         r25_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.25
         initial_ones = np.full(np.size(self.halos["concentration"]), fill_value=1.0)
 
-        r98_solver = fsolve(r98_minimiser, x0=initial_ones*0.98, full_output=True)
-        r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, full_output=True)
+        r98_solver = root(r98_minimiser, x0=initial_ones*0.98, method="diagbroyden")
+        r25_solver = root(r25_minimiser, x0=initial_ones*0.25, method="diagbroyden")
 
         if r98_solver[2] != 1:
             raise Exception(r98_solver[3])

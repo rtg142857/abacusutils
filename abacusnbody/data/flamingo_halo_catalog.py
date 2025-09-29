@@ -30,7 +30,7 @@ def frac_of_mass_in_radius_nfw(etavir: np.ndarray, c: np.ndarray):
     # result[etavir_negative_mask] = etavir[etavir_negative_mask]
     return result
 
-def jacobian_fracm_nfw(etavir: np.ndarray, c: np.ndarray):
+def jacobian_fracm_nfw(etavir: np.ndarray, c: np.ndarray, matrix: bool):
     etavir_negative_mask = etavir <= 0
     pos_mask = etavir > 0
     etavir_pos = etavir[pos_mask]
@@ -39,7 +39,58 @@ def jacobian_fracm_nfw(etavir: np.ndarray, c: np.ndarray):
     result[etavir_negative_mask] = 1
     result[pos_mask] = c_pos**2 * etavir_pos / (c_pos * etavir_pos + 1) **2
     result[pos_mask] /= np.log(1 + c_pos) - c_pos/(1+c_pos)
-    return np.diag(result)
+    if matrix:
+        return np.diag(result)
+    else:
+        return result
+
+def newton(f,Df,x0,epsilon=0.01,max_iter=10):
+    '''Approximate solution of f(x)=0 by Newton's method.
+
+    Parameters
+    ----------
+    f : function
+        Function for which we are searching for a solution f(x)=0.
+    Df : function
+        Derivative of f(x).
+    x0 : number
+        Initial guess for a solution f(x)=0.
+    epsilon : number
+        Stopping criteria is abs(f(x)) < epsilon.
+    max_iter : integer
+        Maximum number of iterations of Newton's method.
+
+    Returns
+    -------
+    xn : number
+        Implement Newton's method: compute the linear approximation
+        of f(x) at xn and find x intercept by the formula
+            x = xn - f(xn)/Df(xn)
+        Continue until abs(f(xn)) < epsilon and return xn.
+        If Df(xn) == 0, return None. If the number of iterations
+        exceeds max_iter, then return None.
+
+    Examples
+    --------
+    >>> f = lambda x: x**2 - x - 1
+    >>> Df = lambda x: 2*x - 1
+    >>> newton(f,Df,1,1e-8,10)
+    Found solution after 5 iterations.
+    1.618033988749989
+    '''
+    xn = x0
+    for n in range(0,max_iter):
+        fxn = f(xn)
+        if np.max(np.abs(fxn)) < epsilon:
+            print('Found solution after',n,'iterations.')
+            return xn
+        Dfxn = Df(xn)
+        if Dfxn == 0:
+            print('Zero derivative. No solution found.')
+            return None
+        xn = xn - fxn/Dfxn
+    print('Exceeded maximum iterations. No solution found.')
+    return None
 
 class SwiftHaloCatalog(object):
     def __init__(self, path_config_filename):
@@ -93,20 +144,26 @@ class SwiftHaloCatalog(object):
         r98_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.98
         r25_minimiser = lambda x: frac_of_mass_in_radius_nfw(x, self.halos["concentration"]) - 0.25
         initial_ones = np.full(np.size(self.halos["concentration"]), fill_value=1.0)
-        jac = lambda x: jacobian_fracm_nfw(x, self.halos["concentration"])
+        jac = lambda x: jacobian_fracm_nfw(x, self.halos["concentration"], matrix=False)
 
         # r98_solver = root(r98_minimiser, x0=initial_ones*0.98, method="diagbroyden")
         # r25_solver = root(r25_minimiser, x0=initial_ones*0.25, method="diagbroyden")
 
-        r98_solver = fsolve(r98_minimiser, x0=initial_ones*0.98, fprime = jac, full_output=True)
-        r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, fprime = jac, full_output=True)
-
-        if r98_solver[2] != 1:
-            raise Exception(r98_solver[3])
-        if r25_solver[2] != 1:
-            raise Exception(r25_solver[3])
+        # r98_solver = fsolve(r98_minimiser, x0=initial_ones*0.98, fprime = jac, full_output=True)
+        # r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, fprime = jac, full_output=True)
         
-        r98_over_r25 = r98_solver[0] / r25_solver[0] # both the top and bottom are divided by rvir, so they cancel out
+        r98 = newton(r98_minimiser, jac, x0=initial_ones*0.98)
+        r25 = newton(r25_minimiser, jac, x0=initial_ones*0.25)
+
+        if r98 == None or r25 == None:
+            raise Exception()
+
+        # if r98_solver[2] != 1:
+        #     raise Exception(r98_solver[3])
+        # if r25_solver[2] != 1:
+        #     raise Exception(r25_solver[3])
+        
+        r98_over_r25 = r98 / r25 #r98_solver[0] / r25_solver[0] # both the top and bottom are divided by rvir, so they cancel out
         self.halos["concentration_abacus"] = r98_over_r25
 
 

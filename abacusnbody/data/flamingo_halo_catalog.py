@@ -32,7 +32,7 @@ def frac_of_mass_in_radius_nfw(etavir: np.ndarray, c: np.ndarray):
 
 def jacobian_fracm_nfw(etavir: np.ndarray, c: np.ndarray):
     etavir_negative_mask = etavir <= 0
-    pos_mask = etavir = 0
+    pos_mask = etavir > 0
     etavir_pos = etavir[pos_mask]
     c_pos = c[pos_mask]
     result = np.empty(len(etavir))

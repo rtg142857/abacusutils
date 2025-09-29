@@ -85,7 +85,7 @@ def newton(f,Df,x0,epsilon=0.01,max_iter=10):
             print('Found solution after',n,'iterations.')
             return xn
         Dfxn = Df(xn)
-        if Dfxn == 0:
+        if np.any(Dfxn) == 0:
             print('Zero derivative. No solution found.')
             return None
         xn = xn - fxn/Dfxn

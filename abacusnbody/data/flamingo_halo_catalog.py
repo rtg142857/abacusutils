@@ -237,12 +237,13 @@ class SwiftHaloCatalog(object):
 
         is_not_subhalo = np.array(halo_cat["InputHalos"]["HBTplus"]["Depth"]) == 0
         
-        rvmax_threshold = halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
-        is_above_rvmax_threshold = np.array(halo_cat["SO"]["200_crit"]["NumberOfDarkMatterParticles"]) >= rvmax_threshold
-        is_nonzero_rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) != 0
+        #rvmax_threshold = halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"].attrs["Mask Threshold"]
+        #is_above_rvmax_threshold = np.array(halo_cat["SO"]["200_crit"]["NumberOfDarkMatterParticles"]) >= rvmax_threshold
+        #is_nonzero_rvmax = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"]) != 0
 
-        relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
-        relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
+        #relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
+        #relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
+        relevant_field_halos = is_not_subhalo
 
         number_of_halos = np.count_nonzero(relevant_field_halos)
 

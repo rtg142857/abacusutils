@@ -150,7 +150,7 @@ class SwiftHaloCatalog(object):
         # r25_solver = fsolve(r25_minimiser, x0=initial_ones*0.25, fprime = jac, full_output=True)
         
         r98 = newton(r98_minimiser, jac, x0=initial_ones*0.98, max_iter = 100)
-        r25 = newton(r25_minimiser, jac, x0=initial_ones*0.25 / (self.halos["concentration"]/10), max_iter=300)
+        r25 = newton(r25_minimiser, jac, x0=initial_ones*0.25 / (self.halos["concentration"]/10), max_iter=100)
 
         if np.any(r98 == None) or np.any(r25 == None):
             raise Exception()
@@ -243,7 +243,9 @@ class SwiftHaloCatalog(object):
 
         #relevant_field_halos = np.logical_and(is_above_rvmax_threshold, is_not_subhalo)
         #relevant_field_halos = np.logical_and(relevant_field_halos, is_nonzero_rvmax)
-        relevant_field_halos = is_not_subhalo
+
+        is_nonzero_concentration = np.array(halo_cat["SO"]["200_crit"]["Concentration"]) != 0
+        relevant_field_halos = np.logical_and(is_not_subhalo, is_nonzero_concentration)
 
         number_of_halos = np.count_nonzero(relevant_field_halos)
 

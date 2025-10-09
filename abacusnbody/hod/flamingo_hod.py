@@ -646,6 +646,8 @@ class FlamingoHOD:
             hrandoms = hrandoms[sortind]
             hveldev = hveldev[sortind]
             hsigma3d = hsigma3d[sortind]
+            hc = hc[sortind]
+            hrvir = hrvir[sortind]
             if self.want_AB:
                 hdeltac = hdeltac[sortind]
                 hfenv = hfenv[sortind]

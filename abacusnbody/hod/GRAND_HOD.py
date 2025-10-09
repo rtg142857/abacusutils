@@ -11,6 +11,14 @@ from astropy.table import Table
 from numba import njit, types
 from numba.typed import Dict
 
+def state_346790(ids, ms, rs, message):
+    id = 346790
+    mask = ids == id
+    m = ms[mask]
+    r = rs[mask]
+
+    print(message, "m:", m, "r:", r)
+
 # import yaml
 # config = yaml.safe_load(open('config/abacus_hod.yaml'))
 # numba.set_num_threads(16)
@@ -584,7 +592,7 @@ def compute_fast_NFW(
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
 
 
-@njit(fastmath=True, parallel=True)
+#@njit(fastmath=True, parallel=True)
 def gen_sats_nfw(
     NFW_draw,
     hpos,
@@ -622,6 +630,8 @@ def gen_sats_nfw(
     If tabulation_mock is set to True, exactly 3 satellites are given per halo (otherwise it'll be the ordinary distribution given by the HOD)
 
     """
+
+    state_346790(hid, hmass, hrvir, message="At the start of gen_sats_nfw:")
 
     # defaults in case want_ELG = False, so the function call compute_fast_NFW doesn't break anything
     f_sigv_L = 1
@@ -705,6 +715,8 @@ def gen_sats_nfw(
             QSO_hod_dict['ic'],
         )
         f_sigv_Q = QSO_hod_dict['f_sigv']
+
+    state_346790(hid, hmass, hrvir, message="After defining LRG/ELG/QSO stuff in gen_sats_nfw:")
 
     # if verbose:
     #     with numba.objmode(): print("Setting number of threads", flush=True)
@@ -796,6 +808,8 @@ def gen_sats_nfw(
                     )
                     num_sats_Q[i] = np.random.poisson(base_p_Q)
 
+    state_346790(hid, hmass, hrvir, message="After getting the number of sats in gen_sats_nfw:")
+
     # if verbose:
     #     with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)
     # generate rdpos
@@ -806,6 +820,8 @@ def gen_sats_nfw(
     #np.save(temp_stuff + "hrvir.npy", hrvir)
     rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, seed=seed, verbose=verbose)
     rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, seed=seed, verbose=verbose)
+
+    state_346790(hid, hmass, hrvir, message="After getting points on a sphere in gen_sats_nfw:")
 
     # if verbose:
     #     with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)
@@ -889,6 +905,7 @@ def gen_sats_nfw(
             #nfw_rescale,
         )
     )
+    state_346790(hid, hmass, hrvir, message="After doing compute_fast_nfw in gen_sats_nfw:")
     # if verbose:
     #     with numba.objmode(): print("Doing RSD", flush=True)
     # do rsd
@@ -896,6 +913,8 @@ def gen_sats_nfw(
         z_sat_L = (z_sat_L + vz_sat_L * inv_velz2kms) % lbox
         z_sat_E = (z_sat_E + vz_sat_E * inv_velz2kms) % lbox
         z_sat_Q = (z_sat_Q + vz_sat_Q * inv_velz2kms) % lbox
+    
+    state_346790(hid, hmass, hrvir, message="After doing rsd in gen_sats_nfw:")
 
     # if verbose:
     #     with numba.objmode(): print("Putting mock values in the output dicts", flush=True)
@@ -941,6 +960,9 @@ def gen_sats_nfw(
 
     if tabulation_mock:
         LRG_dict["hmultis"] = np.repeat(hmultis, 3)
+
+    state_346790(hid, hmass, hrvir, message="After putting stuff in dicts in gen_sats_nfw (using the hid/hmass/hrvir fed in):")
+    state_346790(ID_dict["LRG"], LRG_dict["mass"], hrvir_dict["LRG"], message="After putting stuff in dicts in gen_sats_nfw (using the dicts put out):")
 
     return LRG_dict, ELG_dict, QSO_dict, ID_dict, hrvir_dict
 
@@ -1468,6 +1490,8 @@ def gen_gals(
 
     """
 
+    state_346790(halos_array["hid"], halos_array["hmass"], halos_array["hrvir"], message="At the start of gen_gals:")
+
     # B.H. TODO: pass as dictionary; make what's below more succinct
     for tracer in tracers.keys():
         if tracer == 'LRG':
@@ -1597,6 +1621,8 @@ def gen_gals(
             key_type=nb.types.unicode_type, value_type=nb.types.float64
         )
 
+    state_346790(halos_array["hid"], halos_array["hmass"], halos_array["hrvir"], message="After defining LRG/ELG/QSO stuff in gen_gals:")
+
     start = time.time()
 
     velz2kms = params['velz2kms']
@@ -1631,6 +1657,7 @@ def gen_gals(
     )
     if verbose:
         print('generating centrals took ', time.time() - start, flush=True)
+    state_346790(halos_array["hid"], halos_array["hmass"], halos_array["hrvir"], message="Between gen_cent and gen_sats_nfw:")
 
     start = time.time()
     if nfw:
@@ -1699,6 +1726,7 @@ def gen_gals(
         )
     if verbose:
         print('generating satellites took ', time.time() - start, flush=True)
+    state_346790(halos_array["hid"], halos_array["hmass"], halos_array["hrvir"], message="After gen_sats_nfw, before concatenate:")
 
     # B.H. TODO: need a for loop above so we don't need to do this by hand
     HOD_dict_sat = {'LRG': LRG_dict_sat, 'ELG': ELG_dict_sat, 'QSO': QSO_dict_sat}
@@ -1731,6 +1759,7 @@ def gen_gals(
         HOD_dict[tracer] = tracer_dict
     if verbose:
         print('organizing outputs took ', time.time() - start, flush=True)
+    state_346790(halos_array["hid"], halos_array["hmass"], halos_array["hrvir"], message="After concatenate:")
     return HOD_dict
 
 
@@ -1803,6 +1832,8 @@ def gen_gal_cat(
 
     if not isinstance(rsd, bool):
         raise ValueError('Error: rsd has to be a boolean')
+    
+    state_346790(halo_data["hid"], halo_data["hmass"], halo_data["hrvir"], message="At the start of gen_gal_cat:")
 
     # find the halos, populate them with galaxies and write them to files
     HOD_dict = gen_gals(
@@ -1818,6 +1849,8 @@ def gen_gal_cat(
         NFW_draw,
         tabulation_mock=tabulation_mock
     )
+
+    state_346790(halo_data["hid"], halo_data["hmass"], halo_data["hrvir"], message="At the end of gen_gal_cat:")
 
     # how many galaxies were generated and write them to disk
     for tracer in tracers.keys():

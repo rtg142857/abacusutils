@@ -139,6 +139,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
             rwp_error = np.diagonal(rwp_error_mat)
             axs[y, x].errorbar(rpcent[i0:i1], rwp_data[i0:i1], yerr=rwp_error[i0:i1], marker="o", color="orange", label="Data")
             axs[y, x].plot(rpcent[:i0], rwp_data[:i0], marker="o", color="black", label="Data (unused)")
+            axs[y, x].set_xscale('log')
             axs[y, x].legend()
 
     plt.savefig(save_path)

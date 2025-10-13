@@ -127,7 +127,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
     i0 = 5 # 
     i1 = np.size(target_wp["LRG_LRG"])
 
-    fig, axs = plt.subplots(2, 3)
+    fig, axs = plt.subplots(2, 3, figsize=(15, 8))
     for y in range(2):
         for x in range(3):
             yx_label = str(y)+"_"+str(x)

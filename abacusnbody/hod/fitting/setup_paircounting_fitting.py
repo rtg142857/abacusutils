@@ -58,7 +58,7 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
 
 def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray):
     # Only look at a subset of the data points to improve chi squared
-    i0 = 7 # 0
+    i0 = 5 # 0
     i1 = np.size(fitting_wp)
     mock = fitting_wp[i0:i1]
     data = target_wp[i0:i1]

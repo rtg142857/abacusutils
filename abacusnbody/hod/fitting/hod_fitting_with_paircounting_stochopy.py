@@ -124,7 +124,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
     label_dict = {"0_0": "LRG_LRG", "0_1": "ELG_ELG", "0_2": "QSO_QSO", "1_0": "LRG_ELG", "1_1": "LRG_QSO", "1_2": "ELG_QSO"}
 
-    i0 = 7 # 
+    i0 = 5 # 
     i1 = np.size(target_wp["LRG_LRG"])
 
     fig, axs = plt.subplots(2, 3, figsize=(15, 8))
@@ -136,7 +136,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
             rwp_data = rpcent * target_wp[label_dict[yx_label]]
             rwp_error_mat = np.linalg.inv(target_jackknife_inverse[label_dict[yx_label]])
-            rwp_error = np.diagonal(rwp_error_mat)
+            rwp_error = np.diagonal(rwp_error_mat) * rpcent
             axs[y, x].errorbar(rpcent[i0:i1], rwp_data[i0:i1], yerr=rwp_error[i0:i1], marker="o", color="orange", label=f"Data ("+label_dict[yx_label]+")")
             axs[y, x].plot(rpcent[:i0], rwp_data[:i0], marker="o", color="black", label="Data (unused)")
             axs[y, x].set_xscale('log')

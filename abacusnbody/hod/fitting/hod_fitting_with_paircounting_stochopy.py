@@ -43,11 +43,6 @@ def fit_HOD(path_config_filename, save_chains=False):
         paircounts[pair] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
-    print("Prematurely plotting wp, to make sure it works", flush=True)
-    save_path = fitting_params["sampler_save_path"]
-    plot_wp(save_path+"wps.png", hod_params=get_priors("mean"), tracers=tracer_list, paircounts=paircounts,
-            target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
-
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
 
@@ -86,6 +81,10 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Plotting HODs...")
     plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)
+
+    print("Plotting wps...", flush=True)
+    plot_wp(save_path+"wps.png", hod_params=best_fit, tracers=tracer_list, paircounts=paircounts,
+            target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
 
     return best_fit
 

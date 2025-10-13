@@ -177,26 +177,70 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     stuff["hmf_big"] = hmf_big
     return stuff
 
-def get_priors():
-    return np.array([[10,16],
-                   [10,16],
-                   [0,5],
-                   [0,5],
-                   [0,5],
-                   [0,1],
-                   [0,100],
-                   [10,16],
-                   [0,5],
-                   [0,5],
-                   [10,16],
-                   [0,5],
-                   [0,100],
-                   [10,16],
-                   [10,16],
-                   [0,5],
-                   [0,5],
-                   [0,5]
-    ])
+def get_priors(type="bounds"):
+    match type:
+        case "bounds":
+            return np.array([[10,16],
+                        [10,16],
+                        [0,5],
+                        [0,5],
+                        [0,5],
+                        [0,1],
+                        [0,100],
+                        [10,16],
+                        [0,5],
+                        [0,5],
+                        [10,16],
+                        [0,5],
+                        [0,100],
+                        [10,16],
+                        [10,16],
+                        [0,5],
+                        [0,5],
+                        [0,5]
+            ])
+        case "mean":
+            return np.array([ # Yuan et al.
+                13.3, # LRGs
+                14.4,
+                0.5,
+                1.0,
+                0.5,
+                0.7, # ELGs
+                20.0,
+                13.3,
+                0.8,
+                0.5,
+                14.4,
+                0.7,
+                6.0,
+                13.3, # QSOs
+                14.4,
+                0.5,
+                1.0,
+                0.5
+            ])
+        case "std":
+            return np.array([ # Yuan et al.
+                0.5, #LRGs
+                0.5,
+                0.2,
+                0.3,
+                0.2,
+                0.5, # ELGs
+                0.5,
+                0.5,
+                0.2,
+                0.3,
+                0.5,
+                0.2,
+                1.0,
+                0.5, # QSOs
+                0.5,
+                0.2,
+                0.3,
+                0.2
+            ])
 
 def initialise_walkers(initial_params_random: bool, num_walkers):
     """
@@ -209,49 +253,11 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         (ELGs): p_max, Q, logM_cut, kappa, sigma, logM1, alpha, gamma,
         (QSOs): logM_cut, logM1, sigma, alpha, kappa])
     """
-    priors = get_priors()
+    priors = get_priors(type="bounds")
 
-    mean_priors = np.array([ # Yuan et al.
-        13.3, # LRGs
-        14.4,
-        0.5,
-        1.0,
-        0.5,
-        0.7, # ELGs
-        20.0,
-        13.3,
-        0.8,
-        0.5,
-        14.4,
-        0.7,
-        6.0,
-        13.3, # QSOs
-        14.4,
-        0.5,
-        1.0,
-        0.5
-    ])
+    mean_priors = get_priors(type="mean")
 
-    std_priors = np.array([ # Yuan et al.
-        0.5, #LRGs
-        0.5,
-        0.2,
-        0.3,
-        0.2,
-        0.5, # ELGs
-        0.5,
-        0.5,
-        0.2,
-        0.3,
-        0.5,
-        0.2,
-        1.0,
-        0.5, # QSOs
-        0.5,
-        0.2,
-        0.3,
-        0.2
-    ])
+    std_priors = get_priors(type="std")
 
     initial_params = np.array([
         13.3,

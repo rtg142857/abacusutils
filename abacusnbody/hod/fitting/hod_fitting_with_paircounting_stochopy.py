@@ -43,6 +43,11 @@ def fit_HOD(path_config_filename, save_chains=False):
         paircounts[pair] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
+    print("Prematurely plotting wp, to make sure it works", flus=True)
+    save_path = fitting_params["sampler_save_path"]
+    plot_wp(save_path, hod_params=get_priors("mean"), tracers=tracer_list, paircounts=paircounts,
+            target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
+
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
 
@@ -78,17 +83,20 @@ def fit_HOD(path_config_filename, save_chains=False):
     hod_values = get_hod_values_given_parameters(M_h, best_fit, tracer_list, other_stuff_dict_here)
     for key, val in hod_values.items():
         np.save(save_path + key + ".npy", val)
-    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)    
+
+    print("Plotting HODs...")
+    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)
 
     return best_fit
 
 def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int):
 
-    bounds = get_priors()
+    bounds = get_priors(type="bounds")
+    x0 = get_priors(type="mean") # just needs one initial guess apparently
     minimum = True
 
     print("Running optimisation...", flush=True)
-    OptimizeResult = minimize(log_probability, bounds, method="cmaes", args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum), options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True})
+    OptimizeResult = minimize(log_probability, bounds, x0, method="cmaes", args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum), options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True})
 
     return OptimizeResult
 
@@ -102,4 +110,34 @@ def plot_HODs(save_path, M_h, hod_values, tracers):
         plt.loglog(M_h, sat, color=tracer_cols[tracer], linestyle='dashed', label=tracer+" sat")
         plt.ylim(10**-3, 10**3)
         plt.legend()
+    plt.savefig(save_path)
+
+def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params):
+    import matplotlib.pyplot as plt
+
+    npart = get_npart(hod_params, tracers, other_stuff_dict_here)
+    wp_dict = get_wp(hod_params, paircounts, tracers, npart, other_stuff_dict_here, clustering_params)
+
+    rpbins = np.logspace(clustering_params["logmin"], clustering_params["logmax"], clustering_params["nbins"] + 1)
+    rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
+
+    label_dict = {"0_0": "LRG_LRG", "0_1": "ELG_ELG", "0_2": "QSO_QSO", "1_0": "LRG_ELG", "1_1": "LRG_QSO", "1_2": "ELG_QSO"}
+
+    i0 = 5 # 
+    i1 = np.size(target_wp["LRG_LRG"])
+
+    fig, axs = plt.subplots(2, 3)
+    for y in range(2):
+        for x in range(3):
+            yx_label = str(y)+"_"+str(x)
+            rwp_flamingo = rpcent * wp_dict[label_dict[yx_label]]
+            axs[y, x].plot(rpcent, rwp_flamingo, "-b", label="FlamingoHOD")
+
+            rwp_data = rpcent * target_wp[label_dict[yx_label]]
+            rwp_error_mat = np.linalg.inv(target_jackknife_inverse[label_dict[yx_label]])
+            rwp_error = np.diagonal(rwp_error_mat)
+            axs[y, x].errorbar(rpcent[i0:i1], rwp_data[i0:i1], yerr=rwp_error[i0:i1], marker="o", color="orange", label="Data")
+            axs[y, x].plot(rpcent[:i0], rwp_data[:i0], marker="o", color="black", label="Data (unused)")
+            axs[y, x].legend()
+
     plt.savefig(save_path)

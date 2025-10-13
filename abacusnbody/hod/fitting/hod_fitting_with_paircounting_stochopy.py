@@ -45,7 +45,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Prematurely plotting wp, to make sure it works", flush=True)
     save_path = fitting_params["sampler_save_path"]
-    plot_wp(save_path, hod_params=get_priors("mean"), tracers=tracer_list, paircounts=paircounts,
+    plot_wp(save_path+"wps.png", hod_params=get_priors("mean"), tracers=tracer_list, paircounts=paircounts,
             target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
 
     nwalkers = fitting_params["nwalkers"]

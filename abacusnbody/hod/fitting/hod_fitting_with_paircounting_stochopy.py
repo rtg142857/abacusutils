@@ -118,7 +118,8 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
     npart = get_npart(hod_params, tracers, other_stuff_dict_here)
     wp_dict = get_wp(hod_params, paircounts, tracers, npart, other_stuff_dict_here, clustering_params)
 
-    rpbins = np.logspace(clustering_params["logmin"], clustering_params["logmax"], clustering_params["nbins"] + 1)
+    bin_params = clustering_params["bin_params"]
+    rpbins = np.logspace(bin_params["logmin"], bin_params["logmax"], bin_params["nbins"] + 1)
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
     label_dict = {"0_0": "LRG_LRG", "0_1": "ELG_ELG", "0_2": "QSO_QSO", "1_0": "LRG_ELG", "1_1": "LRG_QSO", "1_2": "ELG_QSO"}

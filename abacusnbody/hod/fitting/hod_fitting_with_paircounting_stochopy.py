@@ -141,4 +141,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
             axs[y, x].set_xscale('log')
             axs[y, x].legend()
 
+            if y == 0 and x == 2: # QSO_QSO
+                axs[y, x].set_ylim([-50, 250])
+
     plt.savefig(save_path)

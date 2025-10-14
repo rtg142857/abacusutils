@@ -48,10 +48,12 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
 
 def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
     """
-    Eq. 18 in https://arxiv.org/pdf/2110.11412 , using the same sigma_n
+    Using the "rather lenient" sigma_n in Eq. 18 in https://arxiv.org/pdf/2110.11412 results in the wp dominating the chi squared
+    Which is bad because it wants to push the incompleteness above 100%
+    So we drop sigma_n by a factor of 10
     """
     if fitting_ngal < target_ngal:
-        sigma_n = 4 * 10 ** (-5)
+        sigma_n = 4 * 10 ** (-6) # 4 * 10 ** (-5)
         return -((fitting_ngal - target_ngal) / sigma_n) **2
     else:
         return 0

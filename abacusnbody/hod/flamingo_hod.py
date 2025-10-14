@@ -34,7 +34,6 @@ from .GRAND_HOD import (
     N_sat_elg,
     N_cen_QSO,
     N_sat_generic,
-    state_346790,
 )
 #from NFW import nfw_draw
 
@@ -226,7 +225,6 @@ class FlamingoHOD:
             self.halo_data, self.particle_data, self.params, self.mock_dir = (
                 self.staging()
             )
-            state_346790(self.halo_data["hid"], self.halo_data["hmass"], self.halo_data["hrvir"], message="After staging:")
 
             print(len(self.halo_data["hmass"]),"halos loaded", flush=True)
 
@@ -255,7 +253,6 @@ class FlamingoHOD:
                 bins=[self.logMbins, self.deltacbins, self.fenvbins],
                 weights=self.halo_data['hmultis'],
             )
-            state_346790(self.halo_data["hid"], self.halo_data["hmass"], self.halo_data["hrvir"], message="After getting the hmf:")
         else:
             raise Exception("This hasn't been implemented yet")
             from abacusnbody.metadata import get_meta
@@ -287,7 +284,6 @@ class FlamingoHOD:
             bins=[self.logMbins, self.deltacbins, self.fenvbins, self.shearbins],
             weights=self.halo_data['hmultis'],
         )
-        state_346790(self.halo_data["hid"], self.halo_data["hmass"], self.halo_data["hrvir"], message="At the end of init:")
 
     def staging(self):
         """
@@ -522,8 +518,6 @@ class FlamingoHOD:
             # halo_submask = maskedhalos['mask_subsample'].astype(bool)
             halo_randoms = maskedhalos['randoms']
 
-            state_346790(halo_ids, halo_mass, halo_rvir, message="Immediately after loading halos from the file, looping over files:")
-
             hpos[halo_ticker : halo_ticker + Nhalos[i]] = halo_pos
             hvel[halo_ticker : halo_ticker + Nhalos[i]] = halo_vels
             hmass[halo_ticker : halo_ticker + Nhalos[i]] = halo_mass
@@ -632,8 +626,6 @@ class FlamingoHOD:
                     )
                 parts_ticker += Nparts[eslab - start]
 
-        state_346790(hid, hmass, hrvir, message="After going through and loading all the halos:")
-
         # sort halos by hid, important for conformity
         if not np.all(hid[:-1] <= hid[1:]):
             self.logger.info('Sorting halos for conformity calculation.')
@@ -654,8 +646,6 @@ class FlamingoHOD:
             if self.want_shear:
                 hshear = hshear[sortind]
         assert np.all(hid[:-1] <= hid[1:])
-
-        state_346790(hid, hmass, hrvir, message="After sorting halos by hid:")
 
         halo_data = {
             'hpos': hpos,
@@ -706,8 +696,6 @@ class FlamingoHOD:
             particle_data['pranksp'] = np.ones(Nparts_tot)
             particle_data['pranksr'] = np.ones(Nparts_tot)
             particle_data['pranksc'] = np.ones(Nparts_tot)
-
-        state_346790(halo_data["hid"], halo_data["hmass"], halo_data["hrvir"], message="At the end of staging:")
 
         return halo_data, particle_data, params, mock_dir
 
@@ -779,7 +767,6 @@ class FlamingoHOD:
             in the catalog are always centrals and the rest are satellites.
 
         """
-        state_346790(self.halo_data["hid"], self.halo_data["hmass"], self.halo_data["hrvir"], message="At the start of run_hod:")
         if tracers is None:
             tracers = self.tracers
         if tabulation_mock:
@@ -854,8 +841,6 @@ class FlamingoHOD:
             self.logger.info(
                 f'Randoms generated in elapsed time {time.time() - start:.2f} s.'
             )
-
-        state_346790(self.halo_data["hid"], self.halo_data["hmass"], self.halo_data["hrvir"], message="Just before gen_gal_cat:")
 
         start = time.time()
         mock_dict = gen_gal_cat(

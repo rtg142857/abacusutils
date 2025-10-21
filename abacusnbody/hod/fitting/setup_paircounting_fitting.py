@@ -24,6 +24,8 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         
         total_log_prob = 0.0
 
+        boxsize = other_stuff_dict_here["boxsize"]
+
         # w_p chi squared
         for i1, tr1 in enumerate(tracer_list):
             for i2, tr2 in enumerate(tracer_list):
@@ -36,9 +38,12 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         
         # n_g chi squared
         for tracer in tracer_list:
-            fitting_ngal = npart[tracer] / other_stuff_dict_here["boxsize"]**3
+            fitting_ngal = npart[tracer] / boxsize**3
             target_ngal = target_ngal_dict[tracer]
             total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal)
+
+        # making sure there's only one central galaxy
+        total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here)
     else:
         total_log_prob = -np.inf
 
@@ -50,10 +55,10 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
     """
     Using the "rather lenient" sigma_n in Eq. 18 in https://arxiv.org/pdf/2110.11412 results in the wp dominating the chi squared
     Which is bad because it wants to push the incompleteness above 100%
-    So we drop sigma_n by a factor of 10
+    So we drop sigma_n by a factor of 100
     """
     if fitting_ngal < target_ngal:
-        sigma_n = 4 * 10 ** (-6) # 4 * 10 ** (-5)
+        sigma_n = 4 * 10 ** (-7) # 4 * 10 ** (-5)
         return -((fitting_ngal - target_ngal) / sigma_n) **2
     else:
         return 0
@@ -68,6 +73,20 @@ def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp
 
     temp = np.matmul(C_matrix, mock-data)
     chi2 = np.dot(mock-data, temp)
+    return -chi2
+
+def negative_chi_squared_central_occupation(hod_params, tracers, other_stuff_dict_here):
+
+    M_h = np.logspace(10, 16, 90) # doesn't need to be the same as in other cases
+    hod_values = get_hod_values_given_parameters(M_h, hod_params, tracers, other_stuff_dict_here)
+
+    cenHOD_sum = np.zeros(len(hod_values["LRG_cen"]))
+
+    for tracer in tracers:
+        cenHOD_sum += hod_values[tracer+"_cen"]
+    
+    amount_greater_than_1 = np.maximum(np.ones(len(cenHOD_sum)), cenHOD_sum) - 1
+    chi2 = np.dot(amount_greater_than_1, amount_greater_than_1) * 10 ** 7 # guess at what works
     return -chi2
 
 def params_inside_priors(params):

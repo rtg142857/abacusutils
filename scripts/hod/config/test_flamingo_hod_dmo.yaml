@@ -85,6 +85,10 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
+        exp_frac: 0.5
+        exp_scale: 9.0
+        nfw_rescale: 0.6
+        f_sigv: 1.5
         ic: 1.0
 
     # parameters for setting up the HOD of QSOs
@@ -122,8 +126,8 @@ clustering_params:
 # ===========================================================================================
 # Specifically for fitting the HOD parameters
 fitting_params:
-    nwalkers: 180 #36
-    num_steps: 100 #100000
+    nwalkers: 720 #36
+    num_steps: 200 #100000
     target_dict_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/"
     sampler_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/samplers/"
     paircounts_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/"

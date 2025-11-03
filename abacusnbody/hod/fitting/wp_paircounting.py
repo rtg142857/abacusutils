@@ -170,6 +170,29 @@ def create_weighting_factor(mass_pair_array,hod1,hod2):
     weighting_factor = np.tensordot(np.outer(hod1,hod2),mass_pair_array,axes=([0,1],[0,1]))
     return weighting_factor
 
+def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, num_sat_parts: int, tracer2: str | None = None):
+    if tracer1 == "ELG" and (tracer2 == None or tracer2 == "ELG"):
+        CC = create_weighting_factor(paircounts["cencen_ELGauto"],hod_cen1,hod_cen2)
+        CS = create_weighting_factor(paircounts["censat_ELGauto"],hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS = create_weighting_factor(paircounts["satsat_ELGauto"],hod_sat1,hod_sat2) / num_sat_parts**2
+        SS1 = create_weighting_factor(paircounts["satsat_onehalo_ELGauto"],hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
+
+    elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"):
+        CC = create_weighting_factor(paircounts["cencen_ELGcross"],hod_cen1,hod_cen2)
+        CS = create_weighting_factor(paircounts["censat_ELGcross"],hod_cen1,hod_sat2) / num_sat_parts # TODO: CHECK DOUBLECOUNTING!!
+        SS = create_weighting_factor(paircounts["satsat_ELGcross"],hod_sat1,hod_sat2) / num_sat_parts**2
+        SS1 = create_weighting_factor(paircounts["satsat_onehalo_ELGcross"],hod_sat1,hod_sat2) / (num_sat_parts**2) # Here too!
+
+    else:
+        CC = create_weighting_factor(paircounts["cencen"],hod_cen1,hod_cen2)
+        CS = create_weighting_factor(paircounts["censat"],hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS = create_weighting_factor(paircounts["satsat"],hod_sat1,hod_sat2) / num_sat_parts**2
+        SS1 = create_weighting_factor(paircounts["satsat_onehalo"],hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
+
+    return CC + CS + SS + SS1
+
+
+
 def create_randoms_for_wp(npart, tracer1, r_bin_edges,pi_max,boxsize, tracer2=None):
     """
     Calculate the analytic randoms for npart particles in a box with
@@ -237,11 +260,8 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         hod_cen2, hod_sat2 = get_accurate_tracer_HOD(hod_params, tracer2, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
 
     # Galaxy pairs
-    CC = create_weighting_factor(cencen,hod_cen1,hod_cen2)
-    CS = create_weighting_factor(censat,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
-    SS = create_weighting_factor(satsat,hod_sat1,hod_sat2) / num_sat_parts**2
-    SS1 = create_weighting_factor(satsat_onehalo,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
-    GG = CC + CS + SS + SS1
+    GG = get_galaxy_pairs(tracer1=tracer1, tracer2=tracer2, paircounts=paircounts,
+                          hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, num_sat_parts=num_sat_parts)
 
     # randoms
     if tracer2 == None or tracer2 == tracer1:

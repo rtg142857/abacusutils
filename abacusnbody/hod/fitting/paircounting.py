@@ -109,7 +109,8 @@ def npairs_conversion_wp(samples1,samples2,n_pairs,r_bin_edges,pi_max, d_pi=1):
                         n_pairs_mass_r_bins_wp[i,j,k,l] = 0
     return n_pairs_mass_r_bins_wp
 
-def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_bin_edges,pi_max, d_pi=1):
+def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
+                             cross=False, x2=None, y2=None, z2=None):
     """
     We cannot use corrfunc for the one halo satellite-satellite term.
     This is because it would be too inefficient to split by
@@ -120,33 +121,47 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
 
     We know the number of satellite tracer particles so can use 
     this to count the one halo pairs
+
+    If calculating crosscorr, set cross=True and add the second values as x2, y2, z2 (weights and Ms are the same because it's by-halo)
     """
     # Create empty arrays to hold data
-    # For N sat particles we will have num_sat_parts*(num_sat_parts-1)/2 pairs per halo
+    # For N sat particles we will have num_sat_parts*(num_sat_parts-1)/2 pairs per halo if doing autocorr
+    # If crosscorr, it's num_sat_parts^2 pairs per halo
+    if cross:
+        pairs_per_halo = num_sat_parts**2
+    else:
+        pairs_per_halo = num_sat_parts*(num_sat_parts-1)/2
     Ms_reduced = np.zeros((len(Ms[::num_sat_parts]),
-                           int(num_sat_parts*(num_sat_parts-1)/2)))
+                           int(pairs_per_halo)))
 
     # distances in LOS and projected directions are binned
     distances_rp = np.zeros((len(Ms[::num_sat_parts]),
-                          int(num_sat_parts*(num_sat_parts-1)/2)))
+                          int(pairs_per_halo)))
 
     distances_pi = np.zeros((len(Ms[::num_sat_parts]),
-                          int(num_sat_parts*(num_sat_parts-1)/2)))
+                          int(pairs_per_halo)))
     
     weights_reduced = np.zeros((len(Ms[::num_sat_parts]),
-                           int(num_sat_parts*(num_sat_parts-1)/2)))
+                           int(pairs_per_halo)))
+    
+    if not cross:
+        x2, y2, z2 = x, y, z
 
     k = 0
     # For any number of satellite particles can take every combination of ith and 
     # jth satellite particle and find the distance and put them all in a big array
     for i in range(num_sat_parts):
-        for j in range(i):
+        if cross:
+            max_j_index = num_sat_parts
+        else:
+            max_j_index = i
+        for j in range(max_j_index):
             print(k)
             Ms_reduced[:,k] = Ms[::num_sat_parts]
-            distances_rp[:,k] = ((x[i::num_sat_parts]-x[j::num_sat_parts])**2
-                            + (y[i::num_sat_parts]-y[j::num_sat_parts])**2)**0.5
+            distances_rp[:,k] = ((x[i::num_sat_parts]-x2[j::num_sat_parts])**2
+                            + (y[i::num_sat_parts]-y2[j::num_sat_parts])**2)**0.5
 
-            distances_pi[:,k] = ((z[i::num_sat_parts]-z[j::num_sat_parts])**2)**0.5
+            distances_pi[:,k] = ((z[i::num_sat_parts]-z2[j::num_sat_parts])**2)**0.5
 
             weights_reduced[:,k] = weights[::num_sat_parts]
 
@@ -191,15 +206,14 @@ def correct_doublecounting(npairs, type):
             return npairs/2
 
 
-def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=False, verbose=False):
+def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthread=1, save=False, verbose=False):
     """
     Returns a 3D Numpy array of the paircounts of tracers, binned by both halo masses and distance
     
     path_config_filename: the usual
     tracer_mock: mock dict of tracers, with one central and three satellite tracers per halo
-    type: "cencen", "censat", "satcen" (only for crosscorr), "satsat", "satsat_onehalo"
-    tracer1: str e.g. "LRG" (currently not implemented)
-    tracer2: str: 2nd list of tracers, for cross-correlation (optional) (currently not implemented)
+    type: "cencen", "censat", "satsat", "satsat_onehalo"
+    category: "" (LRG), "_ELGauto", "_ELGcross" (LRG-ELG)
     Nthread: Number of threads to use
     save: Boolean, whether to save to disk
     verbose: Boolean, whether to print logs to stdout
@@ -221,9 +235,15 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
 
     time0 = time.time()
 
-    # Hardcoding because it doesn't make a difference for tracer mocks, I think
-    tracer1 = "LRG"
-    tracer2 = "LRG"
+    if category == "":
+        tracer1 = "LRG"
+        tracer2 = "LRG"
+    elif category == "_ELGauto":
+        tracer1 = "ELG"
+        tracer2 = "ELG"
+    elif category == "_ELGcross":
+        tracer1 = "LRG"
+        tracer2 = "ELG"
 
     mock1 = tracer_mock[tracer1] # x, y, z, vx, vy, vz, mass, id, Ncent
     if verbose:
@@ -270,6 +290,21 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
 
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
+
+            if category == "_ELGcross":
+                for i in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1]:
+                    i = i[::num_sat_parts]
+
+                samples_1 = mass_mask(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges)
+                samples_2 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)
+
+                num_threads = Nthread
+
+                npairs_test_cross = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
+                npairs_mass_r_bins_test_cross = npairs_conversion_wp(samples_1,samples_2,npairs_test_cross,rpbins,pi_max, d_pi)
+
+                npairs_mass_r_bins_test += npairs_mass_r_bins_test_cross
+                
         # case "satcen":
         #     samples_1 = mass_mask(x_sat2, y_sat2, z_sat2, M_sat2, mass_bin_edges)
         #     samples_2 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
@@ -293,7 +328,10 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, Nthread=1, save=
 
         case "satsat_onehalo":
             # Want all 3 sat particles per halo
-            npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
+            if category == "_ELGcross":
+                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2)
+            else:
+                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
         
     time2 = time.time()
     if verbose:
@@ -330,7 +368,9 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
         verbose: Boolean, whether to print logs to stdout
     Returns:
         paircounts: Dict of paircounts, in the following format:
-        paircounts["cencen"], ''["censat"], ''["satsat"], ''["satsat_onehalo"]
+        paircounts["cencen"], ''["censat"], ''["satsat"], ''["satsat_onehalo"] (for LRGs and QSOs)
+        paircounts["cencen_ELGauto"], ... (for ELGs specifically)
+        paircounts["cencen_ELGcross"], ... (where censat counts BOTH LRG cen-ELG sat and ELG cen-LRG sat)
         Each value is a 3d numpy array of the following form:
         paircounts["cencen"][i,j,k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
 
@@ -372,9 +412,15 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
 
 
     pairs_list = ["cencen", "censat", "satsat", "satsat_onehalo"]
-    for pair in pairs_list:
-        if verbose:
-            print(f"Paircounting {pair}")
-        paircounts[pair] = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, Nthread=Nthread, save=save, verbose=verbose)
+    category_list = ["", "_ELGauto", "_ELGcross"]
+    for category in category_list:
+        for pair in pairs_list:
+            if verbose:
+                if category == "":
+                    category_name = "normal"
+                else:
+                    category_name == category
+                print(f"Paircounting {pair}, {category_name}")
+            paircounts[pair+category] = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, category=category, Nthread=Nthread, save=save, verbose=verbose)
 
     return paircounts

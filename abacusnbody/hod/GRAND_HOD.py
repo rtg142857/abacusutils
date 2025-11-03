@@ -180,6 +180,7 @@ def gen_cent(
     Nthread,
     origin,
     tabulation_mock=False,
+    tabulation_tracer="LRG",
     hrvir=None
 ):
     """
@@ -232,12 +233,18 @@ def gen_cent(
     keep = np.empty(H, dtype=np.int8)  # mask array tracking which halos to keep
 
     # figuring out the number of halos kept for each thread
-    if tabulation_mock: # Each halo gets an LRG tracer
+    if tabulation_mock and tabulation_tracer == "LRG": # Each halo gets an LRG tracer
         keep.fill(1) # all and only LRG tracers
         # get the number of galaxies of each type
         for tid in numba.prange(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
                 Nout[tid, 0, 0] += 1
+    elif tabulation_mock and tabulation_tracer == "ELG": # Each halo gets an ELG tracer
+        keep.fill(2) # all and only ELG tracers
+        # get the number of galaxies of each type
+        for tid in numba.prange(Nthread):
+            for i in range(hstart[tid], hstart[tid + 1]):
+                Nout[tid, 1, 0] += 1
     else:
         for tid in numba.prange(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
@@ -728,8 +735,9 @@ def gen_sats_nfw(
     )  # starting index of each thread
     # if verbose:
     #     with numba.objmode(): print("Looping over threads: getting number of satellites and the like", flush=True)
-    if tabulation_mock: # exactly 3 satellite tracers in the LRG halos
+    if tabulation_mock: # exactly 3 LRG and ELG tracers per halo
         num_sats_L.fill(3)
+        num_sats_E.fill(3)
     else:
         for tid in range(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
@@ -950,6 +958,7 @@ def gen_sats_nfw(
 
     if tabulation_mock:
         LRG_dict["hmultis"] = np.repeat(hmultis, 3)
+        ELG_dict["hmultis"] =  np.repeat(hmultis, 3)
 
     return LRG_dict, ELG_dict, QSO_dict, ID_dict, hrvir_dict
 
@@ -1638,6 +1647,34 @@ def gen_gals(
         tabulation_mock=tabulation_mock,
         hrvir = halos_array['hrvir']
     )
+    if tabulation_mock:
+        _, ELG_dict_cent, _, _, _, _ = gen_cent(
+            halos_array['hpos'],
+            halos_array['hvel'],
+            halos_array['hmass'],
+            halos_array['hid'],
+            halos_array['hmultis'],
+            halos_array['hrandoms'],
+            halos_array['hveldev'],
+            halos_array.get('hdeltac', np.zeros(len(halos_array['hmass']))),
+            halos_array.get('hfenv', np.zeros(len(halos_array['hmass']))),
+            halos_array.get('hshear', np.zeros(len(halos_array['hmass']))),
+            LRG_hod_dict,
+            ELG_hod_dict,
+            QSO_hod_dict,
+            rsd,
+            inv_velz2kms,
+            lbox,
+            want_LRG,
+            want_ELG,
+            want_QSO,
+            Nthread,
+            origin,
+            tabulation_mock=tabulation_mock,
+            tabulation_tracer="ELG",
+            hrvir = halos_array['hrvir']
+        )
+
     if verbose:
         print('generating centrals took ', time.time() - start, flush=True)
 

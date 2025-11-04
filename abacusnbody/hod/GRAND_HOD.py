@@ -457,6 +457,8 @@ def gen_cent(
     ELG_dict['vz'] = elg_vz
     ELG_dict['mass'] = elg_mass
     ID_dict['ELG'] = elg_id
+    if tabulation_mock: # just reuse the LRG one once we calculate the ELGs
+        ID_dict["ELG"] = ID_dict["LRG"]
 
     QSO_dict['x'] = qso_x
     QSO_dict['y'] = qso_y

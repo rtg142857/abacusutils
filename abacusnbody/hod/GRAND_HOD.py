@@ -1759,14 +1759,16 @@ def gen_gals(
             tracer_dict[k] = fast_concatenate(
                 HOD_dict_cent[tracer][k], HOD_dict_sat[tracer][k], Nthread
             )
+            print(f"Length of {tracer} tracer_dict {k}:", len(tracer_dict[k]))
         tracer_dict['id'] = fast_concatenate(
             ID_dict_cent[tracer], ID_dict_sat[tracer], Nthread
         )
-        hrvir_dict_cent_tracer = hrvir_dict_cent[tracer]
-        hrvir_dict_sat_tracer = hrvir_dict_sat[tracer]
-        tracer_dict["hrvir"] = fast_concatenate(
-            hrvir_dict_cent_tracer, hrvir_dict_sat_tracer, Nthread
-        )
+        print(f"Length of id:", len(tracer_dict["id"]))
+        # hrvir_dict_cent_tracer = hrvir_dict_cent[tracer]
+        # hrvir_dict_sat_tracer = hrvir_dict_sat[tracer]
+        # tracer_dict["hrvir"] = fast_concatenate(
+        #     hrvir_dict_cent_tracer, hrvir_dict_sat_tracer, Nthread
+        # )
         if verbose:
             print(tracer, 'number of galaxies ', len(tracer_dict['x']), flush=True)
             print(

@@ -407,7 +407,7 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
                 if category == "":
                     category_name = "normal"
                 else:
-                    category_name == category
+                    category_name = category
                 print(f"Paircounting {pair}, {category_name}")
 
             save_path = config["fitting_params"]["paircounts_save_path"] + config["Labels"]["sim_label"] + "/"

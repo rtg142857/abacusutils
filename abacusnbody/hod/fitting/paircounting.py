@@ -3,6 +3,7 @@ import yaml
 import numpy as np
 import time
 from pathlib import Path
+import os
 from Corrfunc.theory.DDrppi import DDrppi
 
 def split_cen_sat(mock_galaxies: dict):
@@ -339,20 +340,6 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
     #npairs_mass_r_bins_test = correct_doublecounting(npairs_mass_r_bins_test, type)
 
-    if save:
-        if verbose:
-            print("Saving...")
-
-        save_path = config["fitting_params"]["paircounts_save_path"] + config["Labels"]["sim_label"] + "/"
-        path = Path(save_path)
-        path.mkdir(parents=True, exist_ok=True)
-
-        np.save(save_path+f"{type}.npy",npairs_mass_r_bins_test)
-
-        time3 = time.time()
-        if verbose:
-            print("Saving took",time3-time2,"seconds")
-
     return npairs_mass_r_bins_test
 
 def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=False, verbose=False):
@@ -385,6 +372,7 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
         paircounts["LRG_ELG"]["satsat"][i, j, k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
     """
     #tracer_list = ["LRG", "ELG", "QSO"]
+    config = yaml.safe_load(open(path_config_filename))
 
     paircounts = {}
 
@@ -421,6 +409,19 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
                 else:
                     category_name == category
                 print(f"Paircounting {pair}, {category_name}")
-            paircounts[pair+category] = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, category=category, Nthread=Nthread, save=save, verbose=verbose)
+
+            save_path = config["fitting_params"]["paircounts_save_path"] + config["Labels"]["sim_label"] + "/"
+            path = Path(save_path)
+            path.mkdir(parents=True, exist_ok=True)
+            filename = save_path + f"{pair}{category}.npy"
+
+            if not os.path.exists(filename):
+                paircount = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, category=category, Nthread=Nthread, save=save, verbose=verbose)
+                if save:
+                    np.save(filename,paircount)
+                paircounts[pair+category] = paircount
+            else:
+                print("Paircount file exists, skipping", flush=True)
+                paircounts[pair+category] = np.load(filename)
 
     return paircounts

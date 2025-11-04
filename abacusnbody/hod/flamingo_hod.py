@@ -721,7 +721,7 @@ class FlamingoHOD:
             dictionary of multi-tracer HOD. ``tracers['LRG']`` is the dictionary of LRG HOD parameters,
             overwrites the ``LRG_params`` argument in the constructor.
             Same for keys ``'ELG'`` and ``'QSO'``.
-            If tabulation_mock = True, only use LRGs.
+            If tabulation_mock = True, only use LRGs and ELGs.
 
         ``want_rsd``: bool
             enable RSD? default ``True``.
@@ -772,6 +772,7 @@ class FlamingoHOD:
         if tabulation_mock:
             tabulation_tracers = {}
             tabulation_tracers["LRG"] = tracers["LRG"]
+            tabulation_tracers["ELG"] = tracers["ELG"]
             tracers = tabulation_tracers
         if True: #self.z_type == 'secondary':, i.e. no particles:
             assert want_nfw

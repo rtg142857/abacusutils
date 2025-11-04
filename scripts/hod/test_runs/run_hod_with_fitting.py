@@ -52,14 +52,14 @@ def main(path_config_filename):
     # create a new FlamingoHOD object
     newBall = FlamingoHOD(path_config_filename)
 
-    # print("Getting mock dict, write to disk", flush=True)##############################################
-    # # throw away run for jit to compile, don't write to disk
-    # mock_dict = newBall.run_hod(
-    #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
-    # )
-
-    if not os.path.exists(paircount_path + sim_label + "/cencen.npy"):
-        print("No paircounts found; computing them now", flush=True)
+    paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
+                        "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    all_paircounts_exist = True
+    for label in paircount_labels:
+        if not os.path.exists(paircount_path + sim_label + f"/{label}.npy"):
+            all_paircounts_exist = False
+    if not all_paircounts_exist:
+        print("Paircounts missing; computing them now", flush=True)
         print("Making tracer mock...", flush=True)
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)

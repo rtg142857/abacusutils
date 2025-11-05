@@ -39,8 +39,9 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("Loading precomputed things...")
     paircounts = {}
     for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
-        filename = paircount_path + pair + ".npy"
-        paircounts[pair] = np.load(filename)
+        for pair_type in ["", "_ELGauto", "_ELGcross"]:
+            filename = paircount_path + pair + pair_type + ".npy"
+            paircounts[pair+pair_type] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
     nwalkers = fitting_params["nwalkers"]

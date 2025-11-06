@@ -237,11 +237,6 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
 
-    cencen = paircounts["cencen"]
-    censat = paircounts["censat"]
-    satsat = paircounts["satsat"]
-    satsat_onehalo = paircounts["satsat_onehalo"]
-
     boxsize = other_stuff_dict_here["boxsize"]
     num_sat_parts = other_stuff_dict_here["num_sat_parts"]
     num_mass_bins_big = other_stuff_dict_here["num_mass_bins_big"]

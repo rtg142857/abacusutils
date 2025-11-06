@@ -58,7 +58,7 @@ def main(path_config_filename):
     Lp = HOD_params["LRG_params"]
     Ep = HOD_params["ELG_params"]
     Qp = HOD_params["QSO_params"]
-    HOD_params = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
+    HOD_params_list = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
                   Ep["p_max"], Ep["Q"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["alpha"], Ep["gamma"],
                   Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"]]
     clustering_params = config['clustering_params']
@@ -108,10 +108,10 @@ def main(path_config_filename):
                 paircounts[pair+pair_type] = np.load(filename)
         other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
-        npart = get_npart(HOD_params, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
-        wp_pair_LRGLRG = get_wp_given_tracer(HOD_params, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG")
-        wp_pair_ELGLRG = get_wp_given_tracer(HOD_params, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
-        wp_pair_ELGELG = get_wp_given_tracer(HOD_params, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
+        npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
+        wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG")
+        wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
+        wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)

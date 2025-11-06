@@ -55,6 +55,12 @@ def main(path_config_filename):
     run_params = yaml.safe_load(open(config["Paths"]["params_path"]))
     sim_params = config['sim_params']
     HOD_params = config['HOD_params']
+    Lp = HOD_params["LRG_params"]
+    Ep = HOD_params["ELG_params"]
+    Qp = HOD_params["QSO_params"]
+    HOD_params = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
+                  Ep["p_max"], Ep["Q"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["alpha"], Ep["gamma"],
+                  Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"]]
     clustering_params = config['clustering_params']
     Paths = config["Paths"]
     Labels = config["Labels"]

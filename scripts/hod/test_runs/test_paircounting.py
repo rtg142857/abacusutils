@@ -94,7 +94,7 @@ def main(path_config_filename):
     if not pair_wp_exists:
 
         print("Loading paircounts from the tabulation mock", flush=True)###############################################
-        paircount_path = config["fitting_params"]["paircounts_save_path"]
+        paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
         paircounts = {}
         for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
             for pair_type in ["", "_ELGauto", "_ELGcross"]:

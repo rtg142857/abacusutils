@@ -21,8 +21,8 @@ import h5py
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusutils.abacusnbody.hod.fitting.setup_paircounting_fitting import *
-from abacusutils.abacusnbody.hod.fitting.wp_paircounting import get_wp_given_tracer
+from abacusnbody.hod.fitting.setup_paircounting_fitting import *
+from abacusnbody.hod.fitting.wp_paircounting import get_wp_given_tracer
 import abacusnbody.hod.fitting.paircounting as paircounting
 
 

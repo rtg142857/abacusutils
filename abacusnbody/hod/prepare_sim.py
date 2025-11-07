@@ -46,13 +46,19 @@ def subsample_halos(m, MT):
     downfactors = np.zeros(len(x))
     if MT:
         # for elgs
-        mask1 = x < 11.4
-        mask2 = x < 11.6
-        downfactors[mask1] = 0.2 / (1.0 + 10 * np.exp(-(x[mask1] - 11.2) * 25))
+        mask1 = x < 10.0#11.4
+        mask2 = x < 10.5#11.6
+        # downfactors[mask1] = 0.2 / (1.0 + 10 * np.exp(-(x[mask1] - 11.2) * 25))
+        # downfactors[mask2 & (~mask1)] = 0.4 / (
+        #     1.0 + 10 * np.exp(-(x[mask2 & (~mask1)] - 11.3) * 25)
+        # )
+        # downfactors[~mask2] = 1.0 / (1.0 + 0.1 * np.exp(-(x[~mask2] - 11.7) * 10))
+        downfactors[mask1] = 0.2 / (1.0 + 10 * np.exp(-(x[mask1] - 11.0) * 25)) # done because downsampling was too aggressive and causing problems later on
         downfactors[mask2 & (~mask1)] = 0.4 / (
-            1.0 + 10 * np.exp(-(x[mask2 & (~mask1)] - 11.3) * 25)
+            1.0 + 10 * np.exp(-(x[mask2 & (~mask1)] - 11.0) * 25)
         )
-        downfactors[~mask2] = 1.0 / (1.0 + 0.1 * np.exp(-(x[~mask2] - 11.7) * 10))
+        downfactors[~mask2] = 1.0 / (1.0 + 0.1 * np.exp(-(x[~mask2] - 11.0) * 10))
+
 
         # # for bgs
         # mask1 = x < 11.0

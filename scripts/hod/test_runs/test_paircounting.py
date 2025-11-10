@@ -80,6 +80,8 @@ def main(path_config_filename):
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
     subsample_dir = sim_params["subsample_dir"]
+    fitting_params = config["fitting_params"]
+    paircount_path = fitting_params["paircounts_save_path"]
     sim_label = Labels["sim_label"]
 
     temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
@@ -96,6 +98,23 @@ def main(path_config_filename):
     print("Getting NFW draw for satellites", flush=True)#############################################################
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
+
+    paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
+                        "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    all_paircounts_exist = True
+    for label in paircount_labels:
+        if not os.path.exists(paircount_path + sim_label + f"/{label}.npy"):
+            all_paircounts_exist = False
+    if not all_paircounts_exist:
+        print("Paircounts missing; computing them now", flush=True)
+        print("Making tracer mock...", flush=True)
+        max_nfw = 40
+        NFW_draw = nfw_draw(10000, max_nfw, seed)
+        mock_dict = newBall.run_hod(
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True, tabulation_mock=True
+        )
+        print("Paircounting...")
+        paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
     if not pair_wp_exists:
 

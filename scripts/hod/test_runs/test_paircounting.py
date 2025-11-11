@@ -116,26 +116,29 @@ def main(path_config_filename):
         print("Paircounting...")
         paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
-    if not pair_wp_exists:
+    #if not pair_wp_exists:
 
-        print("Loading paircounts from the tabulation mock", flush=True)###############################################
-        paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
-        paircounts = {}
-        for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
-            for pair_type in ["", "_ELGauto", "_ELGcross"]:
-                filename = paircount_path + pair + pair_type + ".npy"
-                paircounts[pair+pair_type] = np.load(filename)
-        other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    print("Loading paircounts from the tabulation mock", flush=True)###############################################
+    paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
+    paircounts = {}
+    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
+        for pair_type in ["", "_ELGauto", "_ELGcross"]:
+            filename = paircount_path + pair + pair_type + ".npy"
+            paircounts[pair+pair_type] = np.load(filename)
+    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
-        npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
-        wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG")
-        wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
-        wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
+    npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
+    print("LRG npart:", npart["LRG"])
+    print("ELG npart:", npart["ELG"])
+    print("QSO npart:", npart["QSO"])
+    wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG")
+    wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
+    wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)
-    else:
-        pass
+    #else:
+    #    pass
         # print("pair_wp already saved, skipping")
         # wp_pair = np.load(temp_stuff + "pair_wp.npy")
 

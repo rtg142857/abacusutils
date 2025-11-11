@@ -111,7 +111,7 @@ def npairs_conversion_wp(samples1,samples2,n_pairs,r_bin_edges,pi_max, d_pi=1):
     return n_pairs_mass_r_bins_wp
 
 def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
-                             cross=False, x2=None, y2=None, z2=None):
+                             cross=False, x2=None, y2=None, z2=None, weight2=None, Ms2=None):
     """
     We cannot use corrfunc for the one halo satellite-satellite term.
     This is because it would be too inefficient to split by
@@ -124,6 +124,7 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
     this to count the one halo pairs
 
     If calculating crosscorr, set cross=True and add the second values as x2, y2, z2 (weights and Ms are the same because it's by-halo)
+    (weights and Ms are only included as arguments for sanity checking)
     """
     # Create empty arrays to hold data
     # For N sat particles we will have num_sat_parts*(num_sat_parts-1)/2 pairs per halo if doing autocorr
@@ -147,6 +148,10 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
     
     if not cross:
         x2, y2, z2 = x, y, z
+    else:
+        # sanity check
+        assert weights == weight2
+        assert Ms == Ms2
 
     k = 0
     # For any number of satellite particles can take every combination of ith and 
@@ -330,7 +335,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         case "satsat_onehalo":
             # Want all 3 sat particles per halo
             if category == "_ELGcross":
-                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2)
+                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2)
             else:
                 npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
         

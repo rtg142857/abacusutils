@@ -222,7 +222,7 @@ def create_randoms_for_wp(npart, tracer1, r_bin_edges,pi_max,boxsize, tracer2=No
         RR = (dv*rhor)
         #print(RR)
         RR_out[p::pi_max] = RR
-        print(f"Sum of RR for {tracer1}, {tracer2}:", np.sum(RR_out))
+    print(f"Sum of RR for {tracer1}, {tracer2}:", np.sum(RR_out))
     return RR_out
 
 def xi_to_wps(xis,r_bin_edges,pi_max):

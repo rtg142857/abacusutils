@@ -150,8 +150,8 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
         x2, y2, z2 = x, y, z
     else:
         # sanity check
-        assert weights == weight2
-        assert Ms == Ms2
+        assert np.all(weights == weight2)
+        assert np.all(Ms == Ms2)
 
     k = 0
     # For any number of satellite particles can take every combination of ith and 

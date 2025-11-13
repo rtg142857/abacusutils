@@ -257,6 +257,8 @@ class SwiftHaloCatalog(object):
         #halos["rvmax"] = np.array(halo_cat["BoundSubhalo"]["MaximumDarkMatterCircularVelocityRadius"])[relevant_field_halos] * self.h
         halos["concentration"] = np.array(halo_cat["SO"]["200_crit"]["Concentration"])[relevant_field_halos]
 
+        print("Number of halos read in before downsampling:",len(halos["id"]))
+
         self.halos = halos
         #self.halos = Table(halos, copy=False)
         #self.halos.meta.update(self.header)

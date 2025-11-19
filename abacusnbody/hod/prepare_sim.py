@@ -54,13 +54,11 @@ def subsample_halos(m, MT):
         )
         downfactors[~mask2] = 1.0 / (1.0 + 0.1 * np.exp(-(x[~mask2] - 11.7) * 10))
 
-        # The following was tried for debugging, but it takes too long so no
-        # downfactors[mask1] = 0.2 / (1.0 + 10 * np.exp(-(x[mask1] - 11.0) * 25)) # done because downsampling was too aggressive and causing problems later on
-        # downfactors[mask2 & (~mask1)] = 0.4 / (
-        #     1.0 + 10 * np.exp(-(x[mask2 & (~mask1)] - 11.0) * 25)
-        # )
-        # downfactors[~mask2] = 1.0 / (1.0 + 0.1 * np.exp(-(x[~mask2] - 11.0) * 10))
-
+        # Having the downfactors be too high cuts out a lot of halos, since their odds are too close to zero
+        # Cap the downfactor at 10**-6
+        # TODO: Make the downfactor cap dynamic based upon the HMF
+        cap = downfactors < 10**-6
+        downfactors[cap] = 10**-6
 
         # # for bgs
         # mask1 = x < 11.0

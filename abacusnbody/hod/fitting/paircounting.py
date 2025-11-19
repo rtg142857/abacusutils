@@ -184,7 +184,7 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
     distances_pi = np.reshape(distances_pi,(1,-1))[0]
     weights_reduced = np.ravel(weights_reduced)
 
-    final_data = np.histogramdd(sample = np.array([Ms_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weights_reduced**2) # weights are squared because of both particles 
+    final_data = np.histogramdd(sample = np.array([Ms_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weights_reduced)
     final_data = final_data[0]
     # Finally transform into the usual format with 2 separate M bins so that it easily fits into the rest of my existing code
 

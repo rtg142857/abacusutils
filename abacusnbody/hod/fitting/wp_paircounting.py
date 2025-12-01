@@ -178,8 +178,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         SS1 = create_weighting_factor(paircounts["satsat_onehalo_ELGauto"],hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
     elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"): # none of these should be doublecounted
-        CC = create_weighting_factor(paircounts["cencen_ELGcross"],hod_cen1,hod_cen2) * 2 # Doublecounting test 1/4
-        CS = create_weighting_factor(paircounts["censat_ELGcross"],hod_cen1,hod_sat2) / num_sat_parts # TODO: CHECK DOUBLECOUNTING!! # Checked; seems to be correct?
+        CC = create_weighting_factor(paircounts["cencen_ELGcross"],hod_cen1,hod_cen2)
+        CS = create_weighting_factor(paircounts["censat_ELGcross"],hod_cen1,hod_sat2) * 2 / num_sat_parts # Doublecounting test 2/4 # TODO: CHECK DOUBLECOUNTING!! # Checked; seems to be correct?
         SS = create_weighting_factor(paircounts["satsat_ELGcross"],hod_sat1,hod_sat2) / (num_sat_parts**2)
         SS1 = create_weighting_factor(paircounts["satsat_onehalo_ELGcross"],hod_sat1,hod_sat2) / (num_sat_parts**2) # Here too!
 

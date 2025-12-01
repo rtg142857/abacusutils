@@ -391,6 +391,7 @@ class FlamingoHOD:
             #halofilename = str(halofilename) + '_new.h5'
             # particlefilename = str(particlefilename) + '_new.h5'
 
+            print("Opening subsample file at", subsample_file, flush=True)
             newfile = h5py.File(subsample_file, 'r')
             Nhalos[i] = len(newfile['halos'])
             if self.z_type == 'primary' or self.z_type == 'lightcone':

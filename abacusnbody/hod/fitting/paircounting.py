@@ -86,7 +86,7 @@ def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,
                 # return 0 for this combination
             else:
                 n_pairs.append(0)
-            print(i,j)
+            print(i,j, flush=True)
     return(n_pairs)
 
 def npairs_conversion_wp(samples1,samples2,n_pairs,r_bin_edges,pi_max, d_pi=1):

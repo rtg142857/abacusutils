@@ -218,7 +218,7 @@ def create_randoms_for_wp(npart, tracer1, r_bin_edges,pi_max,boxsize, tracer2=No
             rhor = (npart[tracer1]*(npart[tracer1]-1))/global_volume
         else:
             # crosscorr
-            rhor = (npart[tracer1]*npart[tracer2]) * 2 /global_volume # Doublecounting does this maybe?
+            rhor = (npart[tracer1]*npart[tracer2]) /global_volume
         RR = (dv*rhor)
         #print(RR)
         RR_out[p::pi_max] = RR

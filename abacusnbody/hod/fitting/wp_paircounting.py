@@ -180,10 +180,10 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp = paircounts["censat_ELGauto"]
         ssp = paircounts["satsat_ELGauto"]
         ss1p = paircounts["satsat_onehalo_ELGauto"]
-        vprint("Sum of cc paircounts: "+np.sum(ccp), verbose)
-        vprint("Sum of cs paircounts: "+np.sum(csp), verbose)
-        vprint("Sum of ss paircounts: "+np.sum(ssp), verbose)
-        vprint("Sum of ss1 paircounts: "+np.sum(ss1p), verbose)
+        vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+        vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+        vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+        vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / num_sat_parts**2
@@ -194,10 +194,10 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp = paircounts["censat_ELGcross"]
         ssp = paircounts["satsat_ELGcross"]
         ss1p = paircounts["satsat_onehalo_ELGcross"]
-        vprint("Sum of cc paircounts: "+np.sum(ccp), verbose)
-        vprint("Sum of cs paircounts: "+np.sum(csp), verbose)
-        vprint("Sum of ss paircounts: "+np.sum(ssp), verbose)
-        vprint("Sum of ss1 paircounts: "+np.sum(ss1p), verbose)
+        vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+        vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+        vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+        vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) / num_sat_parts
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / (num_sat_parts**2) 
@@ -208,22 +208,22 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp = paircounts["censat"]
         ssp = paircounts["satsat"]
         ss1p = paircounts["satsat_onehalo"]
-        vprint("Sum of cc paircounts: "+np.sum(ccp), verbose)
-        vprint("Sum of cs paircounts: "+np.sum(csp), verbose)
-        vprint("Sum of ss paircounts: "+np.sum(ssp), verbose)
-        vprint("Sum of ss1 paircounts: "+np.sum(ss1p), verbose)
+        vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+        vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+        vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+        vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / num_sat_parts**2
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
-    vprint("Sum of CC after HOD integration: "+np.sum(CC), verbose)
-    vprint("Sum of CS after HOD integration: "+np.sum(CS), verbose)
-    vprint("Sum of SS after HOD integration: "+np.sum(SS), verbose)
-    vprint("Sum of SS1 after HOD integration: "+np.sum(SS1), verbose)
+    vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)
+    vprint("Sum of CS after HOD integration: "+str(np.sum(CS)), verbose)
+    vprint("Sum of SS after HOD integration: "+str(np.sum(SS)), verbose)
+    vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
 
     GG = CC + CS + SS + SS1
-    vprint(f"Sum of GG for {tracer1}, {tracer2}: "+np.sum(GG), verbose)
+    vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
 
     return CC + CS + SS + SS1
 
@@ -296,7 +296,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     vprint("Getting galaxy pairs", verbose)
     GG = get_galaxy_pairs(tracer1=tracer1, tracer2=tracer2, paircounts=paircounts,
                           hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, num_sat_parts=num_sat_parts, verbose=verbose)
-    vprint("Sum of ggs: "+np.sum(GG), verbose)
+    vprint("Sum of ggs: "+str(np.sum(GG)), verbose)
 
     # randoms
     vprint("Creating randoms", verbose)
@@ -307,7 +307,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         # crosscorr
         rands = create_randoms_for_wp(npart = npart, tracer1=tracer1, tracer2=tracer2, r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
     wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
-    vprint("Sum of randoms: "+np.sum(wp_rands), verbose)
+    vprint("Sum of randoms: "+str(np.sum(wp_rands)), verbose)
 
     # finishing
     vprint("Getting xi", verbose)

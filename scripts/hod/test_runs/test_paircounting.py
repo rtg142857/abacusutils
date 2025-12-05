@@ -131,9 +131,9 @@ def main(path_config_filename):
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
-    wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG")
-    wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
-    wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG")
+    wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
+    wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)

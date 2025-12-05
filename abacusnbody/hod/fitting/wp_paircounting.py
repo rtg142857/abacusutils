@@ -174,27 +174,56 @@ def create_weighting_factor(mass_pair_array,hod1,hod2):
     weighting_factor = np.tensordot(np.outer(hod1,hod2),mass_pair_array,axes=([0,1],[0,1]))
     return weighting_factor
 
-def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, num_sat_parts: int, tracer2: str | None = None):
+def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, num_sat_parts: int, tracer2: str | None = None, verbose=False):
     if tracer1 == "ELG" and (tracer2 == None or tracer2 == "ELG"):
-        CC = create_weighting_factor(paircounts["cencen_ELGauto"],hod_cen1,hod_cen2)
-        CS = create_weighting_factor(paircounts["censat_ELGauto"],hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
-        SS = create_weighting_factor(paircounts["satsat_ELGauto"],hod_sat1,hod_sat2) / num_sat_parts**2
-        SS1 = create_weighting_factor(paircounts["satsat_onehalo_ELGauto"],hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
+        ccp = paircounts["cencen_ELGauto"]
+        csp = paircounts["censat_ELGauto"]
+        ssp = paircounts["satsat_ELGauto"]
+        ss1p = paircounts["satsat_onehalo_ELGauto"]
+        vprint("Sum of cc paircounts: "+np.sum(ccp), verbose)
+        vprint("Sum of cs paircounts: "+np.sum(csp), verbose)
+        vprint("Sum of ss paircounts: "+np.sum(ssp), verbose)
+        vprint("Sum of ss1 paircounts: "+np.sum(ss1p), verbose)
+        CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
+        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / num_sat_parts**2
+        SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
     elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"): # none of these should be doublecounted, and yet final result seems to be double, but only at low rp?
-        CC = create_weighting_factor(paircounts["cencen_ELGcross"],hod_cen1,hod_cen2)
-        CS = create_weighting_factor(paircounts["censat_ELGcross"],hod_cen1,hod_sat2) / num_sat_parts
-        SS = create_weighting_factor(paircounts["satsat_ELGcross"],hod_sat1,hod_sat2) / (num_sat_parts**2) 
-        SS1 = create_weighting_factor(paircounts["satsat_onehalo_ELGcross"],hod_sat1,hod_sat2) / (num_sat_parts**2)
+        ccp = paircounts["cencen_ELGcross"]
+        csp = paircounts["censat_ELGcross"]
+        ssp = paircounts["satsat_ELGcross"]
+        ss1p = paircounts["satsat_onehalo_ELGcross"]
+        vprint("Sum of cc paircounts: "+np.sum(ccp), verbose)
+        vprint("Sum of cs paircounts: "+np.sum(csp), verbose)
+        vprint("Sum of ss paircounts: "+np.sum(ssp), verbose)
+        vprint("Sum of ss1 paircounts: "+np.sum(ss1p), verbose)
+        CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
+        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) / num_sat_parts
+        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / (num_sat_parts**2) 
+        SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
 
     else:
-        CC = create_weighting_factor(paircounts["cencen"],hod_cen1,hod_cen2)
-        CS = create_weighting_factor(paircounts["censat"],hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
-        SS = create_weighting_factor(paircounts["satsat"],hod_sat1,hod_sat2) / num_sat_parts**2
-        SS1 = create_weighting_factor(paircounts["satsat_onehalo"],hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
+        ccp = paircounts["cencen"]
+        csp = paircounts["censat"]
+        ssp = paircounts["satsat"]
+        ss1p = paircounts["satsat_onehalo"]
+        vprint("Sum of cc paircounts: "+np.sum(ccp), verbose)
+        vprint("Sum of cs paircounts: "+np.sum(csp), verbose)
+        vprint("Sum of ss paircounts: "+np.sum(ssp), verbose)
+        vprint("Sum of ss1 paircounts: "+np.sum(ss1p), verbose)
+        CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
+        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / num_sat_parts**2
+        SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
+
+    vprint("Sum of CC after HOD integration: "+np.sum(CC), verbose)
+    vprint("Sum of CS after HOD integration: "+np.sum(CS), verbose)
+    vprint("Sum of SS after HOD integration: "+np.sum(SS), verbose)
+    vprint("Sum of SS1 after HOD integration: "+np.sum(SS1), verbose)
 
     GG = CC + CS + SS + SS1
-    print(f"Sum of GG for {tracer1}, {tracer2}:", np.sum(GG))
+    vprint(f"Sum of GG for {tracer1}, {tracer2}: "+np.sum(GG), verbose)
 
     return CC + CS + SS + SS1
 
@@ -226,7 +255,7 @@ def create_randoms_for_wp(npart, tracer1, r_bin_edges,pi_max,boxsize, tracer2=No
         RR = (dv*rhor)
         #print(RR)
         RR_out[p::pi_max] = RR
-    print(f"Sum of RR for {tracer1}, {tracer2}:", np.sum(RR_out))
+    #vprint(f"Sum of RR for {tracer1}, {tracer2}:", np.sum(RR_out), verbose)
     return RR_out
 
 def xi_to_wps(xis,r_bin_edges,pi_max):
@@ -238,7 +267,7 @@ def xi_to_wps(xis,r_bin_edges,pi_max):
     wp_out = 2.0 * dpi * np.sum(xis, axis=1)
     return(wp_out)
 
-def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, tracer2: str | None = None) -> np.ndarray:
+def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, tracer2: str | None = None, verbose=False) -> np.ndarray:
     # getting important values from the given dicts
     bin_params = clustering_params['bin_params']
     rpbins = np.logspace(bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1)
@@ -253,6 +282,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     hmf_big = other_stuff_dict_here["hmf_big"]
 
     # Getting HODs
+    vprint("Getting HODs", verbose)
     if tracer2 == None or tracer2 == tracer1:
         # autocorr
         hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
@@ -263,10 +293,13 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         hod_cen2, hod_sat2 = get_accurate_tracer_HOD(hod_params, tracer2, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
 
     # Galaxy pairs
+    vprint("Getting galaxy pairs", verbose)
     GG = get_galaxy_pairs(tracer1=tracer1, tracer2=tracer2, paircounts=paircounts,
-                          hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, num_sat_parts=num_sat_parts)
+                          hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, num_sat_parts=num_sat_parts, verbose=verbose)
+    vprint("Sum of ggs: "+np.sum(GG), verbose)
 
     # randoms
+    vprint("Creating randoms", verbose)
     if tracer2 == None or tracer2 == tracer1:
         # autocorr
         rands = create_randoms_for_wp(npart = npart, tracer1=tracer1, r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
@@ -274,10 +307,15 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         # crosscorr
         rands = create_randoms_for_wp(npart = npart, tracer1=tracer1, tracer2=tracer2, r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
     wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
+    vprint("Sum of randoms: "+np.sum(wp_rands), verbose)
 
     # finishing
+    vprint("Getting xi", verbose)
     xi = np.divide(GG, wp_rands) - 1
+    vprint("Xi: "+xi, verbose)
+    vprint("Getting wp")
     wp = xi_to_wps(xi,rpbins,pimax)
+    vprint("WP:, "+wp, verbose)
     return wp
 
 def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, verbose=False) -> dict:

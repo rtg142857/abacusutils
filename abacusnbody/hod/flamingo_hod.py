@@ -923,7 +923,10 @@ class FlamingoHOD:
                 )
                 print("Number of LRG centrals:",newngal[0],"\nNumber of LRG sats:",newngal[1])
                 ngal_dict[etracer] = newngal[0] + newngal[1]
-                fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
+                if ngal_dict[etracer] == 0:
+                    fsat_dict[etracer] = 0
+                else:
+                    fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
             elif etracer == 'ELG':
                 newngal = FlamingoHOD._compute_ngal_elg(
                     self.logMbins,
@@ -959,7 +962,10 @@ class FlamingoHOD:
                 # print('newngal', newngal)
 
                 ngal_dict[etracer] = newngal[0] + newngal[1]
-                fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
+                if ngal_dict[etracer] == 0:
+                    fsat_dict[etracer] = 0
+                else:
+                    fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
             elif etracer == 'QSO':
                 newngal = FlamingoHOD._compute_ngal_qso(
                     self.logMbins,
@@ -982,7 +988,10 @@ class FlamingoHOD:
                     Nthread,
                 )
                 ngal_dict[etracer] = newngal[0] + newngal[1]
-                fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
+                if ngal_dict[etracer] == 0:
+                    fsat_dict[etracer] = 0
+                else:
+                    fsat_dict[etracer] = newngal[1] / (newngal[0] + newngal[1])
         return ngal_dict, fsat_dict
 
     @staticmethod

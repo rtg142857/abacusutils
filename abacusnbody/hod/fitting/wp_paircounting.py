@@ -1,6 +1,10 @@
 import numpy as np
 from scipy.special import erfc, erf
 
+def vprint(input, verbose):
+    if verbose:
+        print(input, flush=True)
+
 def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
@@ -276,7 +280,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     wp = xi_to_wps(xi,rpbins,pimax)
     return wp
 
-def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: dict, other_stuff_dict_here: dict, clustering_params: dict) -> dict:
+def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, verbose=False) -> dict:
     """
     Returns a dict of wp autocorr and crosscorr
     Keys: LRG_LRG, LRG_ELG, etc.
@@ -298,6 +302,7 @@ def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: d
         rpbins
         pimax
         pi_bin_size (currently hardcoded to 1 tbqh)
+    Verbose: bool
     """
     wp_dict = {}
 
@@ -307,9 +312,11 @@ def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: d
                 continue
             if i == j:
                 # autocorr
-                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], paircounts = paircounts, npart = npart, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
+                vprint("Doing autocorr for"+tracer_list[i], verbose)
+                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], paircounts = paircounts, npart = npart, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, verbose=verbose)
             if i < j:
                 # crosscorr
-                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], tracer2 = tracer_list[j], paircounts = paircounts, npart = npart, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
+                vprint(f"Doing crosscorr for {tracer_list[i]}, {tracer_list[j]}", verbose)
+                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], tracer2 = tracer_list[j], paircounts = paircounts, npart = npart, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, verbose=verbose)
 
     return wp_dict

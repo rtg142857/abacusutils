@@ -1875,13 +1875,21 @@ def gen_gal_cat(
     for tracer in tracers.keys():
         Ncent = HOD_dict[tracer]['Ncent']
         if verbose:
-            print(
-                'generated %ss:' % tracer,
-                len(HOD_dict[tracer]['x']),
-                'satellite fraction ',
-                1 - Ncent / len(HOD_dict[tracer]['x']),
-                flush=True
-            )
+            if len(HOD_dict[tracer]['x']) != 0:
+                print(
+                    'generated %ss:' % tracer,
+                    len(HOD_dict[tracer]['x']),
+                    'satellite fraction ',
+                    1 - Ncent / len(HOD_dict[tracer]['x']),
+                    flush=True
+                )
+            else:
+                print(
+                    'generated %ss:' % tracer,
+                    len(HOD_dict[tracer]['x']),
+                    'satellite fraction N/A',
+                    flush=True
+                )      
 
         if write_to_disk:
             if verbose:

@@ -1774,11 +1774,12 @@ def gen_gals(
         # )
         if verbose:
             print(tracer, 'number of galaxies ', len(tracer_dict['x']), flush=True)
-            print(
-                'satellite fraction ',
-                len(HOD_dict_sat[tracer]['x']) / len(tracer_dict['x']),
-                flush=True
-            )
+            if len(tracer_dict['x']) != 0:
+                print(
+                    'satellite fraction ',
+                    len(HOD_dict_sat[tracer]['x']) / len(tracer_dict['x']),
+                    flush=True
+                )
         HOD_dict[tracer] = tracer_dict
     if verbose:
         print('organizing outputs took ', time.time() - start, flush=True)

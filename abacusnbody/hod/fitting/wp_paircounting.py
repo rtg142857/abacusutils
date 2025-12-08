@@ -313,7 +313,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     vprint("Getting xi", verbose)
     xi = np.divide(GG, wp_rands) - 1
     vprint("Xi: "+str(xi), verbose)
-    vprint("Getting wp")
+    vprint("Getting wp", verbose)
     wp = xi_to_wps(xi,rpbins,pimax)
     vprint("WP:, "+str(wp), verbose)
     return wp

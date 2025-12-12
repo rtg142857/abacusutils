@@ -482,6 +482,7 @@ def gen_cent(
 def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     """
     --- Aiding function for NFW computation, generate random points in a sphere
+    seed should be an integer
     """
     # if verbose:
     #     with numba.objmode(): print("Setting number of threads", flush=True)
@@ -506,14 +507,18 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     #     with numba.objmode(): print("Getting the points", flush=True)
     if nPoints > 0:
         for tid in numba.prange(ind):
+            # if seed is not None:
+            #     # if verbose:
+            #     #     with numba.objmode(): print("Seeding", flush=True)
+            #     np.random.seed(seed[tid])
             if seed is not None:
-                # if verbose:
-                #     with numba.objmode(): print("Seeding", flush=True)
-                np.random.seed(seed[tid])
+                rng = np.random.default_rng([seed, tid])
+            else:
+                rng = np.random.default_rng()
             for i in range(hstart[tid], hstart[tid + 1]):
                 # if verbose:
                 #     with numba.objmode(): print("Getting point on sphere for point",i,flush=True)
-                u1, u2 = np.random.uniform(0, 1), np.random.uniform(0, 1)
+                u1, u2 = rng.uniform(0, 1), rng.uniform(0, 1)
                 ra = 0 + u1 * (2 * np.pi - 0)
                 dec = np.pi - (np.arccos(cmin + u2 * (cmax - cmin)))
 
@@ -546,6 +551,7 @@ def compute_fast_NFW(
     exp_frac=0,
     exp_scale=1,
     nfw_rescale=1,
+    seed=None
 ):
     """
     --- Compute NFW positions and velocities for satellite galaxies
@@ -575,17 +581,21 @@ def compute_fast_NFW(
     # starting index of each thread
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))
     for tid in numba.prange(Nthread):
+        if seed is not None:
+            rng = np.random.default_rng([seed, tid])
+        else:
+            rng = np.random.default_rng()
         for i in range(int(hstart[tid]), int(hstart[tid + 1])):
             ind = i % len(NFW_draw)
             # while (NFW_draw[ind] > c[i]):
             #    ind = np.random.randint(0, len(NFW_draw))
             # etaVir = NFW_draw[ind]/c[i]  # =r/rvir
-            if np.random.uniform(0, 1) < exp_frac:
-                tt = np.random.exponential(exp_scale, size=1)[0]
+            if rng.uniform(0, 1) < exp_frac:
+                tt = rng.exponential(exp_scale, size=1)[0]
                 etaVir = tt / c[i]
             else:
                 while NFW_draw[ind] > c[i]:
-                    ind = np.random.randint(low=0, high=len(NFW_draw))
+                    ind = rng.integers(low=0, high=len(NFW_draw))
                 etaVir = NFW_draw[ind] / c[i] * nfw_rescale
 
             p = etaVir * Rvir[i]
@@ -594,9 +604,9 @@ def compute_fast_NFW(
             z_sat[i] = (z_h[i] + rd_pos[i, 2] * p) % Lbox
             if vel_sat == 'rd_normal':
                 sig = vrms_h[i] * 0.577 * f_sigv
-                vx_sat[i] = np.random.normal(loc=vx_h[i], scale=sig)
-                vy_sat[i] = np.random.normal(loc=vy_h[i], scale=sig)
-                vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
+                vx_sat[i] = rng.normal(loc=vx_h[i], scale=sig)
+                vy_sat[i] = rng.normal(loc=vy_h[i], scale=sig)
+                vz_sat[i] = rng.normal(loc=vz_h[i], scale=sig)
             else:
                 raise ValueError('Wrong vel_sat argument only "rd_normal"')
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
@@ -630,7 +640,8 @@ def gen_sats_nfw(
     hmultis=None,
     Nthread=16,
     verbose=False,
-    want_hrvir=False
+    want_hrvir=False,
+    seed=None
 ):
     """
     Generate satellite galaxies on an NFW profile, with option for an extended profile. See Rocher et al. 2023.
@@ -727,6 +738,7 @@ def gen_sats_nfw(
     # if verbose:
     #     with numba.objmode(): print("Setting number of threads", flush=True)
     numba.set_num_threads(Nthread)
+    rng = np.random.default_rng(seed=seed)
 
     # compute nsate for each halo
     # figuring out the number of particles kept for each thread
@@ -759,7 +771,7 @@ def gen_sats_nfw(
                         )
                         * ic_L
                     )
-                    num_sats_L[i] = np.random.poisson(base_p_L)
+                    num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
                     M1_E_temp = 10 ** (
                         logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
@@ -802,7 +814,7 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
-                    num_sats_E[i] = np.random.poisson(base_p_E)
+                    num_sats_E[i] = rng.poisson(base_p_E)
 
                 if want_QSO:
                     M1_Q_temp = 10 ** (logM1_Q + As_Q * hdeltac[i] + Bs_Q * hfenv[i])
@@ -813,22 +825,27 @@ def gen_sats_nfw(
                         )
                         * ic_Q
                     )
-                    num_sats_Q[i] = np.random.poisson(base_p_Q)
+                    num_sats_Q[i] = rng.poisson(base_p_Q)
 
     # if verbose:
     #     with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)
     # generate rdpos
-    seed = np.arange(128)
-    rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=seed, verbose=verbose)
+    sphere_seed = seed
+    rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=sphere_seed, verbose=verbose)
     #temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
     #np.save(temp_stuff + "rd_pos_L.npy", rd_pos_L)
     #np.save(temp_stuff + "hrvir.npy", hrvir)
-    rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, seed=seed, verbose=verbose)
-    rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, seed=seed, verbose=verbose)
+    if sphere_seed is not None:
+        sphere_seed += 1
+    rd_pos_E = getPointsOnSphere(np.sum(num_sats_E), Nthread, seed=sphere_seed, verbose=verbose)
+    if sphere_seed is not None:
+        sphere_seed += 1
+    rd_pos_Q = getPointsOnSphere(np.sum(num_sats_Q), Nthread, seed=sphere_seed, verbose=verbose)
 
     # if verbose:
     #     with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)
     # put satellites on NFW
+    nfw_seed = seed
     h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L, h_hrvir_L = (
         compute_fast_NFW(
             NFW_draw,
@@ -852,8 +869,11 @@ def gen_sats_nfw(
             #exp_frac,
             #exp_scale,
             #nfw_rescale,
+            seed=nfw_seed
         )
     )
+    if nfw_seed is not None:
+        nfw_seed += 1
     # if verbose:
     #     with numba.objmode(): print("Putting ELG satellites on NFW profile", flush=True)
     h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E, h_hrvir_E = (
@@ -879,8 +899,11 @@ def gen_sats_nfw(
             exp_frac,
             exp_scale,
             nfw_rescale,
+            seed=nfw_seed
         )
     )
+    if nfw_seed is not None:
+        nfw_seed += 1
     # if verbose:
     #     with numba.objmode(): print("Putting QSO satellites on NFW profile", flush=True)
     h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q, h_hrvir_Q = (
@@ -906,6 +929,7 @@ def gen_sats_nfw(
             #exp_frac,
             #exp_scale,
             #nfw_rescale,
+            seed=nfw_seed
         )
     )
     # if verbose:
@@ -1457,7 +1481,8 @@ def gen_gals(
     verbose,
     nfw,
     NFW_draw=None,
-    tabulation_mock=False
+    tabulation_mock=False,
+    seed=None
 ):
     """
     parse hod parameters, pass them on to central and satellite generators
@@ -1486,6 +1511,9 @@ def gen_gals(
 
     ``tabulation_mock``: bool
         Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
+
+    seed : int, optional
+        Seed for RNG
 
     """
 
@@ -1712,7 +1740,8 @@ def gen_gals(
             hmultis=halos_array["hmultis"],
             verbose=verbose,
             tabulation_mock=tabulation_mock,
-            want_hrvir=True
+            want_hrvir=True,
+            seed=seed
         )
     else:
         LRG_dict_sat, ELG_dict_sat, QSO_dict_sat, ID_dict_sat = gen_sats(
@@ -1800,7 +1829,8 @@ def gen_gal_cat(
     savedir='./',
     verbose=False,
     fn_ext=None,
-    tabulation_mock=False
+    tabulation_mock=False,
+    seed=None
 ):
     """
     pass on inputs to the gen_gals function and takes care of I/O
@@ -1844,6 +1874,9 @@ def gen_gal_cat(
     ``tabulation_mock``: bool
         Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
 
+    seed: int, optional
+        Seed for RNG
+
     Output
     ------
 
@@ -1868,7 +1901,8 @@ def gen_gal_cat(
         verbose,
         nfw,
         NFW_draw,
-        tabulation_mock=tabulation_mock
+        tabulation_mock=tabulation_mock,
+        seed=seed
     )
 
     # how many galaxies were generated and write them to disk

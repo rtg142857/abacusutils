@@ -711,7 +711,8 @@ class FlamingoHOD:
         Nthread=16,
         verbose=False,
         fn_ext=None,
-        tabulation_mock=False
+        tabulation_mock=False,
+        seed=None
     ):
         """
         Runs a custom HOD.
@@ -737,7 +738,7 @@ class FlamingoHOD:
             Only needed if ``want_nfw == True``.
 
         ``reseed``: int
-            re-generate random numbers? supply random number seed. This overwrites the pre-generated random numbers, at a performance cost.
+            re-generate random numbers for centrals? supply random number seed. This overwrites the pre-generated random numbers, at a performance cost.
             Default ``None``.
 
         ``write_to_disk``: bool
@@ -754,6 +755,9 @@ class FlamingoHOD:
 
         ``tabulation_mock``: bool
             Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
+
+        ``seed``: int
+            Seed for randomness in satellites
 
         Returns
         -------
@@ -859,7 +863,8 @@ class FlamingoHOD:
             savedir=self.mock_dir,
             verbose=verbose,
             fn_ext=fn_ext,
-            tabulation_mock=tabulation_mock
+            tabulation_mock=tabulation_mock,
+            seed=seed
         )
         self.logger.info(f'HOD generated in elapsed time {time.time() - start:.2f} s.')
 

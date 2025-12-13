@@ -512,7 +512,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
             #     #     with numba.objmode(): print("Seeding", flush=True)
             #     np.random.seed(seed[tid])
             if seed is not None:
-                np.random.seed([seed, tid]) # can't use random generators inside numba multithreading AFAIK
+                np.random.seed(seed=seed + tid) # can't use random generators inside numba multithreading AFAIK
             for i in range(hstart[tid], hstart[tid + 1]):
                 # if verbose:
                 #     with numba.objmode(): print("Getting point on sphere for point",i,flush=True)
@@ -580,7 +580,7 @@ def compute_fast_NFW(
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))
     for tid in numba.prange(Nthread):
         if seed is not None:
-            np.random.seed([seed, tid]) # can't use random generators inside numba multithreading AFAIK
+            np.random.seed(seed=seed + tid) # can't use random generators inside numba multithreading AFAIK
         for i in range(int(hstart[tid]), int(hstart[tid + 1])):
             ind = i % len(NFW_draw)
             # while (NFW_draw[ind] > c[i]):

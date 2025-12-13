@@ -512,13 +512,11 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
             #     #     with numba.objmode(): print("Seeding", flush=True)
             #     np.random.seed(seed[tid])
             if seed is not None:
-                rng = np.random.default_rng([seed, tid])
-            else:
-                rng = np.random.default_rng()
+                np.random.seed([seed, tid]) # can't use random generators inside numba multithreading AFAIK
             for i in range(hstart[tid], hstart[tid + 1]):
                 # if verbose:
                 #     with numba.objmode(): print("Getting point on sphere for point",i,flush=True)
-                u1, u2 = rng.uniform(0, 1), rng.uniform(0, 1)
+                u1, u2 = np.random.uniform(0, 1), np.random.uniform(0, 1)
                 ra = 0 + u1 * (2 * np.pi - 0)
                 dec = np.pi - (np.arccos(cmin + u2 * (cmax - cmin)))
 
@@ -582,20 +580,18 @@ def compute_fast_NFW(
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))
     for tid in numba.prange(Nthread):
         if seed is not None:
-            rng = np.random.default_rng([seed, tid])
-        else:
-            rng = np.random.default_rng()
+            np.random.seed([seed, tid]) # can't use random generators inside numba multithreading AFAIK
         for i in range(int(hstart[tid]), int(hstart[tid + 1])):
             ind = i % len(NFW_draw)
             # while (NFW_draw[ind] > c[i]):
             #    ind = np.random.randint(0, len(NFW_draw))
             # etaVir = NFW_draw[ind]/c[i]  # =r/rvir
-            if rng.uniform(0, 1) < exp_frac:
-                tt = rng.exponential(exp_scale, size=1)[0]
+            if np.random.uniform(0, 1) < exp_frac:
+                tt = np.random.exponential(exp_scale, size=1)[0]
                 etaVir = tt / c[i]
             else:
                 while NFW_draw[ind] > c[i]:
-                    ind = rng.integers(low=0, high=len(NFW_draw))
+                    ind = np.random.randint(low=0, high=len(NFW_draw))
                 etaVir = NFW_draw[ind] / c[i] * nfw_rescale
 
             p = etaVir * Rvir[i]
@@ -604,9 +600,9 @@ def compute_fast_NFW(
             z_sat[i] = (z_h[i] + rd_pos[i, 2] * p) % Lbox
             if vel_sat == 'rd_normal':
                 sig = vrms_h[i] * 0.577 * f_sigv
-                vx_sat[i] = rng.normal(loc=vx_h[i], scale=sig)
-                vy_sat[i] = rng.normal(loc=vy_h[i], scale=sig)
-                vz_sat[i] = rng.normal(loc=vz_h[i], scale=sig)
+                vx_sat[i] = np.random.normal(loc=vx_h[i], scale=sig)
+                vy_sat[i] = np.random.normal(loc=vy_h[i], scale=sig)
+                vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
             else:
                 raise ValueError('Wrong vel_sat argument only "rd_normal"')
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir

@@ -23,6 +23,7 @@ from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
 from abacusnbody.hod.fitting.setup_paircounting_fitting import *
 from abacusnbody.hod.fitting.wp_paircounting import get_wp_given_tracer
+import abacusnbody.hod.fitting.wp_paircounting as wp_paircounting
 import abacusnbody.hod.fitting.paircounting as paircounting
 
 
@@ -106,34 +107,74 @@ def main(path_config_filename):
     # TODO: Find the "crosscorr" of the LRGs with the LRGs using these paircounts
     #if not pair_wp_exists:
 
-    # print("Loading paircounts from the tabulation mock", flush=True)###############################################
-    # paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
-    # paircounts = {}
-    # for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
-    #     for pair_type in ["", "_ELGauto", "_ELGcross"]:
-    #         filename = paircount_path + pair + pair_type + ".npy"
-    #         paircounts[pair+pair_type] = np.load(filename)
-    # other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    print("Loading paircounts from the tabulation mock", flush=True)###############################################
+    paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
+    paircounts = {}
+    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
+        for pair_type in ["", "_ELGauto", "_ELGcross"]:
+            filename = paircount_path + pair + pair_type + ".npy"
+            paircounts[pair+pair_type] = np.load(filename)
+    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
-    # npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
-    # print("LRG npart:", npart["LRG"])
-    # print("ELG npart:", npart["ELG"])
-    # print("QSO npart:", npart["QSO"])
-    # # wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
-    # # wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
-    # wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
+
+    num_mass_bins_big = other_stuff_dict_here["num_mass_bins_big"]
+    mass_bin_centres_big = other_stuff_dict_here["mass_bin_centres_big"]
+    mass_bin_edges = other_stuff_dict_here["mass_bin_edges"]
+    hmf_big = other_stuff_dict_here["hmf_big"]
+    hod_cen1, hod_sat1 = wp_paircounting.get_accurate_tracer_HOD(HOD_params_list, "LRG", mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+    hod_cen2, hod_sat2 = hod_cen1, hod_sat1
+
+    ccp = paircounts["cencen_ELGcross"]
+    csp = paircounts["censat_ELGcross"]
+    ssp = paircounts["satsat_ELGcross"]
+    ss1p = paircounts["satsat_onehalo_ELGcross"]
+    num_sat_parts = 3
+    CC = wp_paircounting.create_weighting_factor(ccp,hod_cen1,hod_cen2)
+    CS = wp_paircounting.create_weighting_factor(csp,hod_cen1,hod_sat2) / num_sat_parts
+    SS = wp_paircounting.create_weighting_factor(ssp,hod_sat1,hod_sat2) / (num_sat_parts**2) 
+    SS1 = wp_paircounting.create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
+    
+    GG = CC + CS + SS + SS1
+
+    r_bin_edges = np.logspace(bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1)
+    pi_max = clustering_params['pimax']
+    # getting randoms
+    RR_out = np.zeros((len(r_bin_edges)-1)*pi_max)
+    for p in range(pi_max):
+        # do volume calculations
+        v = 2*np.pi*r_bin_edges**2 # Volume of cylinders
+        dv = np.diff(v)  # difference between r volumes
+        global_volume = boxsize**3  # volume of simulation
+        # calculate the random-random pairs using density * volume
+        # crosscorr style
+        rhor = (npart["LRG"]*npart["LRG"]) /global_volume
+        RR = (dv*rhor)
+        #print(RR)
+        RR_out[p::pi_max] = RR
+    #vprint(f"Sum of RR for {tracer1}, {tracer2}:", np.sum(RR_out), verbose)
+    RR_out
+
+    wp_rands = np.reshape(RR_out,newshape=(len(rpbins)-1,pimax))
+
+    xi = np.divide(GG, wp_rands) - 1
+    wp_pair = wp_paircounting.xi_to_wps(xi,rpbins,pimax)
 
     # wp_mock_ELGELG = []
     # for i in range(10):
-    #     print(f"Getting true mock {i} to compare wp against", flush=True)#############################################################
-    #     mock_dict = newBall.run_hod(
-    #         newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=32, verbose=True, tabulation_mock=False,
-    #         reseed=i, seed=i
-    #     )
-    #     # np.save(temp_stuff + "internal_hmf.npy", newBall.halo_mass_func)
-    #     # print("Calculating number of galaxies from the in-built function now", flush=True)
-    #     # ngal_dict = newBall.compute_ngal(Nthread=1)
-    #     # print("Number of LRGs according to compute_ngal:", ngal_dict)
+    print(f"Getting true mock to compare wp against", flush=True)#############################################################
+    mock_dict = newBall.run_hod(
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=32, verbose=True, tabulation_mock=False
+    )
+    print("Getting wp from the true mock", flush=True)#############################################################
+    wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+    # wp_mock = wp_dict["LRG_ELG"]
+    wp_mock_LRGLRG = wp_dict["LRG_LRG"]
+
+    # np.save(temp_stuff + "internal_hmf.npy", newBall.halo_mass_func)
+    # print("Calculating number of galaxies from the in-built function now", flush=True)
+    # ngal_dict = newBall.compute_ngal(Nthread=1)
+    # print("Number of LRGs according to compute_ngal:", ngal_dict)
 
     #     print("Getting wp from the true mock", flush=True)#############################################################
     #     wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
@@ -143,17 +184,16 @@ def main(path_config_filename):
     #     wp_mock_ELGELG.append(wp_dict["ELG_ELG"])
 
 
-    # print("Plotting", flush=True)###########################################################################
+    print("Plotting", flush=True)###########################################################################
 
-    # rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
+    rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    # for i in range(10):
-    #     plt.loglog(rpcent, wp_mock_ELGELG[i], label=f"True ELGa {i}")
-    # plt.legend()
-    # plt.title("wp(rp)")
-    # plt.savefig("fig_wprp")
-    # plt.show()
+    plt.loglog(rpcent, wp_pair, label="Pair LRGa via xcorr")
+    plt.loglog(rpcent, wp_mock_LRGLRG, label=f"True LRGa {i}")
+    plt.legend()
+    plt.title("wp(rp)")
+    plt.savefig("fig_wprp")
+    plt.show()
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

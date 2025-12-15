@@ -189,7 +189,7 @@ def main(path_config_filename):
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
     plt.loglog(rpcent, wp_pair, label="Pair LRGa via xcorr")
-    plt.loglog(rpcent, wp_mock_LRGLRG, label=f"True LRGa {i}")
+    plt.loglog(rpcent, wp_mock_LRGLRG, label=f"True LRGa")
     plt.legend()
     plt.title("wp(rp)")
     plt.savefig("fig_wprp")

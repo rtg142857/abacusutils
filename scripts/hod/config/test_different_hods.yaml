@@ -46,11 +46,16 @@ HOD_params:
 
     # parameters for setting up the HOD of LRGs
     LRG_params:
-        logM_cut: 12.8 # 13.0 #13.3
-        logM1: 14.0 # 14.24 # 14.4
-        sigma: 0.1 # 0.25 #0.6 # 0.6 # 0.8
-        alpha: 0.78 # 0.4 # 1.0
-        kappa: 0.63 # 0.98 # 0.4
+        logM_cut: 12.21 # QSO values
+        kappa: 1.0
+        sigma: 0.56
+        logM1: 13.94
+        alpha: 0.4
+        # logM_cut: 12.8 # 13.0 #13.3
+        # logM1: 14.0 # 14.24 # 14.4
+        # sigma: 0.1 # 0.25 #0.6 # 0.6 # 0.8
+        # alpha: 0.78 # 0.4 # 1.0
+        # kappa: 0.63 # 0.98 # 0.4
         alpha_c: 0
         alpha_s: 1
         s: 0
@@ -61,7 +66,7 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
-        ic: 1.0
+        ic: 0.3
 
     # parameters for setting up the HOD of ELGs
     ELG_params:
@@ -88,7 +93,7 @@ HOD_params:
         exp_scale: 9.0
         nfw_rescale: 0.6
         f_sigv: 1.5
-        ic: 1.0
+        ic: 0.4
 
     # parameters for setting up the HOD of QSOs
     QSO_params:
@@ -109,7 +114,7 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
-        ic: 1.0
+        ic: 0.3
 
 # clustering parameters
 clustering_params:

@@ -61,7 +61,7 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
-        ic: 0.3
+        ic: 0.2
 
     # parameters for setting up the HOD of ELGs
     ELG_params:
@@ -88,7 +88,7 @@ HOD_params:
         exp_scale: 9.0
         nfw_rescale: 0.6
         f_sigv: 1.5
-        ic: 0.4
+        ic: 0.8
 
     # parameters for setting up the HOD of QSOs
     QSO_params:
@@ -109,7 +109,7 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
-        ic: 0.3
+        ic: 0.0
 
 # clustering parameters
 clustering_params:

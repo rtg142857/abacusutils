@@ -22,6 +22,7 @@ import h5py
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
 from abacusnbody.hod.fitting.setup_paircounting_fitting import *
+from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import plot_HODs
 from abacusnbody.hod.fitting.wp_paircounting import get_wp_given_tracer
 import abacusnbody.hod.fitting.paircounting as paircounting
 
@@ -183,6 +184,9 @@ def main(path_config_filename):
     plt.title("wp(rp)")
     plt.savefig("fig_wprp")
     plt.show()
+
+    print("Plotting HODs...")
+    plot_HODs("HODs.png", np.logspace(10, 16, 90), HOD_params_list, ["LRG", "ELG", "QSO"])
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

@@ -69,7 +69,7 @@ HOD_params:
         Q: 10.
         logM_cut: 12.3
         kappa: 1.
-        sigma: 0.58
+        sigma: 0.78 #0.58
         logM1: 16.53 #13.53
         alpha: 0.9
         gamma: 4.12

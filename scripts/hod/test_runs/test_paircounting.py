@@ -184,6 +184,7 @@ def main(path_config_filename):
     plt.title("wp(rp)")
     plt.savefig("fig_wprp")
     plt.show()
+    plt.clf()
 
     print("Plotting HODs...")
     M_h = np.logspace(10, 16, 90)

@@ -751,7 +751,7 @@ class FlamingoHOD:
             detailed stdout? default ``False``.
 
         ``fn_ext``: str
-            filename extension for saved files. Only relevant when ``write_to_disk = True``.
+            filename extension for saved files. Only relevant when ``write_to_disk = True``. Defaults to "_tabulation" if ``tabulation_mock = True``.
 
         ``tabulation_mock``: bool
             Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
@@ -848,6 +848,8 @@ class FlamingoHOD:
                 f'Randoms generated in elapsed time {time.time() - start:.2f} s.'
             )
 
+        if fn_ext is None and tabulation_mock:
+            fn_ext = "_tabulation"
         start = time.time()
         mock_dict = gen_gal_cat(
             self.halo_data,

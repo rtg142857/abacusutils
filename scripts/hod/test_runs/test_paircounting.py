@@ -147,7 +147,7 @@ def main(path_config_filename):
     if not mock_wp_exists:
         print("Getting true mock to compare wp against", flush=True)#############################################################
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=32, verbose=True, tabulation_mock=False
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False
         )
         np.save(temp_stuff + "internal_hmf.npy", newBall.halo_mass_func)
         print("Calculating number of galaxies from the in-built function now", flush=True)

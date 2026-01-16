@@ -870,7 +870,7 @@ def gen_sats_nfw(
         )
     )
     if nfw_seed is not None:
-        nfw_seed += 1
+        nfw_seed += seed_jump
     # if verbose:
     #     with numba.objmode(): print("Putting ELG satellites on NFW profile", flush=True)
     h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E, h_hrvir_E = (
@@ -900,7 +900,7 @@ def gen_sats_nfw(
         )
     )
     if nfw_seed is not None:
-        nfw_seed += 1
+        nfw_seed += seed_jump
     # if verbose:
     #     with numba.objmode(): print("Putting QSO satellites on NFW profile", flush=True)
     h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q, h_hrvir_Q = (

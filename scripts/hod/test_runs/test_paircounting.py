@@ -185,6 +185,8 @@ def main(path_config_filename):
     plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
     plt.legend()
     plt.title("wp(rp)")
+    plt.xlabel("r (Mpc/h)")
+    plt.ylabel("wp (Mpc/h)")
     plt.savefig("fig_wprp")
     plt.show()
     plt.clf()

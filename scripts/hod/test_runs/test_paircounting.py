@@ -160,7 +160,9 @@ def main(path_config_filename):
         wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         wp_mock_ELGLRG = wp_dict["LRG_ELG"]
         wp_mock_ELGELG = wp_dict["ELG_ELG"]
-        # np.save(temp_stuff + "mock_wp.npy", wp_mock)
+        np.save(temp_stuff + "mock_wp_LL.npy", wp_mock_LRGLRG)
+        np.save(temp_stuff + "mock_wp_LE.npy", wp_mock_ELGLRG)
+        np.save(temp_stuff + "mock_wp_EE.npy", wp_mock_ELGELG)
         # print("Getting xi from the true mock", flush=True)##############################################################
         # xi_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         # xi_mock = xi_dict["LRG_LRG"]

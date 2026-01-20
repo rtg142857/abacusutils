@@ -168,9 +168,10 @@ def main(path_config_filename):
         # xi_mock = xi_dict["LRG_LRG"]
         # np.save(temp_stuff + "mock_xi.npy", xi_mock)
     else:
-        pass
-        # print("mock_wp already saved, skipping")
-        # wp_mock = np.load(temp_stuff + "mock_wp.npy")
+        print("mock_wp already saved, skipping")
+        wp_mock_LRGLRG = np.load(temp_stuff + "mock_wp_LL.npy")
+        wp_mock_ELGLRG = np.load(temp_stuff + "mock_wp_LE.npy")
+        wp_mock_ELGELG = np.load(temp_stuff + "mock_wp_EE.npy")
 
     print("Plotting", flush=True)###########################################################################
 

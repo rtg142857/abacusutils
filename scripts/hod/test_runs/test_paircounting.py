@@ -86,7 +86,7 @@ def main(path_config_filename):
     sim_label = Labels["sim_label"]
 
     temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
-    mock_wp_exists = os.path.isfile(temp_stuff + "mock_wp.npy")
+    mock_wp_exists = os.path.isfile(temp_stuff + "mock_wp_LL.npy") and os.path.isfile(temp_stuff + "mock_wp_LE.npy") and os.path.isfile(temp_stuff + "mock_wp_EE.npy")
     pair_wp_exists = os.path.isfile(temp_stuff + "pair_wp.npy")
 
     # paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/Debugging_fitting/"

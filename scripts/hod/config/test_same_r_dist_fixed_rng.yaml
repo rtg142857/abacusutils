@@ -61,7 +61,7 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
-        ic: 1.0
+        ic: 0.8
 
     # parameters for setting up the HOD of ELGs
     ELG_params:
@@ -109,7 +109,7 @@ HOD_params:
         Asat: 0
         Bcent: 0
         Bsat: 0
-        ic: 0.0
+        ic: 0.2
 
 # clustering parameters
 clustering_params:

@@ -46,8 +46,8 @@ HOD_params:
 
     # parameters for setting up the HOD of LRGs
     LRG_params:
-        logM_cut: 11.8 #12.8 # 13.0 #13.3
-        logM1: 14.0 # 14.0 # 14.24 # 14.4
+        logM_cut: 11.5 #12.8 # 13.0 #13.3
+        logM1: 15.0 #14.0 # 14.0 # 14.24 # 14.4
         sigma: 0.1 # 0.25 #0.6 # 0.6 # 0.8
         alpha: 0.78 #0.78 # 0.4 # 1.0
         kappa: 0.63 #0.63 # 0.98 # 0.4
@@ -67,7 +67,7 @@ HOD_params:
     ELG_params:
         p_max: 0.53
         Q: 10.
-        logM_cut: 11.8 #12.3 #12.3
+        logM_cut: 11.5 #12.3 #12.3
         kappa: 0.63 #1.
         sigma: 0.1 # 0.58
         logM1: 14.0 # 13.53

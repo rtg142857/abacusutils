@@ -59,6 +59,7 @@ def main(path_config_filename):
     Lp = HOD_params["LRG_params"]
     Ep = HOD_params["ELG_params"]
     Qp = HOD_params["QSO_params"]
+    tracer_list = ["LRG", "ELG", "QSO"]
     HOD_params_list = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
                   Ep["p_max"], Ep["Q"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["alpha"], Ep["gamma"],
                   Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"]]
@@ -200,7 +201,6 @@ def main(path_config_filename):
 
     print("Plotting HODs...")
     M_h = np.logspace(10, 16, 90)
-    tracer_list = ["LRG", "ELG", "QSO"]
     hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
     print(hod_values)
     plot_HODs("HODs.png", M_h, hod_values, tracer_list)

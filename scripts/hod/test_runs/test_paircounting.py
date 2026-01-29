@@ -129,9 +129,11 @@ def main(path_config_filename):
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
     npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
+    # Currently satellites only! TODO: Fix in wp_paircounting
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
+    # Currently satellites only! TODO: Fix in wp_paircounting
     wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
@@ -144,7 +146,7 @@ def main(path_config_filename):
         # wp_pair = np.load(temp_stuff + "pair_wp.npy")
 
 
-    if not mock_wp_exists:
+    if True: # not mock_wp_exists:
         print("Getting true mock to compare wp against", flush=True)#############################################################
         mock_dict = newBall.run_hod(
             newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False
@@ -155,6 +157,11 @@ def main(path_config_filename):
         print("Number of LRGs according to compute_ngal:", ngal_dict)
 
         print("Getting wp from the true mock", flush=True)#############################################################
+        # SATELLITES ONLY! TODO: FIX
+        for tracer in tracer_list:
+            Ncent = mock_dict[tracer]["Ncent"]
+            for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
+                mock_dict[tracer][field] = mock_dict[tracer][field][Ncent:]
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         # wp_mock = wp_dict["LRG_ELG"]
         wp_mock_LRGLRG = wp_dict["LRG_LRG"]

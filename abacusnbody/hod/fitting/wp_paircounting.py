@@ -115,7 +115,8 @@ def get_npart_given_tracer(hod_params, tracer, other_stuff_dict_here):
 
     npart_cen = np.sum(hmf_big * hod_cen_big)
     npart_sat = np.sum(hmf_big * hod_sat_big)
-    npart_total = npart_cen + npart_sat
+    # npart_total = npart_cen + npart_sat
+    npart_total = npart_sat # TODO: fix
     return npart_total
 
 def get_npart(hod_params: np.ndarray, tracer_list: list, other_stuff_dict_here: dict) -> dict:
@@ -222,7 +223,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
     vprint("Sum of SS after HOD integration: "+str(np.sum(SS)), verbose)
     vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
 
-    GG = CC + CS + SS + SS1
+    #GG = CC + CS + SS + SS1
+    GG = SS + SS1 #SATELLITES ONLY! TODO: FIX
     vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
 
     return CC + CS + SS + SS1

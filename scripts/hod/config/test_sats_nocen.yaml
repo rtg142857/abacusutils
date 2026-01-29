@@ -16,7 +16,7 @@ Paths:
   ics_path: '/cosma8/data/dp004/flamingo/InitialConditions/L1000N3600/DMO_FIDUCIAL/gen.conf'
 
 Labels:
-  sim_label: "Debugging_sats_withcen" # just for labelling output files
+  sim_label: "Debugging_sats_nocen" # just for labelling output files
 
 Params:
   N: 3600

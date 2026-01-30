@@ -139,6 +139,8 @@ def main(path_config_filename):
     wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
 
+    print("LL pair-mock wp:")
+    print(repr(wp_pair_LRGLRG))
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)
     #else:
@@ -168,9 +170,11 @@ def main(path_config_filename):
         wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         wp_mock_ELGLRG = wp_dict["LRG_ELG"]
         wp_mock_ELGELG = wp_dict["ELG_ELG"]
-        np.save(temp_stuff + "mock_wp_LL.npy", wp_mock_LRGLRG)
-        np.save(temp_stuff + "mock_wp_LE.npy", wp_mock_ELGLRG)
-        np.save(temp_stuff + "mock_wp_EE.npy", wp_mock_ELGELG)
+        np.save(temp_stuff + sim_label + "mock_wp_LL.npy", wp_mock_LRGLRG)
+        print("LL true-mock wp:")
+        print(repr(wp_mock_LRGLRG))
+        #np.save(temp_stuff + "mock_wp_LE.npy", wp_mock_ELGLRG)
+        #np.save(temp_stuff + "mock_wp_EE.npy", wp_mock_ELGELG)
         # print("Getting xi from the true mock", flush=True)##############################################################
         # xi_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         # xi_mock = xi_dict["LRG_LRG"]

@@ -113,7 +113,7 @@ def main(path_config_filename):
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True, seed=seed
         )
         print("Paircounting...")
         paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=32, save=True, verbose=True)
@@ -152,7 +152,7 @@ def main(path_config_filename):
     if True: # not mock_wp_exists:
         print("Getting true mock to compare wp against", flush=True)#############################################################
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False, seed=seed
         )
         np.save(temp_stuff + "internal_hmf.npy", newBall.halo_mass_func)
         print("Calculating number of galaxies from the in-built function now", flush=True)
@@ -164,8 +164,7 @@ def main(path_config_filename):
         for tracer in tracer_list:
             Ncent = mock_dict[tracer]["Ncent"]
             for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
-                mock_dict[tracer][field] = mock_dict[tracer][field][Ncent:]
-        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+                wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         # wp_mock = wp_dict["LRG_ELG"]
         wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         wp_mock_ELGLRG = wp_dict["LRG_ELG"]

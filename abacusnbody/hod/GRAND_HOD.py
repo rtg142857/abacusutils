@@ -827,7 +827,7 @@ def gen_sats_nfw(
     #     with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)
     # generate rdpos
     sphere_seed = seed
-    seed_jump = np.floor((2 ** 32 - 1) / 1.618)
+    seed_jump = int(np.floor((2 ** 32 - 1) / 1.618))
     rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=sphere_seed, verbose=verbose)
     #temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
     #np.save(temp_stuff + "rd_pos_L.npy", rd_pos_L)

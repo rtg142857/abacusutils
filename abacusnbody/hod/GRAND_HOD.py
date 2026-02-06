@@ -608,7 +608,7 @@ def compute_fast_NFW(
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
 
 
-@njit(fastmath=True, parallel=True)
+#@njit(fastmath=True, parallel=True)
 def gen_sats_nfw(
     NFW_draw,
     hpos,

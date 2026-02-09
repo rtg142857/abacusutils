@@ -164,7 +164,8 @@ def main(path_config_filename):
         for tracer in tracer_list:
             Ncent = mock_dict[tracer]["Ncent"]
             for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
-                wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+                mock_dict[tracer][field] = mock_dict[tracer][field][Ncent:]
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         # wp_mock = wp_dict["LRG_ELG"]
         wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         wp_mock_ELGLRG = wp_dict["LRG_ELG"]

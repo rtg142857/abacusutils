@@ -156,9 +156,10 @@ def main(path_config_filename):
         print("Number of LRGs according to compute_ngal:", ngal_dict)
 
         print("Getting wp from the true mock", flush=True)#############################################################
+        mock_dict_sat = {}
         for tracer in tracer_list:
             Ncent = mock_dict[tracer]["Ncent"]
-            mock_dict_sat = {}
+            mock_dict_sat[tracer] = {}
             for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
                 mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)

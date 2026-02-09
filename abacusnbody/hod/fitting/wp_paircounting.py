@@ -227,7 +227,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
     GG = SS + SS1 #SATELLITES ONLY! TODO: FIX
     vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
 
-    return CC + CS + SS + SS1
+    return GG
 
 
 

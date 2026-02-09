@@ -68,6 +68,7 @@ def main(path_config_filename):
     Params = config["Params"]
     Misc = config["Misc"]
     seed = Misc["random_seed"]
+    tracer_list = ["LRG", "ELG", "QSO"]
 
     # additional parameter choices
     want_rsd = HOD_params['want_rsd']
@@ -112,7 +113,7 @@ def main(path_config_filename):
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True, seed=seed
         )
         print("Paircounting...")
         paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=32, save=True, verbose=True)
@@ -147,7 +148,7 @@ def main(path_config_filename):
     if not mock_wp_exists:
         print("Getting true mock to compare wp against", flush=True)#############################################################
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False, seed=seed
         )
         np.save(temp_stuff + "internal_hmf.npy", newBall.halo_mass_func)
         print("Calculating number of galaxies from the in-built function now", flush=True)
@@ -202,7 +203,6 @@ def main(path_config_filename):
 
     print("Plotting HODs...")
     M_h = np.logspace(10, 16, 90)
-    tracer_list = ["LRG", "ELG", "QSO"]
     hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
     print(hod_values)
     plot_HODs("HODs.png", M_h, hod_values, tracer_list)

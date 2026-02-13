@@ -6,6 +6,7 @@ from pathlib import Path
 import os
 from Corrfunc.theory.DDrppi import DDrppi
 
+
 def split_cen_sat(mock_galaxies: dict):
     """
     Splits a given mock into central and satellite galaxies.
@@ -279,9 +280,13 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         print("Splitting took",time1-time0, "seconds")
 
     if verbose:
-        print("Doing the paircounting...", flush=True)
+        print("Doing the paircounting for type", type, flush=True)
     match type:
         case "cencen":
+            if verbose:
+                print("Initial samples:")
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                    print(a)
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges)
             num_threads = Nthread
@@ -290,8 +295,16 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
         case "censat":
             # Only want one sat particle per halo
+            if verbose:
+                print("Initial samples:")
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                    print(a)
             for i in [x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
                 i = i[::num_sat_parts]
+            if verbose:
+                print("Samples after cutting:")
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                    print(a)
 
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)
@@ -314,19 +327,19 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
                 npairs_mass_r_bins_test_cross = npairs_conversion_wp(samples_1,samples_2,npairs_test_cross,rpbins,pi_max, d_pi)
 
                 npairs_mass_r_bins_test += npairs_mass_r_bins_test_cross
-                
-        # case "satcen":
-        #     samples_1 = mass_mask(x_sat2, y_sat2, z_sat2, M_sat2, mass_bin_edges)
-        #     samples_2 = mass_mask(x_cen1, y_cen1, z_cen1, M_cen1, mass_bin_edges)
 
-        #     num_threads = 1
-
-        #     npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
-        #     npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
         case "satsat":
             # Only want one sat particle per halo
+            if verbose:
+                print("Initial samples:")
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                    print(a)
             for i in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
                 i = i[::num_sat_parts]
+            if verbose:
+                print("Samples after cutting:")
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                    print(a)
 
             samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)
@@ -351,7 +364,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
     return npairs_mass_r_bins_test
 
-def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=False, verbose=False):
+def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=True, verbose=False):
     """
     Returns a dict of paircounts, binned by M1, M2, and rp
     where M1 is the mass of the first halo and M2 is the mass of the second
@@ -384,29 +397,6 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=Fals
     config = yaml.safe_load(open(path_config_filename))
 
     paircounts = {}
-
-    # for i in range(len(tracer_list)):
-    #     for j in range(i):
-    #         if verbose:
-    #             print(f"Paircounting tracer {tracer_1} against {tracer_2}")
-    #         tracer_1 = tracer_list[i]
-    #         tracer_2 = tracer_list[j]
-            
-    #         label = f"{tracer_1}_{tracer_2}"
-    #         paircounts[label] = {}
-
-    #         if tracer_1 == tracer_2:
-    #             pair_type = "autocorr"
-    #             pairs_list = ["cencen", "censat", "satsat", "satsat_onehalo"]
-    #         else:
-    #             pair_type = "crosscorr"
-    #             pairs_list = ["cencen", "censat", "satcen", "satsat", "satsat_onehalo"]
-
-    #         for pair in pairs_list:
-    #             if verbose:
-    #                 print(f"Paircounting {pair}")
-    #             paircounts[label][pair] = count_npairs(path_config_filename=path_config_filename, tracer_mock=tracer_mock, type=pair, tracer1=tracer_1, tracer2=tracer_2, save=save, verbose=verbose)
-
 
     pairs_list = ["cencen", "censat", "satsat", "satsat_onehalo"]
     category_list = ["", "_ELGauto", "_ELGcross"]

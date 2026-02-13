@@ -286,10 +286,10 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         print("Doing the paircounting for type", type, flush=True)
     match type:
         case "cencen":
-            if verbose:
-                print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2):")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
-                    print(a)
+            # if verbose:
+            #     print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2):")
+            #     for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+            #         print(a)
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges)
             num_threads = Nthread
@@ -298,18 +298,18 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
         case "censat":
             # Only want one sat particle per halo
-            if verbose:
-                print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2):")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
-                    print(a)
+            # if verbose:
+            #     print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2):")
+            #     for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
+            #         print(a)
 
             x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
             # for i in [x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
             #     i = i[::num_sat_parts]
-            if verbose:
-                print("Samples after cutting:")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
-                    print(a)
+            # if verbose:
+            #     print("Samples after cutting:")
+            #     for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
+            #         print(a)
 
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)
@@ -335,10 +335,10 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
         case "satsat":
             # Only want one sat particle per halo
-            if verbose:
-                print("Initial samples (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2):")
-                for a in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2, mass_bin_edges]:
-                    print(a)
+            # if verbose:
+            #     print("Initial samples (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2):")
+            #     for a in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2, mass_bin_edges]:
+            #         print(a)
             if verbose:
                 print("len(x_sat1) before cutting:", len(x_sat1))
             x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
@@ -346,10 +346,10 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             #     i = i[::num_sat_parts]
             if verbose:
                 print("len(x_sat1) after cutting:", len(x_sat1))
-            if verbose:
-                print("Samples after cutting:")
-                for a in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2, mass_bin_edges]:
-                    print(a)
+            # if verbose:
+            #     print("Samples after cutting:")
+            #     for a in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2, mass_bin_edges]:
+            #         print(a)
 
             samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)

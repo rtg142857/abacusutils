@@ -287,7 +287,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
     match type:
         case "cencen":
             if verbose:
-                print("Initial samples:")
+                print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2):")
                 for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
                     print(a)
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
@@ -299,14 +299,14 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         case "censat":
             # Only want one sat particle per halo
             if verbose:
-                print("Initial samples:")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2):")
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
                     print(a)
             for i in [x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
                 i = i[::num_sat_parts]
             if verbose:
                 print("Samples after cutting:")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
                     print(a)
 
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
@@ -334,14 +334,14 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         case "satsat":
             # Only want one sat particle per halo
             if verbose:
-                print("Initial samples:")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                print("Initial samples (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2):")
+                for a in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2, mass_bin_edges]:
                     print(a)
             for i in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
                 i = i[::num_sat_parts]
             if verbose:
                 print("Samples after cutting:")
-                for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges]:
+                for a in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2, mass_bin_edges]:
                     print(a)
 
             samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)

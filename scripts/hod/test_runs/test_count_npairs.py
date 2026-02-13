@@ -20,7 +20,7 @@ def main():
     sat_22 = [10.0, 0.9, 1.0, 0.0, 0.0, 0.0, 3, 1.0, 10**13]
     sat_23 = [10.05, 1.0, 1.1, 0.0, 0.0, 0.0, 3, 1.0, 10**13]
 
-    tracers = zip(cen1, cen2, sat_11, sat_12, sat_13, sat_21, sat_22, sat_23)
+    tracers = list(zip(cen1, cen2, sat_11, sat_12, sat_13, sat_21, sat_22, sat_23))
     for i, field in enumerate(fields):
         tracer_mock["LRG"][field] = np.array(tracers[i])
     tracer_mock["LRG"]["Ncent"] = 2

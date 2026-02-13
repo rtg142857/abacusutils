@@ -302,8 +302,10 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
                 print("Initial samples (x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2):")
                 for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
                     print(a)
-            for i in [x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
-                i = i[::num_sat_parts]
+
+            x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
+            # for i in [x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
+            #     i = i[::num_sat_parts]
             if verbose:
                 print("Samples after cutting:")
                 for a in [x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges]:
@@ -339,8 +341,9 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
                     print(a)
             if verbose:
                 print("len(x_sat1) before cutting:", len(x_sat1))
-            for i in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
-                i = i[::num_sat_parts]
+            x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
+            # for i in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2]:
+            #     i = i[::num_sat_parts]
             if verbose:
                 print("len(x_sat1) after cutting:", len(x_sat1))
             if verbose:

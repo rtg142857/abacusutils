@@ -274,7 +274,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         x_cen2, y_cen2, z_cen2, M_cen2, weight_cen2, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = split_cen_sat(mock2)
         if verbose:
             print("Number of central tracers for tracer 2:",len(x_cen2), flush=True)
-            print("Number of satellite tracers for tracer 2:", len(x_sat2s), flush=True)
+            print("Number of satellite tracers for tracer 2:", len(x_sat2), flush=True)
         #autocorr = False
     else:
         x_cen2, y_cen2, z_cen2, M_cen2, weight_cen2, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1

@@ -185,8 +185,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
         vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
-        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
-        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / num_sat_parts**2
+        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
     elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"): # none of these should be doublecounted, and yet final result seems to be double, but only at low rp?
@@ -213,8 +213,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
         vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
-        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 / num_sat_parts # these paircounts are not doublecounted, but the others (including the randoms) are
-        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) / num_sat_parts**2
+        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
     vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)

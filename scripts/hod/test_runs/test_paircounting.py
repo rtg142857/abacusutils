@@ -145,7 +145,7 @@ def main(path_config_filename):
         # wp_pair = np.load(temp_stuff + "pair_wp.npy")
 
 
-    if not mock_wp_exists:
+    if True: #not mock_wp_exists:
         print("Getting true mock to compare wp against", flush=True)#############################################################
         mock_dict = newBall.run_hod(
             newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False, seed=seed

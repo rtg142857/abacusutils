@@ -265,13 +265,16 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
     if verbose:
         print("Number of central tracers:",len(x_cen1), flush=True)
         print("Number of satellite tracers:", len(x_sat1), flush=True)
-        print("Values of x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1:")
-        for a in [x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1]:
-            print(a)
+        # print("Values of x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1:")
+        # for a in [x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1]:
+        #     print(a)
 
     if tracer2 != tracer1:
         mock2 = tracer_mock[tracer2]
         x_cen2, y_cen2, z_cen2, M_cen2, weight_cen2, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = split_cen_sat(mock2)
+        if verbose:
+            print("Number of central tracers for tracer 2:",len(x_cen2), flush=True)
+            print("Number of satellite tracers for tracer 2:", len(x_sat2s), flush=True)
         #autocorr = False
     else:
         x_cen2, y_cen2, z_cen2, M_cen2, weight_cen2, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = x_cen1, y_cen1, z_cen1, M_cen1, weight_cen1, x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1
@@ -320,8 +323,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
 
             if category == "_ELGcross":
-                for i in [x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1]:
-                    i = i[::num_sat_parts]
+                x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1))
 
                 samples_1 = mass_mask(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges)
                 samples_2 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)

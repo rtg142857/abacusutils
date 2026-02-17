@@ -115,7 +115,23 @@ def npairs_conversion_wp(samples1,samples2,n_pairs,r_bin_edges,pi_max, d_pi=1):
                         n_pairs_mass_r_bins_wp[i,j,k,l] = 0
     return n_pairs_mass_r_bins_wp
 
-def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
+def wrap(x, L):
+    """x is a numpy array; L is the boxsize"""
+    L2 = L / 2
+    # if x >= L2:
+    #     return x - L
+    # elif x < -L2:
+    #     return x + L
+    # return x
+
+    gL2 = x >= L2
+    lmL2 = x < -L2
+
+    x[gL2] -= L
+    x[lmL2] += L
+    return x
+
+def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
                              cross=False, x2=None, y2=None, z2=None, weight2=None, Ms2=None):
     """
     We cannot use corrfunc for the one halo satellite-satellite term.
@@ -169,10 +185,12 @@ def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts,mass_bin_edges,r_b
         for j in range(max_j_index):
             print(k)
             Ms_reduced[:,k] = Ms[::num_sat_parts]
-            distances_rp[:,k] = ((x[i::num_sat_parts]-x2[j::num_sat_parts])**2
-                            + (y[i::num_sat_parts]-y2[j::num_sat_parts])**2)**0.5
+            x_disp = wrap(x[i::num_sat_parts]-x2[j::num_sat_parts], boxsize)
+            y_disp = wrap(y[i::num_sat_parts]-y2[j::num_sat_parts], boxsize)
+            z_disp = wrap(z[i::num_sat_parts]-z2[j::num_sat_parts], boxsize)
 
-            distances_pi[:,k] = ((z[i::num_sat_parts]-z2[j::num_sat_parts])**2)**0.5
+            distances_rp[:,k] = ((x_disp)**2 + (y_disp)**2)**0.5
+            distances_pi[:,k] = ((z_disp)**2)**0.5
 
             weights_reduced[:,k] = weights[::num_sat_parts]
 
@@ -364,9 +382,9 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
         case "satsat_onehalo":
             # Want all 3 sat particles per halo
             if category == "_ELGcross":
-                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2)
+                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2)
             else:
-                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts,mass_bin_edges,rpbins,pi_max, d_pi)
+                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi)
         
     time2 = time.time()
     if verbose:

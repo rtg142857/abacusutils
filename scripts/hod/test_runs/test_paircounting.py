@@ -136,6 +136,15 @@ def main(path_config_filename):
     wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_pair_LRGLRG)
+    np.save(temp_stuff + "pair_wp_LRG_ELG.npy", wp_pair_ELGLRG)
+    np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_pair_ELGELG)
+    np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_pair_LRGQSO)
+    np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_pair_ELGQSO)
+    np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_pair_QSOQSO)
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)
@@ -168,12 +177,18 @@ def main(path_config_filename):
         wp_dict_sat = newBall.compute_wp(mock_dict_sat, rpbins, pimax, pi_bin_size, Nthread=32)
         print("wp_dict without cens: ",wp_dict_sat)
         # wp_mock = wp_dict["LRG_ELG"]
-        wp_mock_LRGLRG = wp_dict["LRG_LRG"]
-        wp_mock_ELGLRG = wp_dict["LRG_ELG"]
-        wp_mock_ELGELG = wp_dict["ELG_ELG"]
-        np.save(temp_stuff + "mock_wp_LL.npy", wp_mock_LRGLRG)
-        np.save(temp_stuff + "mock_wp_LE.npy", wp_mock_ELGLRG)
-        np.save(temp_stuff + "mock_wp_EE.npy", wp_mock_ELGELG)
+        for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
+            np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
+        # wp_mock_LRGLRG = wp_dict["LRG_LRG"]
+        # wp_mock_ELGLRG = wp_dict["LRG_ELG"]
+        # wp_mock_ELGELG = wp_dict["ELG_ELG"]
+        # wp_mock_QSOQSO = wp_dict["QSO_QSO"]
+        # wp_mock_LRGQSO = wp_dict["LRG_QSO"]
+        # wp_mock_ELGQSO = wp_dict["ELG_QSO"]
+        # for i in [""]
+        # np.save(temp_stuff + "mock_wp_LL.npy", wp_mock_LRGLRG)
+        # np.save(temp_stuff + "mock_wp_LE.npy", wp_mock_ELGLRG)
+        # np.save(temp_stuff + "mock_wp_EE.npy", wp_mock_ELGELG)
         # print("Getting xi from the true mock", flush=True)##############################################################
         # xi_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
         # xi_mock = xi_dict["LRG_LRG"]
@@ -188,9 +203,9 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    plt.loglog(rpcent, wp_mock_LRGLRG, label="True LRGa")
-    plt.loglog(rpcent, wp_mock_ELGLRG, label="True LEx")
-    plt.loglog(rpcent, wp_mock_ELGELG, label="True ELGa")
+    plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
+    plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
+    plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
     plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
     plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
     plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")

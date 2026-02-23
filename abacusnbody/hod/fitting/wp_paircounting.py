@@ -306,7 +306,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     else:
         # crosscorr
         rands = create_randoms_for_wp(npart = npart, tracer1=tracer1, tracer2=tracer2, r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
-    wp_rands = np.reshape(rands,shape=(len(rpbins)-1,pimax))
+    wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
     vprint("Sum of randoms: "+str(np.sum(wp_rands)), verbose)
 
     # finishing

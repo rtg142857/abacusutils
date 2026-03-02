@@ -26,6 +26,8 @@ from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import plot_
 from abacusnbody.hod.fitting.wp_paircounting import get_wp_given_tracer
 import abacusnbody.hod.fitting.paircounting as paircounting
 
+from Corrfunc.theory.DDrppi import DDrppi
+
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
@@ -173,6 +175,16 @@ def main(path_config_filename):
         #         mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
         wp_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
         print("wp_dict with cens: ",wp_dict)
+        print("Getting ddrppi of the mock:")
+        lrgs = mock_dict["LRG"]
+        elgs = mock_dict["ELG"]
+        mock_ddrppi = DDrppi(autocorr=0, nthreads=32, pimax=pimax, #npibins=(pi_max//d_pi),
+                         binfile=rpbins,
+                         X1=lrgs["x"],Y1=lrgs["y"],Z1=lrgs["z"], weights1=np.ones(len(lrgs["x"])), X2=elgs["x"],
+                         Y2=elgs["x"],Z2 = elgs["x"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
+        print("Mock ddrppi:", mock_ddrppi)
+        np.save(temp_stuff + "mock_ddrppi", mock_ddrppi)
+
         # print("Now for the satelllites only:")
         # wp_dict_sat = newBall.compute_wp(mock_dict_sat, rpbins, pimax, pi_bin_size, Nthread=32)
         # print("wp_dict without cens: ",wp_dict_sat)

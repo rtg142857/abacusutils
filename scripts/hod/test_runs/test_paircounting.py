@@ -171,14 +171,16 @@ def main(path_config_filename):
             mock_dict_sat[tracer] = {}
             for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
                 mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
-        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+        wp_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
         print("wp_dict with cens: ",wp_dict)
-        print("Now for the satelllites only:")
-        wp_dict_sat = newBall.compute_wp(mock_dict_sat, rpbins, pimax, pi_bin_size, Nthread=32)
-        print("wp_dict without cens: ",wp_dict_sat)
+        # print("Now for the satelllites only:")
+        # wp_dict_sat = newBall.compute_wp(mock_dict_sat, rpbins, pimax, pi_bin_size, Nthread=32)
+        # print("wp_dict without cens: ",wp_dict_sat)
         # wp_mock = wp_dict["LRG_ELG"]
-        for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
-            np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
+
+        np.save(temp_stuff + "mock_xi_LRG_ELG", wp_dict["LRG_ELG"])
+        # for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
+        #     np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
         # wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         # wp_mock_ELGLRG = wp_dict["LRG_ELG"]
         # wp_mock_ELGELG = wp_dict["ELG_ELG"]
@@ -203,19 +205,19 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
-    plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
-    plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
-    plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
-    plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    plt.legend()
-    plt.title("wp(rp)")
-    plt.xlabel("r (Mpc/h)")
-    plt.ylabel("wp (Mpc/h)")
-    plt.savefig("fig_wprp")
-    plt.show()
-    plt.clf()
+    # plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
+    # plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
+    # plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
+    # plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
+    # plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
+    # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
+    # plt.legend()
+    # plt.title("wp(rp)")
+    # plt.xlabel("r (Mpc/h)")
+    # plt.ylabel("wp (Mpc/h)")
+    # plt.savefig("fig_wprp")
+    # plt.show()
+    # plt.clf()
 
     print("Plotting HODs...")
     M_h = np.logspace(10, 16, 90)

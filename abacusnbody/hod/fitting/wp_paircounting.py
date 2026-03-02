@@ -332,7 +332,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     vprint("Getting wp", verbose)
     wp = xi_to_wps(xi,rpbins,pimax)
     vprint("WP:, "+str(wp), verbose)
-    return wp
+    return xi # return wp TODO: revert
 
 def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, verbose=False) -> dict:
     """

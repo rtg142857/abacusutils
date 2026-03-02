@@ -38,13 +38,22 @@ def n_sat_LRG_modified(M_h, logM_cut, M_cut, M_1, sigma, alpha, kappa):
     """
     Standard Zheng et al. (2005) satellite HOD parametrization for LRGs, modified with n_cent_LRG
     """
-    if M_h - kappa * M_cut < 0:
+    mass_bin_edges = 10**10 * np.logspace(0,6,31)
+    mass_lower = mass_bin_edges[9]
+    mass_upper = mass_bin_edges[10]
+    if M_h - mass_lower < 0:
         return 0
-    return (
-        ((M_h - kappa * M_cut) / M_1) ** alpha
-        * 0.5
-        * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
-    )* 0 + 1 # TODO: UNDO
+    elif M_h - mass_upper > 0:
+        return 0
+    else:
+        return 1
+    # if M_h - kappa * M_cut < 0:
+    #     return 0
+    # return (
+    #     ((M_h - kappa * M_cut) / M_1) ** alpha
+    #     * 0.5
+    #     * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
+    # )* 0 + 1 # TODO: UNDO
 
 
 @njit(fastmath=True)
@@ -71,11 +80,25 @@ def N_sat_elg(M_h, M_cut, kappa, M_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0):
     Standard power law modulated by an exponential fall off at small M
     """
     # return (M_h/M_1)**alpha/(1+np.exp(-A_s*(np.log10(M_h)-np.log10(kappa*M_cut)))) + beta*(M_h/M_1)**(-alpha1)/100
-    if M_h - kappa * M_cut < 0:
+    mass_bin_edges = 10**10 * np.logspace(0,6,31)
+    mass_lower = mass_bin_edges[9]
+    mass_upper = mass_bin_edges[10]
+    if M_h - mass_lower < 0:
         return 0
-    return (
-        A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
-    ) * 0 + 1 # + beta*(M_h/M_1)**(-alpha1)/100
+    elif M_h - mass_upper > 0:
+        return 0
+    else:
+        return 1
+    below_cut = M_h - mass_lower < 0
+    above_cut = M_h - mass_upper > 0
+    hod_value = np.ones(np.size(M_h))
+    hod_value[below_cut] = 0
+    hod_value[above_cut] = 0
+    # if M_h - kappa * M_cut < 0:
+    #     return 0
+    # return (
+    #     A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
+    # ) * 0 + 1 # + beta*(M_h/M_1)**(-alpha1)/100
 
 
 @njit(fastmath=True)

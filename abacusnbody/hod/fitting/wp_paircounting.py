@@ -240,7 +240,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
 
     GG = CC + CS + SS + SS1
     vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
-    vprint(f"GG values: "+GG, verbose)
+    vprint(f"GG values:", verbose)
+    vprint(GG, verbose)
     np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/pair_ddrppi", GG)
 
     return CC + CS + SS + SS1

@@ -28,6 +28,14 @@ import abacusnbody.hod.fitting.paircounting as paircounting
 
 from Corrfunc.theory.DDrppi import DDrppi
 
+def convert_ddrppi(output):
+    n_pairs = np.zeros((24, 80))
+    for i in range(24):
+        for j in range(80):
+            idx = i * 80 + j
+            n_pairs[i,j] = output[idx][4]
+    return n_pairs
+
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'

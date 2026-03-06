@@ -60,10 +60,10 @@ def main(path_config_filename):
     for tracer in tracer_list:
         #M_h = tab_mock_dict[tracer]["mass"]
         Ncen = tab_mock_dict[tracer]["Ncent"]
-        for field in tab_mock_dict[tracer].keys():
+        for field in fields_to_cut:
             tab_mock_dict[tracer][field] = cut_til_one_sat_tracer(tab_mock_dict[tracer][field], Ncen)
         M_h = tab_mock_dict[tracer]["mass"]
-        for field in tab_mock_dict[tracer].keys():
+        for field in fields_to_cut:
             tab_mock_dict[tracer][field] = mass_cut(tab_mock_dict[tracer][field], M_h, mass_lower, mass_upper)
 
     print("Making 'true' mock...", flush=True)##########################################################################

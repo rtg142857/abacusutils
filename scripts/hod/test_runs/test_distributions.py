@@ -56,6 +56,7 @@ def main(path_config_filename):
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
     mass_lower = mass_bin_edges[9]
     mass_upper = mass_bin_edges[10]
+    fields_to_cut = ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]
     for tracer in tracer_list:
         #M_h = tab_mock_dict[tracer]["mass"]
         Ncen = tab_mock_dict[tracer]["Ncent"]

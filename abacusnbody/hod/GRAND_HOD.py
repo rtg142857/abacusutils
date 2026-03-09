@@ -256,13 +256,13 @@ def gen_cent(
     keep = np.empty(H, dtype=np.int8)  # mask array tracking which halos to keep
 
     # figuring out the number of halos kept for each thread
-    if tabulation_mock and tabulation_tracer == "LRG": # Each halo gets an LRG tracer
+    if tabulation_mock in ["fixed", "poisson"] and tabulation_tracer == "LRG": # Each halo gets an LRG tracer
         keep.fill(1) # all and only LRG tracers
         # get the number of galaxies of each type
         for tid in numba.prange(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
                 Nout[tid, 0, 0] += 1
-    elif tabulation_mock and tabulation_tracer == "ELG": # Each halo gets an ELG tracer
+    elif tabulation_mock in ["fixed", "poisson"] and tabulation_tracer == "ELG": # Each halo gets an ELG tracer
         keep.fill(2) # all and only ELG tracers
         # get the number of galaxies of each type
         for tid in numba.prange(Nthread):
@@ -480,7 +480,7 @@ def gen_cent(
     ELG_dict['vz'] = elg_vz
     ELG_dict['mass'] = elg_mass
     ID_dict['ELG'] = elg_id
-    if tabulation_mock: # just reuse the LRG one once we calculate the ELGs
+    if tabulation_mock in ["fixed", "poisson"]: # just reuse the LRG one once we calculate the ELGs
         ID_dict["ELG"] = ID_dict["LRG"]
 
     QSO_dict['x'] = qso_x
@@ -492,7 +492,7 @@ def gen_cent(
     QSO_dict['mass'] = qso_mass
     ID_dict['QSO'] = qso_id
 
-    if tabulation_mock:
+    if tabulation_mock in ["fixed", "poisson"]:
         LRG_dict["hmultis"] = multis
         ELG_dict["hmultis"] = multis
     if hrvir is not None:
@@ -567,6 +567,7 @@ def compute_fast_NFW(
     num_sat,
     f_sigv,
     Lbox,
+    hmultis,
     vel_sat='rd_normal',
     Nthread=16,
     exp_frac=0,
@@ -592,6 +593,7 @@ def compute_fast_NFW(
     vy_h = np.repeat(vy_h, num_sat)
     vz_h = np.repeat(vz_h, num_sat)
     vrms_h = np.repeat(vrms_h, num_sat)
+    hmultis = np.repeat(hmultis, num_sat)
     x_sat = np.empty_like(x_h)
     y_sat = np.empty_like(y_h)
     z_sat = np.empty_like(z_h)
@@ -628,7 +630,7 @@ def compute_fast_NFW(
                 vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
             else:
                 raise ValueError('Wrong vel_sat argument only "rd_normal"')
-    return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
+    return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir, hmultis
 
 
 #@njit(fastmath=True, parallel=True)
@@ -667,7 +669,9 @@ def gen_sats_nfw(
 
     Not yet on lightcone!! Different velocity bias treatment!! Not built for performance!!
 
-    If tabulation_mock is set to True, exactly 3 satellites are given per halo (otherwise it'll be the ordinary distribution given by the HOD)
+    If tabulation_mock is set to "poisson", each halo has a poisson-distributed number of satellites with mean 1
+    If it's "fixed", exactly 3 satellites are given per halo
+    Otherwise it'll be the ordinary distribution given by the HOD
 
     """
 
@@ -769,81 +773,90 @@ def gen_sats_nfw(
     )  # starting index of each thread
     # if verbose:
     #     with numba.objmode(): print("Looping over threads: getting number of satellites and the like", flush=True)
-    if tabulation_mock: # exactly 3 LRG and ELG tracers per halo
+    if tabulation_mock == "fixed": # exactly 3 LRG and ELG tracers per halo
         num_sats_L.fill(3)
         num_sats_E.fill(3)
     else:
         for tid in range(Nthread):
             for i in range(hstart[tid], hstart[tid + 1]):
                 if want_LRG:
-                    M1_L_temp = 10 ** (logM1_L + As_L * hdeltac[i] + Bs_L * hfenv[i])
-                    logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
-                    base_p_L = (
-                        n_sat_LRG_modified(
-                            hmass[i],
-                            logM_cut_L_temp,
-                            10**logM_cut_L_temp,
-                            M1_L_temp,
-                            sigma_L,
-                            alpha_L,
-                            kappa_L,
+                    if tabulation_mock == "poisson":
+                        base_p_L = 1.0
+                    else:
+                        M1_L_temp = 10 ** (logM1_L + As_L * hdeltac[i] + Bs_L * hfenv[i])
+                        logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
+                        base_p_L = (
+                            n_sat_LRG_modified(
+                                hmass[i],
+                                logM_cut_L_temp,
+                                10**logM_cut_L_temp,
+                                M1_L_temp,
+                                sigma_L,
+                                alpha_L,
+                                kappa_L,
+                            )
+                            * ic_L
                         )
-                        * ic_L
-                    )
                     num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
-                    M1_E_temp = 10 ** (
-                        logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                    )
-                    logM_cut_E_temp = (
-                        logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
-                    )
-                    base_p_E = (
-                        N_sat_elg(
-                            hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
-                        )
-                        * ic_E
-                    )
-                    # elg conformity
-                    if keep_cent[i] == 1:
-                        M1_E_temp = 10 ** (logM1_EL + As_E * hdeltac[i] + Bs_E * hfenv[i])
-                        base_p_E = (
-                            N_sat_elg(
-                                hmass[i],
-                                10**logM_cut_E_temp,
-                                kappa_E,
-                                M1_E_temp,
-                                alpha_EL,
-                                A_E,
-                            )
-                            * ic_E
-                        )
-                    elif keep_cent[i] == 2:
+                    if tabulation_mock == "poisson":
+                        base_p_E = 1.0
+                    else:
                         M1_E_temp = 10 ** (
-                            logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
-                        )  # M1_E_temp*10**delta_M1
+                            logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                        )
+                        logM_cut_E_temp = (
+                            logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                        )
                         base_p_E = (
                             N_sat_elg(
-                                hmass[i],
-                                10**logM_cut_E_temp,
-                                kappa_E,
-                                M1_E_temp,
-                                alpha_EE,
-                                A_E,
+                                hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
                             )
                             * ic_E
                         )
+                        # elg conformity
+                        if keep_cent[i] == 1:
+                            M1_E_temp = 10 ** (logM1_EL + As_E * hdeltac[i] + Bs_E * hfenv[i])
+                            base_p_E = (
+                                N_sat_elg(
+                                    hmass[i],
+                                    10**logM_cut_E_temp,
+                                    kappa_E,
+                                    M1_E_temp,
+                                    alpha_EL,
+                                    A_E,
+                                )
+                                * ic_E
+                            )
+                        elif keep_cent[i] == 2:
+                            M1_E_temp = 10 ** (
+                                logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
+                            )  # M1_E_temp*10**delta_M1
+                            base_p_E = (
+                                N_sat_elg(
+                                    hmass[i],
+                                    10**logM_cut_E_temp,
+                                    kappa_E,
+                                    M1_E_temp,
+                                    alpha_EE,
+                                    A_E,
+                                )
+                                * ic_E
+                            )
                     num_sats_E[i] = rng.poisson(base_p_E)
 
                 if want_QSO:
-                    M1_Q_temp = 10 ** (logM1_Q + As_Q * hdeltac[i] + Bs_Q * hfenv[i])
-                    logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
-                    base_p_Q = (
-                        N_sat_generic(
-                            hmass[i], 10**logM_cut_Q_temp, kappa_Q, M1_Q_temp, alpha_Q
+                    if tabulation_mock == "poisson":
+                        base_p_Q = 0.0
+                    else:
+                        M1_Q_temp = 10 ** (logM1_Q + As_Q * hdeltac[i] + Bs_Q * hfenv[i])
+                        logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
+                        base_p_Q = (
+                            N_sat_generic(
+                                hmass[i], 10**logM_cut_Q_temp, kappa_Q, M1_Q_temp, alpha_Q
+                            )
+                            * ic_Q
                         )
-                        * ic_Q
-                    )
                     num_sats_Q[i] = rng.poisson(base_p_Q)
 
     # if verbose:
@@ -867,7 +880,7 @@ def gen_sats_nfw(
     #     with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)
     # put satellites on NFW
     nfw_seed = seed
-    h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L, h_hrvir_L = (
+    h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L, h_hrvir_L, hmultis_L = (
         compute_fast_NFW(
             NFW_draw,
             hid,
@@ -897,7 +910,7 @@ def gen_sats_nfw(
         nfw_seed = (nfw_seed + seed_jump) % SEED_MAX
     # if verbose:
     #     with numba.objmode(): print("Putting ELG satellites on NFW profile", flush=True)
-    h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E, h_hrvir_E = (
+    h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E, h_hrvir_E, hmultis_E = (
         compute_fast_NFW(
             NFW_draw,
             hid,
@@ -927,7 +940,7 @@ def gen_sats_nfw(
         nfw_seed = (nfw_seed + seed_jump) % SEED_MAX
     # if verbose:
     #     with numba.objmode(): print("Putting QSO satellites on NFW profile", flush=True)
-    h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q, h_hrvir_Q = (
+    h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q, h_hrvir_Q, hmultis_Q = (
         compute_fast_NFW(
             NFW_draw,
             hid,
@@ -1004,9 +1017,9 @@ def gen_sats_nfw(
     else:
         hrvir_dict = None
 
-    if tabulation_mock:
-        LRG_dict["hmultis"] = np.repeat(hmultis, 3)
-        ELG_dict["hmultis"] =  np.repeat(hmultis, 3)
+    if tabulation_mock in ["fixed", "poisson"]:
+        LRG_dict["hmultis"] = hmultis_L #np.repeat(hmultis, 3)
+        ELG_dict["hmultis"] =  hmultis_E # np.repeat(hmultis, 3)
 
     return LRG_dict, ELG_dict, QSO_dict, ID_dict, hrvir_dict
 
@@ -1530,8 +1543,10 @@ def gen_gals(
     params : dict
         Dictionary of various simulation parameters.
 
-    ``tabulation_mock``: bool
-        Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
+    ``tabulation_mock``: {False, "poisson", "fixed"}
+        Is the mock specifically for tabulating halo paircounts? If "fixed", each halo has exactly one central and three satellite galaxies,
+        If "poisson", each halo has exactly one central and an average of one satellite galaxies, Poisson-distributed.
+        Otherwise use the HOD. Default ``False``.
 
     seed : int, optional
         Seed for RNG
@@ -1674,6 +1689,8 @@ def gen_gals(
     lbox = params['Lbox']
     origin = params['origin']
 
+    if verbose:
+        print(f"Generating initial mock, tabulation type {tabulation_mock}")
     LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict_cent = gen_cent(
         halos_array['hpos'],
         halos_array['hvel'],
@@ -1699,7 +1716,9 @@ def gen_gals(
         tabulation_mock=tabulation_mock,
         hrvir = halos_array['hrvir']
     )
-    if tabulation_mock:
+    if tabulation_mock in ["poisson", "fixed"]:
+        if verbose:
+            print("Generating tabulation mock centrals for ELGs")
         _, ELG_dict_cent, _, _, _, _ = gen_cent(
             halos_array['hpos'],
             halos_array['hvel'],
@@ -1890,8 +1909,10 @@ def gen_gal_cat(
     fn_ext: str
         filename extension for saved files. Only relevant when ``write_to_disk = True``.
 
-    ``tabulation_mock``: bool
-        Is the mock specifically for tabulating halo paircounts? If true, each halo has exactly one central and three satellite galaxies, otherwise use the HOD. Default ``False``.
+    ``tabulation_mock``: {False, "poisson", "fixed"}
+        Is the mock specifically for tabulating halo paircounts? If "fixed", each halo has exactly one central and three satellite galaxies,
+        If "poisson", each halo has exactly one central and an average of one satellite galaxies, Poisson-distributed.
+        Otherwise use the HOD. Default ``False``.
 
     seed: int, optional
         Seed for RNG

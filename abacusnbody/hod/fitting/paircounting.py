@@ -310,7 +310,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
         case "censat":
             # Only want one sat particle per halo
-            x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
+            # x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
 
             samples_1 = mass_mask(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)
@@ -335,7 +335,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
         case "satsat":
             # Only want one sat particle per halo
-            x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
+            # x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
 
             samples_1 = mass_mask(x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, mass_bin_edges)
             samples_2 = mass_mask(x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, mass_bin_edges)

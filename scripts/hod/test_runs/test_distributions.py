@@ -26,7 +26,7 @@ def main(path_config_filename):
     # run_params = yaml.safe_load(open(config["Paths"]["params_path"]))
     # sim_params = config['sim_params']
     HOD_params = config['HOD_params']
-    tracer_list=["LRG", "ELG", "QSO"]
+    tracer_list=["LRG", "ELG"]
     Misc = config["Misc"]
     want_rsd = HOD_params['want_rsd']
     seed = Misc["random_seed"]

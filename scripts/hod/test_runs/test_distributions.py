@@ -68,7 +68,7 @@ def main(path_config_filename):
 
     print("Making 'true' mock...", flush=True)##########################################################################
     true_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False, seed=seed
     )
     print("Sanity check: Number of LRGs and ELGs")
     print("Number of LRGs in the tab mock:", len(tab_mock_dict["LRG"]["mass"]))

@@ -209,7 +209,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         ccp = paircounts["cencen_ELGcross"]
         csp = paircounts["censat_ELGcross"]
         ssp = paircounts["satsat_ELGcross"]
-        ss1p = paircounts["satsat_onehalo_ELGcross"]
+        # ss1p = paircounts["satsat_onehalo_ELGcross"]
         vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
         vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
         vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)

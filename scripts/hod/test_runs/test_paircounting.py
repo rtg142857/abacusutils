@@ -111,8 +111,9 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
 
-    paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
-                        "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    # paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
+    #                     "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    paircount_labels = ["cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross"]#, "satsat_onehalo_ELGcross"]
     all_paircounts_exist = True
     for label in paircount_labels:
         if not os.path.exists(paircount_path + sim_label + f"/{label}.npy"):
@@ -133,8 +134,8 @@ def main(path_config_filename):
     print("Loading paircounts from the tabulation mock", flush=True)###############################################
     paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
     paircounts = {}
-    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
-        for pair_type in ["", "_ELGauto", "_ELGcross"]:
+    for pair in ["cencen", "censat", "satsat"]:#, "satsat_onehalo"]:
+        for pair_type in ["_ELGcross"]:#["", "_ELGauto", "_ELGcross"]:
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
@@ -143,15 +144,15 @@ def main(path_config_filename):
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
-    wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
+    # wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
-    wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    # wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     # wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
     # wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
     # wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_pair_LRGLRG)
+    # np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_pair_LRGLRG)
     np.save(temp_stuff + "pair_xi_LRG_ELG.npy", wp_pair_ELGLRG)
-    np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_pair_ELGELG)
+    # np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_pair_ELGELG)
     # np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_pair_LRGQSO)
     # np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_pair_ELGQSO)
     # np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_pair_QSOQSO)
@@ -228,9 +229,9 @@ def main(path_config_filename):
     plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
     plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
     plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
+    # plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
     plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
-    plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
+    # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
     plt.legend()
     plt.title("wp(rp)")
     plt.xlabel("r (Mpc/h)")

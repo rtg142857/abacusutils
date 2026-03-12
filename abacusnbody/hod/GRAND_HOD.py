@@ -501,7 +501,7 @@ def gen_cent(
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, None
 
 
-@njit(parallel=True, fastmath=True)
+#@njit(parallel=True, fastmath=True)
 def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     """
     --- Aiding function for NFW computation, generate random points in a sphere
@@ -549,7 +549,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     return ur
 
 
-@njit(fastmath=True, parallel=True)  # parallel=True,
+#@njit(fastmath=True, parallel=True)  # parallel=True,
 def compute_fast_NFW(
     NFW_draw,
     h_id,
@@ -1467,7 +1467,7 @@ def gen_sats(
     return LRG_dict, ELG_dict, QSO_dict, ID_dict
 
 
-@njit(parallel=True, fastmath=True)
+#@njit(parallel=True, fastmath=True)
 def fast_concatenate(array1, array2, Nthread):
     """Fast concatenate with numba parallel"""
 

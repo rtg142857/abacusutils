@@ -898,6 +898,7 @@ def gen_sats_nfw(
             num_sats_L,
             f_sigv_L,
             lbox,
+            hmultis,
             vel_sat,
             Nthread,
             #exp_frac,
@@ -928,6 +929,7 @@ def gen_sats_nfw(
             num_sats_E,
             f_sigv_E,
             lbox,
+            hmultis,
             vel_sat,
             Nthread,
             #exp_frac, # Removing the ELG stuff for debugging; TODO: Undo
@@ -958,6 +960,7 @@ def gen_sats_nfw(
             num_sats_Q,
             f_sigv_Q,
             lbox,
+            hmultis,
             vel_sat,
             Nthread,
             #exp_frac,

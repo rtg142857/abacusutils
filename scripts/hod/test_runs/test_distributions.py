@@ -77,19 +77,30 @@ def main(path_config_filename):
     print("Number of ELGs in the true mock:", len(true_mock_dict["ELG"]["mass"]))
 
     print("Getting wps...", flush=True)################################################################################
-    true_wp_dict = newBall.compute_xirppi(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
-    tab_wp_dict = newBall.compute_xirppi(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+    true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+    tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+
+    temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
+    np.save(temp_stuff + "poisson_wp_LRG_ELG", true_wp_dict["LRG_ELG"])
+    np.save(temp_stuff + "tab_wp_LRG_ELG", tab_wp_dict["LRG_ELG"])
 
     print("Plotting...", flush=True)#####################################################################################
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="True LRGa")
-    plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="True LEx")
-    plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="True ELGa")
+    plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="Poisson LRGa")
+    plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="Poisson LEx")
+    plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="Poisson ELGa")
     plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Tab LRGa")
     plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Tab LEx")
     plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Tab ELGa")
+    plt.legend()
+    plt.title("wp(rp)")
+    plt.xlabel("r (Mpc/h)")
+    plt.ylabel("wp (Mpc/h)")
+    plt.savefig("fig_wprp")
+    plt.show()
+    plt.clf()
 
 
 DEFAULTS = {}

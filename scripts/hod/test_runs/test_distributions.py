@@ -38,7 +38,7 @@ def main(path_config_filename):
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
 
-    Nthread=16
+    Nthread=32
 
     print("Making new FlamingoHOD object", flush=True)###############################################################
     # create a new FlamingoHOD object

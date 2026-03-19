@@ -72,9 +72,9 @@ def main(path_config_filename):
     )
     for tracer in tracer_list:
         # Testing all at the origin
-        for ax in ["x", "y", "z"]:
-            tab_mock_dict[tracer][ax] = np.zeros(len(tab_mock_dict[tracer][ax]))
-            true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
+        # for ax in ["x", "y", "z"]:
+            # tab_mock_dict[tracer][ax] = np.zeros(len(tab_mock_dict[tracer][ax]))
+            # true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
 
         for field in fields_to_cut:
             tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:10000]

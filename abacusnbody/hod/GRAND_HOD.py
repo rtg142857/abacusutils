@@ -599,6 +599,11 @@ def compute_fast_NFW(
     vy_sat = np.empty_like(vy_h)
     vz_sat = np.empty_like(vz_h)
 
+    # For debugging; TODO: Undo
+    x_h = np.zeros(len(x_h))
+    y_h = np.zeros(len(y_h))
+    z_h = np.zeros(len(z_h))
+
     # starting index of each thread
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))
     for tid in numba.prange(Nthread):

@@ -38,6 +38,8 @@ def main(path_config_filename):
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
 
+    Nthread=16
+
     print("Making new FlamingoHOD object", flush=True)###############################################################
     # create a new FlamingoHOD object
     newBall = FlamingoHOD(path_config_filename)
@@ -50,7 +52,7 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
     tab_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=seed
     )
 
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
@@ -68,7 +70,7 @@ def main(path_config_filename):
 
     print("Making 'true' mock...", flush=True)##########################################################################
     true_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
     )
     for tracer in tracer_list:
         # Testing all at the origin
@@ -86,8 +88,8 @@ def main(path_config_filename):
     print("Number of ELGs in the true mock:", len(true_mock_dict["ELG"]["mass"]))
 
     print("Getting wps...", flush=True)################################################################################
-    true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
-    tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=32)
+    true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
+    tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
 
     temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
     np.save(temp_stuff + "poisson_wp_LRG_ELG", true_wp_dict["LRG_ELG"])

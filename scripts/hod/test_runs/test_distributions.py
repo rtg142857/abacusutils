@@ -66,6 +66,11 @@ def main(path_config_filename):
         for field in fields_to_cut:
             tab_mock_dict[tracer][field] = mass_cut(tab_mock_dict[tracer][field], M_h, mass_lower, mass_upper)
 
+        # Testing all at the origin
+        for ax in ["x", "y", "z"]:
+            tab_mock_dict[tracer][ax] = np.zeros(len(tab_mock_dict[tracer][ax]))
+            true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
+
     print("Making 'true' mock...", flush=True)##########################################################################
     true_mock_dict = newBall.run_hod(
         newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=False, seed=seed

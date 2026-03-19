@@ -182,7 +182,7 @@ def main(path_config_filename):
         #     mock_dict_sat[tracer] = {}
         #     for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
         #         mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
-        wp_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
         print("wp_dict with cens: ",wp_dict)
         print("Getting ddrppi of the mock:")
         lrgs = mock_dict["LRG"]

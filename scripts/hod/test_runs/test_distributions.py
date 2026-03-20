@@ -89,8 +89,8 @@ def main(path_config_filename):
     print("Number of ELGs in the true mock:", len(true_mock_dict["ELG"]["mass"]))
 
     print("Getting wps...", flush=True)################################################################################
-    # true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
-    # tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
+    true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
+    tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
 
     # temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
     # np.save(temp_stuff + "poisson_wp_LRG_ELG", true_wp_dict["LRG_ELG"])

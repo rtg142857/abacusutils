@@ -549,7 +549,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
     return ur
 
 
-@njit(fastmath=True, parallel=True)  # parallel=True,
+#@njit(fastmath=True, parallel=True)  # parallel=True,
 def compute_fast_NFW(
     NFW_draw,
     h_id,

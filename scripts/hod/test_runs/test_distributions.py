@@ -52,7 +52,7 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
     tab_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=seed
     )
 
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
@@ -70,7 +70,7 @@ def main(path_config_filename):
 
     print("Making 'true' mock...", flush=True)##########################################################################
     true_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
     )
     for tracer in tracer_list:
         # Testing all at the origin
@@ -115,17 +115,17 @@ def main(path_config_filename):
 
     for tracer in ["LRG", "ELG"]:
         fig, axs = plt.subplots(2, 3)
-        axs[0,0].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["y"])
+        axs[0,0].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["y"], s=1)
         axs[0,0].set_title("Tab XY")
-        axs[0,1].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["z"])
+        axs[0,1].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["z"], s=1)
         axs[0,1].set_title("Tab XZ")
-        axs[0,2].scatter(tab_mock_dict[tracer]["y"], tab_mock_dict[tracer]["z"])
+        axs[0,2].scatter(tab_mock_dict[tracer]["y"], tab_mock_dict[tracer]["z"], s=1)
         axs[0,2].set_title("Tab YZ")
-        axs[1,0].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["y"])
+        axs[1,0].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["y"], s=1)
         axs[1,0].set_title("Tab XY")
-        axs[1,1].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["z"])
+        axs[1,1].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["z"], s=1)
         axs[1,1].set_title("Tab XZ")
-        axs[1,2].scatter(true_mock_dict[tracer]["y"], true_mock_dict[tracer]["z"])
+        axs[1,2].scatter(true_mock_dict[tracer]["y"], true_mock_dict[tracer]["z"], s=1)
         axs[1,2].set_title("Tab YZ")
         fig.suptitle(tracer)
         plt.savefig(f"{tracer}_dist")

@@ -80,8 +80,8 @@ def main(path_config_filename):
             # true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
 
         for field in fields_to_cut:
-            tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:1e6]
-            true_mock_dict[tracer][field] = true_mock_dict[tracer][field][:1e6]
+            tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:1000000]
+            true_mock_dict[tracer][field] = true_mock_dict[tracer][field][:1000000]
     print("Sanity check: Number of LRGs and ELGs")
     print("Number of LRGs in the tab mock:", len(tab_mock_dict["LRG"]["mass"]))
     print("Number of ELGs in the tab mock:", len(tab_mock_dict["ELG"]["mass"]))

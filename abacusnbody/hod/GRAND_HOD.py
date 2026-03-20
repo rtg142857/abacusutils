@@ -606,19 +606,20 @@ def compute_fast_NFW(
     x_h = Lbox/100 * np.arange(100).repeat(10000).reshape((-1, 10000)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
     y_h = Lbox/100 * np.arange(100).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
     z_h = Lbox/100 * np.repeat(np.arange(100), 10000)
-    print(len(h_id))
-    print(len(x_h))
-    print(len(h_id) - len(x_h))
-    padright = np.zeros(len(h_id) - len(x_h))
-    x_h = np.concatenate((x_h, padright))
-    y_h = np.concatenate((y_h, padright))
-    z_h = np.concatenate((z_h, padright))
+
+    diff = len(h_id) - len(x_h)
+    if diff > 0:
+        padright = np.zeros(len(h_id) - len(x_h))
+        x_h = np.concatenate((x_h, padright))
+        y_h = np.concatenate((y_h, padright))
+        z_h = np.concatenate((z_h, padright))
+    else:
     # print(len(M))
     # print(len(x_h))
     # print(np.shape(rd_pos))
-    # x_h = x_h[:len(M)]
-    # y_h = y_h[:len(M)]
-    # z_h = z_h[:len(M)]
+        x_h = x_h[:len(M)]
+        y_h = y_h[:len(M)]
+        z_h = z_h[:len(M)]
 
     # starting index of each thread
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))

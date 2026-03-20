@@ -579,25 +579,6 @@ def compute_fast_NFW(
     c: r98/r25, or it used to be
     vrms_h: 'sigmav3d_L2com'
     """
-    # numba.set_num_threads(Nthread)
-    # figuring out the number of halos kept for each thread
-    h_id = np.repeat(h_id, num_sat)
-    M = np.repeat(M, num_sat)
-    c = np.repeat(c, num_sat)
-    Rvir = np.repeat(Rvir, num_sat)
-    x_h = np.repeat(x_h, num_sat)
-    y_h = np.repeat(y_h, num_sat)
-    z_h = np.repeat(z_h, num_sat)
-    vx_h = np.repeat(vx_h, num_sat)
-    vy_h = np.repeat(vy_h, num_sat)
-    vz_h = np.repeat(vz_h, num_sat)
-    vrms_h = np.repeat(vrms_h, num_sat)
-    x_sat = np.empty_like(x_h)
-    y_sat = np.empty_like(y_h)
-    z_sat = np.empty_like(z_h)
-    vx_sat = np.empty_like(vx_h)
-    vy_sat = np.empty_like(vy_h)
-    vz_sat = np.empty_like(vz_h)
 
     # For debugging; TODO: Undo
     #x_h = np.ones(len(x_h)) * Lbox/2
@@ -620,6 +601,26 @@ def compute_fast_NFW(
         x_h = x_h[:len(M)]
         y_h = y_h[:len(M)]
         z_h = z_h[:len(M)]
+
+    # numba.set_num_threads(Nthread)
+    # figuring out the number of halos kept for each thread
+    h_id = np.repeat(h_id, num_sat)
+    M = np.repeat(M, num_sat)
+    c = np.repeat(c, num_sat)
+    Rvir = np.repeat(Rvir, num_sat)
+    x_h = np.repeat(x_h, num_sat)
+    y_h = np.repeat(y_h, num_sat)
+    z_h = np.repeat(z_h, num_sat)
+    vx_h = np.repeat(vx_h, num_sat)
+    vy_h = np.repeat(vy_h, num_sat)
+    vz_h = np.repeat(vz_h, num_sat)
+    vrms_h = np.repeat(vrms_h, num_sat)
+    x_sat = np.empty_like(x_h)
+    y_sat = np.empty_like(y_h)
+    z_sat = np.empty_like(z_h)
+    vx_sat = np.empty_like(vx_h)
+    vy_sat = np.empty_like(vy_h)
+    vz_sat = np.empty_like(vz_h)
 
     # starting index of each thread
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))

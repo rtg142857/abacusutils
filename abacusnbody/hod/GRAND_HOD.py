@@ -600,9 +600,15 @@ def compute_fast_NFW(
     vz_sat = np.empty_like(vz_h)
 
     # For debugging; TODO: Undo
-    x_h = np.ones(len(x_h)) * Lbox/2
-    y_h = np.ones(len(y_h)) * Lbox/2
-    z_h = np.ones(len(z_h)) * Lbox/2
+    #x_h = np.ones(len(x_h)) * Lbox/2
+    #y_h = np.ones(len(y_h)) * Lbox/2
+    # z_h = np.ones(len(z_h)) * Lbox/2
+    x_h = Lbox/100 * np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
+    y_h = Lbox/100 * np.tile(np.repeat(np.array(range(100)), 100), 100)
+    z_h = Lbox/100 * np.repeat(np.array(range(100)), 10000)
+    x_h = np.concat(x_h, np.zeros(len(M)-len(x_h)))
+    y_h = np.concat(y_h, np.zeros(len(M)-len(y_h)))
+    z_h = np.concat(z_h, np.zeros(len(M)-len(z_h)))
 
     # starting index of each thread
     hstart = np.rint(np.linspace(0, num_sat.sum(), Nthread + 1))

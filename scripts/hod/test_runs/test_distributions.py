@@ -33,6 +33,7 @@ def main(path_config_filename):
     clustering_params = config['clustering_params']
     bin_params = clustering_params['bin_params']
     rpbins = np.logspace(
+        # bin_params['logmin'], -1, bin_params["nbins"] + 1
         bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1
     )
     pimax = clustering_params['pimax']
@@ -79,8 +80,8 @@ def main(path_config_filename):
             # true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
 
         for field in fields_to_cut:
-            tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:10000]
-            true_mock_dict[tracer][field] = true_mock_dict[tracer][field][:10000]
+            tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:1e6]
+            true_mock_dict[tracer][field] = true_mock_dict[tracer][field][:1e6]
     print("Sanity check: Number of LRGs and ELGs")
     print("Number of LRGs in the tab mock:", len(tab_mock_dict["LRG"]["mass"]))
     print("Number of ELGs in the tab mock:", len(tab_mock_dict["ELG"]["mass"]))
@@ -99,37 +100,19 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    # plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="Poisson LRGa")
-    # plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="Poisson LEx")
-    # plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="Poisson ELGa")
-    # plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Tab LRGa")
-    # plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Tab LEx")
-    # plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Tab ELGa")
-    # plt.legend()
-    # plt.title("wp(rp)")
-    # plt.xlabel("r (Mpc/h)")
-    # plt.ylabel("wp (Mpc/h)")
-    # plt.savefig("fig_wprp")
-    # plt.show()
-    # plt.clf()
-
-    for tracer in ["LRG", "ELG"]:
-        fig, axs = plt.subplots(2, 3)
-        axs[0,0].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["y"], s=1)
-        axs[0,0].set_title("Tab XY")
-        axs[0,1].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["z"], s=1)
-        axs[0,1].set_title("Tab XZ")
-        axs[0,2].scatter(tab_mock_dict[tracer]["y"], tab_mock_dict[tracer]["z"], s=1)
-        axs[0,2].set_title("Tab YZ")
-        axs[1,0].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["y"], s=1)
-        axs[1,0].set_title("Tab XY")
-        axs[1,1].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["z"], s=1)
-        axs[1,1].set_title("Tab XZ")
-        axs[1,2].scatter(true_mock_dict[tracer]["y"], true_mock_dict[tracer]["z"], s=1)
-        axs[1,2].set_title("Tab YZ")
-        fig.suptitle(tracer)
-        plt.savefig(f"{tracer}_dist")
-        plt.show()
+    plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="Poisson LRGa")
+    plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="Poisson LEx")
+    plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="Poisson ELGa")
+    plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Tab LRGa")
+    plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Tab LEx")
+    plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Tab ELGa")
+    plt.legend()
+    plt.title("wp(rp)")
+    plt.xlabel("r (Mpc/h)")
+    plt.ylabel("wp (Mpc/h)")
+    plt.savefig("fig_wprp")
+    plt.show()
+    plt.clf()
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'

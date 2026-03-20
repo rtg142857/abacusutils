@@ -609,6 +609,9 @@ def compute_fast_NFW(
     # x_h = np.concatenate((x_h, np.zeros(len(M)-len(x_h))))
     # y_h = np.concatenate((y_h, np.zeros(len(M)-len(y_h))))
     # z_h = np.concatenate((z_h, np.zeros(len(M)-len(z_h))))
+    print(len(M))
+    print(len(x_h))
+    print(np.shape(rd_pos))
     x_h = x_h[:len(M)]
     y_h = y_h[:len(M)]
     z_h = z_h[:len(M)]

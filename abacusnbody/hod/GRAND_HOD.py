@@ -603,9 +603,9 @@ def compute_fast_NFW(
     #x_h = np.ones(len(x_h)) * Lbox/2
     #y_h = np.ones(len(y_h)) * Lbox/2
     # z_h = np.ones(len(z_h)) * Lbox/2
-    x_h = Lbox/100 * np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
-    y_h = Lbox/100 * np.tile(np.repeat(np.array(range(100)), 100), 100)
-    z_h = Lbox/100 * np.repeat(np.array(range(100)), 10000)
+    x_h = Lbox/100 * np.array(range(100)).repeat(1e4).reshape((-1, 1e4)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
+    y_h = Lbox/100 * np.array(range(100)).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
+    z_h = Lbox/100 * np.repeat(np.array(range(100)), 1e4)
     x_h = np.concat(x_h, np.zeros(len(M)-len(x_h)))
     y_h = np.concat(y_h, np.zeros(len(M)-len(y_h)))
     z_h = np.concat(z_h, np.zeros(len(M)-len(z_h)))

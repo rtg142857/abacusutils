@@ -88,31 +88,48 @@ def main(path_config_filename):
     print("Number of ELGs in the true mock:", len(true_mock_dict["ELG"]["mass"]))
 
     print("Getting wps...", flush=True)################################################################################
-    true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
-    tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
+    # true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
+    # tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
 
-    temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
-    np.save(temp_stuff + "poisson_wp_LRG_ELG", true_wp_dict["LRG_ELG"])
-    np.save(temp_stuff + "tab_wp_LRG_ELG", tab_wp_dict["LRG_ELG"])
+    # temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
+    # np.save(temp_stuff + "poisson_wp_LRG_ELG", true_wp_dict["LRG_ELG"])
+    # np.save(temp_stuff + "tab_wp_LRG_ELG", tab_wp_dict["LRG_ELG"])
 
     print("Plotting...", flush=True)#####################################################################################
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="Poisson LRGa")
-    plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="Poisson LEx")
-    plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="Poisson ELGa")
-    plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Tab LRGa")
-    plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Tab LEx")
-    plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Tab ELGa")
-    plt.legend()
-    plt.title("wp(rp)")
-    plt.xlabel("r (Mpc/h)")
-    plt.ylabel("wp (Mpc/h)")
-    plt.savefig("fig_wprp")
-    plt.show()
-    plt.clf()
+    # plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="Poisson LRGa")
+    # plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="Poisson LEx")
+    # plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="Poisson ELGa")
+    # plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Tab LRGa")
+    # plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Tab LEx")
+    # plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Tab ELGa")
+    # plt.legend()
+    # plt.title("wp(rp)")
+    # plt.xlabel("r (Mpc/h)")
+    # plt.ylabel("wp (Mpc/h)")
+    # plt.savefig("fig_wprp")
+    # plt.show()
+    # plt.clf()
 
+    for tracer in ["LRG", "ELG"]:
+        fig, axs = plt.subplots(2, 3)
+        axs[0,0].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["y"])
+        axs[0,0].set_title("Tab XY")
+        axs[0,1].scatter(tab_mock_dict[tracer]["x"], tab_mock_dict[tracer]["z"])
+        axs[0,1].set_title("Tab XZ")
+        axs[0,2].scatter(tab_mock_dict[tracer]["y"], tab_mock_dict[tracer]["z"])
+        axs[0,2].set_title("Tab YZ")
+        axs[1,0].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["y"])
+        axs[1,0].set_title("Tab XY")
+        axs[1,1].scatter(true_mock_dict[tracer]["x"], true_mock_dict[tracer]["z"])
+        axs[1,1].set_title("Tab XZ")
+        axs[1,2].scatter(true_mock_dict[tracer]["y"], true_mock_dict[tracer]["z"])
+        axs[1,2].set_title("Tab YZ")
+        fig.suptitle(tracer)
+        plt.savefig(f"{tracer}_dist")
+        plt.show()
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'

@@ -38,7 +38,7 @@ def main(path_config_filename):
         -3, -0.25, bin_params["nbins"] + 1
         #bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1
     )
-    pimax = 10 #clustering_params['pimax']
+    pimax = 2 #clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
 
     run_params = yaml.safe_load(open(config["Paths"]["params_path"]))

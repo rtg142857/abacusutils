@@ -30,7 +30,7 @@ def main(path_config_filename):
     HOD_params = config['HOD_params']
     tracer_list=["LRG", "ELG"]
     Misc = config["Misc"]
-    want_rsd = HOD_params['want_rsd']
+    want_rsd = False #HOD_params['want_rsd']
     seed = Misc["random_seed"]
     clustering_params = config['clustering_params']
     bin_params = clustering_params['bin_params']
@@ -58,7 +58,7 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
     tab_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=seed
     )
 
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
@@ -76,7 +76,7 @@ def main(path_config_filename):
 
     print("Making 'true' mock...", flush=True)##########################################################################
     true_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
     )
     for tracer in tracer_list:
         # Testing all at the origin

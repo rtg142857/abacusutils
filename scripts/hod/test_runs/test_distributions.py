@@ -110,7 +110,7 @@ def main(path_config_filename):
         mock_ddrppi = DDrppi(autocorr=0, nthreads=32, pimax=pimax, #npibins=(pi_max//d_pi),
                             binfile=rpbins,
                             X1=lrgs["x"],Y1=lrgs["y"],Z1=lrgs["z"], weights1=np.ones(len(lrgs["x"])), X2=elgs["x"],
-                            Y2=elgs["x"],Z2 = elgs["x"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
+                            Y2=elgs["y"],Z2 = elgs["z"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
         print("Mock ddrppi:", mock_ddrppi)
         np.save(temp_stuff + mock + "_ddrppi", mock_ddrppi)
 

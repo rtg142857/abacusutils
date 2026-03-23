@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
 
+from Corrfunc.theory.DDrppi import DDrppi
+
 def cut_til_one_sat_tracer(array, Ncen):
     array_no_cen = array[Ncen:]
     return array_no_cen[::3]
@@ -38,6 +40,9 @@ def main(path_config_filename):
     )
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
+
+    run_params = yaml.safe_load(open(config["Paths"]["params_path"]))
+    boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
     Nthread=32
 
@@ -92,9 +97,22 @@ def main(path_config_filename):
     true_wp_dict = newBall.compute_wp(true_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
     tab_wp_dict = newBall.compute_wp(tab_mock_dict, rpbins, pimax, pi_bin_size, Nthread=Nthread)
 
-    # temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
+    temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
     # np.save(temp_stuff + "poisson_wp_LRG_ELG", true_wp_dict["LRG_ELG"])
     # np.save(temp_stuff + "tab_wp_LRG_ELG", tab_wp_dict["LRG_ELG"])
+
+    print("Getting ddrppi...", flush=True)############################################################################
+    mocks = {"poisson": true_mock_dict, "delta": tab_mock_dict}
+    for mock in ["poisson", "delta"]:
+        print(f"Getting ddrppi for {mock}")
+        lrgs = mocks[mock]["LRG"]
+        elgs = mocks[mock]["ELG"]
+        mock_ddrppi = DDrppi(autocorr=0, nthreads=32, pimax=pimax, #npibins=(pi_max//d_pi),
+                            binfile=rpbins,
+                            X1=lrgs["x"],Y1=lrgs["y"],Z1=lrgs["z"], weights1=np.ones(len(lrgs["x"])), X2=elgs["x"],
+                            Y2=elgs["x"],Z2 = elgs["x"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
+        print("Mock ddrppi:", mock_ddrppi)
+        np.save(temp_stuff + mocks, mock_ddrppi)
 
     print("Plotting...", flush=True)#####################################################################################
 

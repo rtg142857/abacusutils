@@ -114,6 +114,17 @@ def main(path_config_filename):
         print("Mock ddrppi:", mock_ddrppi)
         np.save(temp_stuff + mock + "_ddrppi", mock_ddrppi)
 
+    print("Doing more sanity checks...")################################################################################
+    print("Checking number of delta LRGs that have the ELG within 0.56Mpc/h... (10^-0.25)")
+    lrgs = tab_mock_dict["LRG"]
+    elgs = tab_mock_dict["ELG"]
+    squaredist = (lrgs["x"] - elgs["x"])**2 + (lrgs["y"] - elgs["y"])**2
+    withinxy = squaredist <= 0.56
+    zdist = lrgs["z"] - elgs["z"]
+    withinz = abs(zdist) < 10
+    within = np.logical_and(withinxy, withinz)
+    print(np.count_nonzero(within))
+
     print("Plotting...", flush=True)#####################################################################################
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])

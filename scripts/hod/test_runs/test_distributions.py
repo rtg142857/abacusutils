@@ -33,8 +33,8 @@ def main(path_config_filename):
     clustering_params = config['clustering_params']
     bin_params = clustering_params['bin_params']
     rpbins = np.logspace(
-        # bin_params['logmin'], -1, bin_params["nbins"] + 1
-        bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1
+        -3, -0.25, bin_params["nbins"] + 1
+        #bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1
     )
     pimax = clustering_params['pimax']
     pi_bin_size = clustering_params['pi_bin_size']
@@ -103,9 +103,9 @@ def main(path_config_filename):
     plt.loglog(rpcent, true_wp_dict["LRG_LRG"], label="Poisson LRGa")
     plt.loglog(rpcent, true_wp_dict["LRG_ELG"], label="Poisson LEx")
     plt.loglog(rpcent, true_wp_dict["ELG_ELG"], label="Poisson ELGa")
-    plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Tab LRGa")
-    plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Tab LEx")
-    plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Tab ELGa")
+    plt.loglog(rpcent, tab_wp_dict["LRG_LRG"], label="Delta LRGa")
+    plt.loglog(rpcent, tab_wp_dict["LRG_ELG"], label="Delta LEx")
+    plt.loglog(rpcent, tab_wp_dict["ELG_ELG"], label="Delta ELGa")
     plt.legend()
     plt.title("wp(rp)")
     plt.xlabel("r (Mpc/h)")

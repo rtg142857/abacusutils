@@ -112,7 +112,7 @@ def main(path_config_filename):
                             X1=lrgs["x"],Y1=lrgs["y"],Z1=lrgs["z"], weights1=np.ones(len(lrgs["x"])), X2=elgs["x"],
                             Y2=elgs["x"],Z2 = elgs["x"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
         print("Mock ddrppi:", mock_ddrppi)
-        np.save(temp_stuff + mocks, mock_ddrppi)
+        np.save(temp_stuff + mock, mock_ddrppi)
 
     print("Plotting...", flush=True)#####################################################################################
 

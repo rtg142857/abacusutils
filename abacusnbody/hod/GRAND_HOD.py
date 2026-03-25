@@ -546,8 +546,8 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
                 ur[i, 0] = np.sin(dec) * np.cos(ra)
                 ur[i, 1] = np.sin(dec) * np.sin(ra)
                 ur[i, 2] = np.cos(dec)
+    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/points_on_sphere.npy", ur)
     return ur
-
 
 #@njit(fastmath=True, parallel=True)  # parallel=True,
 def compute_fast_NFW(

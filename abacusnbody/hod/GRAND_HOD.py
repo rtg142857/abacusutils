@@ -546,7 +546,6 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
                 ur[i, 0] = np.sin(dec) * np.cos(ra)
                 ur[i, 1] = np.sin(dec) * np.sin(ra)
                 ur[i, 2] = np.cos(dec)
-    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/points_on_sphere.npy", ur)
     return ur
 
 #@njit(fastmath=True, parallel=True)  # parallel=True,
@@ -876,6 +875,7 @@ def gen_sats_nfw(
     sphere_seed = seed
     seed_jump = int(np.floor(SEED_MAX / 1.618))
     rd_pos_L = getPointsOnSphere(np.sum(num_sats_L), Nthread, seed=sphere_seed, verbose=verbose)
+    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/points_on_sphere.npy", rd_pos_L)
     #temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
     #np.save(temp_stuff + "rd_pos_L.npy", rd_pos_L)
     #np.save(temp_stuff + "hrvir.npy", hrvir)

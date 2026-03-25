@@ -19,6 +19,8 @@ def normalised_nfw_cdf(x: float, R: float):
     Normalised cdf of P(x) = x**2/(x*(1+x)**2), up to some cutoff R
     Clipped to be minimum 0 and maximum 1, to make it "bijective"
     """
+    if x < 0.0:
+        return 0.0
     normalised_cdf = nfw_radial_cdf(x) / nfw_radial_cdf(R)
     if normalised_cdf > 1.0:
         return 1.0
@@ -54,7 +56,7 @@ def invert_nfw_cdf(y: np.ndarray, R: float):
     result = np.empty(len(y))
     bnds = [(0, R)]
     for idx, y_value in enumerate(y):
-        optimisation_output = minimise(squared_error, initial_guess, args=(y_value, R), method='Nelder-Mead', bounds=bnds, tol=1e-6)
+        optimisation_output = minimise(squared_error, initial_guess, args=(y_value, R), bounds=bnds, tol=1e-6)
         assert optimisation_output.success, optimisation_output.message
         minimum = optimisation_output.x[0]
         if minimum > R or minimum < 0:
@@ -87,14 +89,20 @@ if __name__=="__main__":
     max = 40 #5.5 # about when the CDF = 1, so the two are normalised about the same
     N = 10000
     sample = nfw_draw(N, max)
+    print(np.count_nonzero(sample == 0.0))
 
-    counts, bins = np.histogram(sample, bins=30, density=True)
+    # counts, bins = np.histogram(sample, bins=30, density=True)
 
-    print(counts)
+    # print(counts)
     
-    true_xvals = np.linspace(0.001, max, num=50)
-    true_yvals = nfw_radial_pdf(true_xvals)
+    # true_xvals = np.linspace(0.001, max, num=50)
+    # true_yvals = nfw_radial_pdf(true_xvals)
 
-    plt.stairs(counts, bins)
-    plt.plot(true_xvals, true_yvals)
-    plt.show()
+    # plt.stairs(counts, bins)
+    # plt.plot(true_xvals, true_yvals)
+    # plt.show()
+
+    # xvals = np.linspace(-1, 5, 90)
+    # yvals = [normalised_nfw_cdf(xval, 40) for xval in xvals]
+    # plt.plot(xvals, yvals)
+    # plt.show()

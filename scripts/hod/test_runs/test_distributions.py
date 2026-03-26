@@ -58,7 +58,7 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
     tab_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=True, seed=None#seed=seed
     )
 
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
@@ -76,7 +76,7 @@ def main(path_config_filename):
 
     print("Making 'true' mock...", flush=True)##########################################################################
     true_mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=None#seed=seed
     )
     for tracer in tracer_list:
         # Testing all at the origin

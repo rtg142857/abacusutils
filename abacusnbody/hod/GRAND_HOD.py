@@ -890,6 +890,7 @@ def gen_sats_nfw(
     #     with numba.objmode(): print("Putting LRG satellites on NFW profile", flush=True)
     # put satellites on NFW
     nfw_seed = seed
+    NFW_draw = rng.permutation(NFW_draw)
     h_id_L, x_sat_L, y_sat_L, z_sat_L, vx_sat_L, vy_sat_L, vz_sat_L, M_L, h_hrvir_L = (
         compute_fast_NFW(
             NFW_draw,
@@ -920,6 +921,7 @@ def gen_sats_nfw(
         nfw_seed = (nfw_seed + seed_jump) % SEED_MAX
     # if verbose:
     #     with numba.objmode(): print("Putting ELG satellites on NFW profile", flush=True)
+    NFW_draw = rng.permutation(NFW_draw)
     h_id_E, x_sat_E, y_sat_E, z_sat_E, vx_sat_E, vy_sat_E, vz_sat_E, M_E, h_hrvir_E = (
         compute_fast_NFW(
             NFW_draw,
@@ -950,6 +952,7 @@ def gen_sats_nfw(
         nfw_seed = (nfw_seed + seed_jump) % SEED_MAX
     # if verbose:
     #     with numba.objmode(): print("Putting QSO satellites on NFW profile", flush=True)
+    NFW_draw = rng.permutation(NFW_draw)
     h_id_Q, x_sat_Q, y_sat_Q, z_sat_Q, vx_sat_Q, vy_sat_Q, vz_sat_Q, M_Q, h_hrvir_Q = (
         compute_fast_NFW(
             NFW_draw,
@@ -984,7 +987,6 @@ def gen_sats_nfw(
         z_sat_E = (z_sat_E + vz_sat_E * inv_velz2kms) % lbox
         z_sat_Q = (z_sat_Q + vz_sat_Q * inv_velz2kms) % lbox
     
-
     # if verbose:
     #     with numba.objmode(): print("Putting mock values in the output dicts", flush=True)
     LRG_dict = Dict.empty(key_type=types.unicode_type, value_type=float_array)

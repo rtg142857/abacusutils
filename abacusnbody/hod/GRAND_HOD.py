@@ -580,12 +580,12 @@ def compute_fast_NFW(
     """
 
     # For debugging; TODO: Undo
-    x_h = np.ones(len(x_h)) * Lbox/2
-    y_h = np.ones(len(y_h)) * Lbox/2
-    z_h = np.ones(len(z_h)) * Lbox/2
-    # x_h = Lbox/100 * np.arange(100).repeat(10000).reshape((-1, 10000)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
-    # y_h = Lbox/100 * np.arange(100).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
-    # z_h = Lbox/100 * np.repeat(np.arange(100), 10000)
+    # x_h = np.ones(len(x_h)) * Lbox/2
+    # y_h = np.ones(len(y_h)) * Lbox/2
+    # z_h = np.ones(len(z_h)) * Lbox/2
+    x_h = Lbox/100 * np.arange(100).repeat(10000).reshape((-1, 10000)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
+    y_h = Lbox/100 * np.arange(100).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
+    z_h = Lbox/100 * np.repeat(np.arange(100), 10000)
 
     diff = len(h_id) - len(x_h)
     if diff > 0:

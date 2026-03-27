@@ -143,9 +143,9 @@ def main(path_config_filename):
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
-    # wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
+    wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
-    # wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     # wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
     # wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
     # wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
@@ -181,7 +181,7 @@ def main(path_config_filename):
         #     mock_dict_sat[tracer] = {}
         #     for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
         #         mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
-        wp_dict = newBall.compute_xirppi(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
+        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
         print("wp_dict with cens: ",wp_dict)
         print("Getting ddrppi of the mock:")
         lrgs = mock_dict["LRG"]
@@ -225,19 +225,19 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    # plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
-    # plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
-    # plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    # plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
-    # plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
-    # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    # plt.legend()
-    # plt.title("wp(rp)")
-    # plt.xlabel("r (Mpc/h)")
-    # plt.ylabel("wp (Mpc/h)")
-    # plt.savefig("fig_wprp")
-    # plt.show()
-    # plt.clf()
+    plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
+    plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
+    plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
+    plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
+    plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
+    plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
+    plt.legend()
+    plt.title("wp(rp)")
+    plt.xlabel("r (Mpc/h)")
+    plt.ylabel("wp (Mpc/h)")
+    plt.savefig("fig_wprp")
+    plt.show()
+    plt.clf()
 
     print("Plotting HODs...")
     M_h = np.logspace(10, 16, 90)

@@ -579,27 +579,27 @@ def compute_fast_NFW(
     vrms_h: 'sigmav3d_L2com'
     """
 
-    # For debugging; TODO: Undo
-    # x_h = np.ones(len(x_h)) * Lbox/2
-    # y_h = np.ones(len(y_h)) * Lbox/2
-    # z_h = np.ones(len(z_h)) * Lbox/2
-    x_h = Lbox/100 * np.arange(100).repeat(10000).reshape((-1, 10000)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
-    y_h = Lbox/100 * np.arange(100).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
-    z_h = Lbox/100 * np.repeat(np.arange(100), 10000)
+    # # For debugging; TODO: Undo
+    # # x_h = np.ones(len(x_h)) * Lbox/2
+    # # y_h = np.ones(len(y_h)) * Lbox/2
+    # # z_h = np.ones(len(z_h)) * Lbox/2
+    # x_h = Lbox/100 * np.arange(100).repeat(10000).reshape((-1, 10000)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
+    # y_h = Lbox/100 * np.arange(100).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
+    # z_h = Lbox/100 * np.repeat(np.arange(100), 10000)
 
-    diff = len(h_id) - len(x_h)
-    if diff > 0:
-        padright = np.zeros(len(h_id) - len(x_h))
-        x_h = np.concatenate((x_h, padright))
-        y_h = np.concatenate((y_h, padright))
-        z_h = np.concatenate((z_h, padright))
-    else:
-    # print(len(M))
-    # print(len(x_h))
-    # print(np.shape(rd_pos))
-        x_h = x_h[:len(M)]
-        y_h = y_h[:len(M)]
-        z_h = z_h[:len(M)]
+    # diff = len(h_id) - len(x_h)
+    # if diff > 0:
+    #     padright = np.zeros(len(h_id) - len(x_h))
+    #     x_h = np.concatenate((x_h, padright))
+    #     y_h = np.concatenate((y_h, padright))
+    #     z_h = np.concatenate((z_h, padright))
+    # else:
+    # # print(len(M))
+    # # print(len(x_h))
+    # # print(np.shape(rd_pos))
+    #     x_h = x_h[:len(M)]
+    #     y_h = y_h[:len(M)]
+    #     z_h = z_h[:len(M)]
 
     # numba.set_num_threads(Nthread)
     # figuring out the number of halos kept for each thread

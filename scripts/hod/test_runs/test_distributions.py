@@ -78,15 +78,15 @@ def main(path_config_filename):
     true_mock_dict = newBall.run_hod(
         newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=Nthread, verbose=True, tabulation_mock=False, seed=seed
     )
-    for tracer in tracer_list:
-        # Testing all at the origin
-        # for ax in ["x", "y", "z"]:
-            # tab_mock_dict[tracer][ax] = np.zeros(len(tab_mock_dict[tracer][ax]))
-            # true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
+    # for tracer in tracer_list:
+    #     # Testing all at the origin
+    #     # for ax in ["x", "y", "z"]:
+    #         # tab_mock_dict[tracer][ax] = np.zeros(len(tab_mock_dict[tracer][ax]))
+    #         # true_mock_dict[tracer][ax] = np.zeros(len(true_mock_dict[tracer][ax]))
 
-        for field in fields_to_cut:
-            tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:10000]
-            true_mock_dict[tracer][field] = true_mock_dict[tracer][field][:10000]
+    #     for field in fields_to_cut:
+    #         tab_mock_dict[tracer][field] = tab_mock_dict[tracer][field][:10000]
+    #         true_mock_dict[tracer][field] = true_mock_dict[tracer][field][:10000]
     print("Sanity check: Number of LRGs and ELGs")
     print("Number of LRGs in the tab mock:", len(tab_mock_dict["LRG"]["mass"]))
     print("Number of ELGs in the tab mock:", len(tab_mock_dict["ELG"]["mass"]))

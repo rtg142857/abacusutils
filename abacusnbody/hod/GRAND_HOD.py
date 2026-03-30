@@ -53,7 +53,7 @@ def n_sat_LRG_modified(M_h, logM_cut, M_cut, M_1, sigma, alpha, kappa):
         ((M_h - kappa * M_cut) / M_1) ** alpha
         * 0.5
         * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
-    ) * 0 # TODO: UNDO
+    ) # TODO: UNDO
 
 
 @njit(fastmath=True)
@@ -61,7 +61,7 @@ def n_cen_LRG(M_h, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
     """
-    return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # For debugging; TODO: Undo
+    return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) * 0 # For debugging; TODO: Undo
 
 
 @njit(fastmath=True)
@@ -98,7 +98,7 @@ def N_sat_elg(M_h, M_cut, kappa, M_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0):
         return 0
     return (
         A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
-    ) # + beta*(M_h/M_1)**(-alpha1)/100
+    ) * 0# + beta*(M_h/M_1)**(-alpha1)/100
 
 
 @njit(fastmath=True)
@@ -111,7 +111,7 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
     return (
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) * 0 # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3)) # For debugging; TODO: Undo
+    ) # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3)) # For debugging; TODO: Undo
 
 
 @njit(fastmath=True)

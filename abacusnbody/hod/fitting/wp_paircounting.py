@@ -15,23 +15,23 @@ def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
     """
     Standard Zheng et al. (2005) satellite HOD parametrization for LRGs, modified with n_cent_LRG
     """
-    mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    mass_lower = mass_bin_edges[9]
-    mass_upper = mass_bin_edges[10]
-    below_cut = M_h - mass_lower < 0
-    above_cut = M_h - mass_upper > 0
-    hod_value = np.ones(np.size(M_h))
-    hod_value[below_cut] = 0
-    hod_value[above_cut] = 0
-    # M_cut = 10 ** logM_cut
-    # M_1 = 10 ** logM_1
-    # below_cut = M_h - kappa * M_cut < 0
-    # hod_value = (
-    #     ((M_h - kappa * M_cut) / M_1) ** alpha
-    #     * 0.5
-    #     * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
-    # ) * 0 + 1 #TODO: UNDO
+    # mass_bin_edges = 10**10 * np.logspace(0,6,31)
+    # mass_lower = mass_bin_edges[9]
+    # mass_upper = mass_bin_edges[10]
+    # below_cut = M_h - mass_lower < 0
+    # above_cut = M_h - mass_upper > 0
+    # hod_value = np.ones(np.size(M_h))
     # hod_value[below_cut] = 0
+    # hod_value[above_cut] = 0
+    M_cut = 10 ** logM_cut
+    M_1 = 10 ** logM_1
+    below_cut = M_h - kappa * M_cut < 0
+    hod_value = (
+        ((M_h - kappa * M_cut) / M_1) ** alpha
+        * 0.5
+        * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
+    )
+    hod_value[below_cut] = 0
     return hod_value
 
 def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
@@ -51,20 +51,20 @@ def N_sat_ELG(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0
     Standard power law modulated by an exponential fall off at small M
     """
     # return (M_h/M_1)**alpha/(1+np.exp(-A_s*(np.log10(M_h)-np.log10(kappa*M_cut)))) + beta*(M_h/M_1)**(-alpha1)/100
-    mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    mass_lower = mass_bin_edges[9]
-    mass_upper = mass_bin_edges[10]
-    below_cut = M_h - mass_lower < 0
-    above_cut = M_h - mass_upper > 0
-    hod_value = np.ones(np.size(M_h))
-    hod_value[below_cut] = 0
-    hod_value[above_cut] = 0
-    # M_cut = 10 ** logM_cut
-    # M_1 = 10 ** logM_1
-    # below_cut = M_h - kappa * M_cut < 0
-    
-    # hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha * 0 + 1 #TODO: UNDO # + beta*(M_h/M_1)**(-alpha1)/100
+    # mass_bin_edges = 10**10 * np.logspace(0,6,31)
+    # mass_lower = mass_bin_edges[9]
+    # mass_upper = mass_bin_edges[10]
+    # below_cut = M_h - mass_lower < 0
+    # above_cut = M_h - mass_upper > 0
+    # hod_value = np.ones(np.size(M_h))
     # hod_value[below_cut] = 0
+    # hod_value[above_cut] = 0
+    M_cut = 10 ** logM_cut
+    M_1 = 10 ** logM_1
+    below_cut = M_h - kappa * M_cut < 0
+    
+    hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha # + beta*(M_h/M_1)**(-alpha1)/100
+    hod_value[below_cut] = 0
     return hod_value
 
 def N_cen_QSO(M_h, logM_cut, sigma):

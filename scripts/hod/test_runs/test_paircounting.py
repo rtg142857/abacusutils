@@ -198,7 +198,7 @@ def main(path_config_filename):
         # print("wp_dict without cens: ",wp_dict_sat)
         # wp_mock = wp_dict["LRG_ELG"]
 
-        np.save(temp_stuff + "mock_xi_LRG_ELG", wp_dict["LRG_ELG"])
+        np.save(temp_stuff + "mock_wp_LRG_ELG", wp_dict["LRG_ELG"])
         # for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
         #     np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
         # wp_mock_LRGLRG = wp_dict["LRG_LRG"]

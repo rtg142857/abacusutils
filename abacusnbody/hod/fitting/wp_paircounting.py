@@ -207,17 +207,26 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
 
     elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"): # none of these should be doublecounted, and yet final result seems to be double, but only at low rp?
         ccp = paircounts["cencen_ELGcross"]
-        csp = paircounts["censat_ELGcross"]
+        csp_lcen_esat = paircounts["censat_ELGcross"][0]
+        csp_ecen_lsat = paircounts["censat_ELGcross"][1]
         ssp = paircounts["satsat_ELGcross"]
         ss1p = paircounts["satsat_onehalo_ELGcross"]
         vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-        vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+        vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat)), verbose)
+        vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat)), verbose)
         vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
         vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
-        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) / 2 #/ num_sat_parts
+        if tracer1 == "ELG":
+            CS_ecen_lsat = create_weighting_factor(csp_ecen_lsat,hod_cen1,hod_sat2)
+            CS_lcen_esat = create_weighting_factor(csp_lcen_esat,hod_cen2,hod_sat1)
+        else:
+            CS_ecen_lsat = create_weighting_factor(csp_lcen_esat,hod_cen1,hod_sat2)
+            CS_lcen_esat = create_weighting_factor(csp_ecen_lsat,hod_cen2,hod_sat1)
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) #/ (num_sat_parts**2) 
         SS1 = np.zeros(shape=np.shape(SS)) #create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
+
+        CS = CS_ecen_lsat + CS_lcen_esat
 
     else:
         ccp = paircounts["cencen"]

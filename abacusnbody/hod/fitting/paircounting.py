@@ -331,7 +331,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
                 npairs_test_cross = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
                 npairs_mass_r_bins_test_cross = npairs_conversion_wp(samples_1,samples_2,npairs_test_cross,rpbins,pi_max, d_pi)
 
-                npairs_mass_r_bins_test += npairs_mass_r_bins_test_cross
+                npairs_mass_r_bins_test = np.array([npairs_mass_r_bins_test, npairs_mass_r_bins_test_cross])
 
         case "satsat":
             # Only want one sat particle per halo
@@ -373,7 +373,7 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=True
         paircounts: Dict of paircounts, in the following format:
         paircounts["cencen"], ''["censat"], ''["satsat"], ''["satsat_onehalo"] (for LRGs and QSOs)
         paircounts["cencen_ELGauto"], ... (for ELGs specifically)
-        paircounts["cencen_ELGcross"], ... (where censat counts BOTH LRG cen-ELG sat and ELG cen-LRG sat)
+        paircounts["cencen_ELGcross"], ... (where censat has an extra dimension, the first entry for LRG cen-ELG sat and the second for ELG cen-LRG sat)
         Each value is a 3d numpy array of the following form:
         paircounts["cencen"][i,j,k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
 

@@ -146,15 +146,15 @@ def main(path_config_filename):
     wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
-    # wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    # wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    # wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    # np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_pair_LRGLRG)
-    np.save(temp_stuff + "pair_xi_LRG_ELG.npy", wp_pair_ELGLRG)
-    # np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_pair_ELGELG)
-    # np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_pair_LRGQSO)
-    # np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_pair_ELGQSO)
-    # np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_pair_QSOQSO)
+    wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_pair_LRGLRG)
+    np.save(temp_stuff + "pair_wp_LRG_ELG.npy", wp_pair_ELGLRG)
+    np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_pair_ELGELG)
+    np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_pair_LRGQSO)
+    np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_pair_ELGQSO)
+    np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_pair_QSOQSO)
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)
@@ -183,24 +183,24 @@ def main(path_config_filename):
         #         mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
         print("wp_dict with cens: ",wp_dict)
-        print("Getting ddrppi of the mock:")
-        lrgs = mock_dict["LRG"]
-        elgs = mock_dict["ELG"]
-        mock_ddrppi = DDrppi(autocorr=0, nthreads=32, pimax=pimax, #npibins=(pi_max//d_pi),
-                         binfile=rpbins,
-                         X1=lrgs["x"],Y1=lrgs["y"],Z1=lrgs["z"], weights1=np.ones(len(lrgs["x"])), X2=elgs["x"],
-                         Y2=elgs["x"],Z2 = elgs["x"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
-        print("Mock ddrppi:", mock_ddrppi)
-        np.save(temp_stuff + "mock_ddrppi", mock_ddrppi)
+        # print("Getting ddrppi of the mock:")
+        # lrgs = mock_dict["LRG"]
+        # elgs = mock_dict["ELG"]
+        # mock_ddrppi = DDrppi(autocorr=0, nthreads=32, pimax=pimax, #npibins=(pi_max//d_pi),
+        #                  binfile=rpbins,
+        #                  X1=lrgs["x"],Y1=lrgs["y"],Z1=lrgs["z"], weights1=np.ones(len(lrgs["x"])), X2=elgs["x"],
+        #                  Y2=elgs["x"],Z2 = elgs["x"],weights2=np.ones(len(elgs["x"])),periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product")
+        # print("Mock ddrppi:", mock_ddrppi)
+        # np.save(temp_stuff + "mock_ddrppi", mock_ddrppi)
 
         # print("Now for the satelllites only:")
         # wp_dict_sat = newBall.compute_wp(mock_dict_sat, rpbins, pimax, pi_bin_size, Nthread=32)
         # print("wp_dict without cens: ",wp_dict_sat)
         # wp_mock = wp_dict["LRG_ELG"]
 
-        np.save(temp_stuff + "mock_wp_LRG_ELG", wp_dict["LRG_ELG"])
-        # for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
-        #     np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
+        # np.save(temp_stuff + "mock_wp_LRG_ELG", wp_dict["LRG_ELG"])
+        for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
+            np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
         # wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         # wp_mock_ELGLRG = wp_dict["LRG_ELG"]
         # wp_mock_ELGELG = wp_dict["ELG_ELG"]
@@ -225,16 +225,41 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
-    plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
-    plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
-    plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
-    plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    plt.legend()
-    plt.title("wp(rp)")
-    plt.xlabel("r (Mpc/h)")
-    plt.ylabel("wp (Mpc/h)")
+    fig, axs = plt.subplots(2, 3)
+    axs[0,0].plot(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
+    axs[0,0].plot(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
+    axs[0,0].legend()
+
+    axs[0,1].plot(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
+    axs[0,1].plot(rpcent, wp_pair_ELGELG, label="Pair ELGa")
+    axs[0,1].legend()
+    
+    axs[0,2].plot(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
+    axs[0,2].plot(rpcent, wp_pair_QSOQSO, label="Pair QSOa")
+    axs[0,2].legend()
+
+    axs[1,0].plot(rpcent, wp_dict["LRG_ELG"], label="True LEx")
+    axs[1,0].plot(rpcent, wp_pair_ELGLRG, label="Pair LEx")
+    axs[1,0].legend()
+
+    axs[1,1].plot(rpcent, wp_dict["LRG_QSO"], label="True LQx")
+    axs[1,1].plot(rpcent, wp_pair_LRGQSO, label="Pair LQx")
+    axs[1,1].legend()
+    
+    axs[1,2].plot(rpcent, wp_dict["ELG_QSO"], label="True EQx")
+    axs[1,2].plot(rpcent, wp_pair_ELGQSO, label="Pair EQx")
+    axs[1,2].legend()
+
+    # plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
+    # plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
+    # plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
+    # plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
+    # plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
+    # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
+    # plt.legend()
+    # plt.title("wp(rp)")
+    # plt.xlabel("r (Mpc/h)")
+    # plt.ylabel("wp (Mpc/h)")
     plt.savefig("fig_wprp")
     plt.show()
     plt.clf()

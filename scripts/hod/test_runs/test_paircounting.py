@@ -226,28 +226,28 @@ def main(path_config_filename):
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
     fig, axs = plt.subplots(2, 3)
-    axs[0,0].plot(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
-    axs[0,0].plot(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
+    axs[0,0].loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
+    axs[0,0].loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
     axs[0,0].legend()
 
-    axs[0,1].plot(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    axs[0,1].plot(rpcent, wp_pair_ELGELG, label="Pair ELGa")
+    axs[0,1].loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
+    axs[0,1].loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
     axs[0,1].legend()
     
-    axs[0,2].plot(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
-    axs[0,2].plot(rpcent, wp_pair_QSOQSO, label="Pair QSOa")
+    axs[0,2].loglog(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
+    axs[0,2].loglog(rpcent, wp_pair_QSOQSO, label="Pair QSOa")
     axs[0,2].legend()
 
-    axs[1,0].plot(rpcent, wp_dict["LRG_ELG"], label="True LEx")
-    axs[1,0].plot(rpcent, wp_pair_ELGLRG, label="Pair LEx")
+    axs[1,0].loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
+    axs[1,0].loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
     axs[1,0].legend()
 
-    axs[1,1].plot(rpcent, wp_dict["LRG_QSO"], label="True LQx")
-    axs[1,1].plot(rpcent, wp_pair_LRGQSO, label="Pair LQx")
+    axs[1,1].loglog(rpcent, wp_dict["LRG_QSO"], label="True LQx")
+    axs[1,1].loglog(rpcent, wp_pair_LRGQSO, label="Pair LQx")
     axs[1,1].legend()
     
-    axs[1,2].plot(rpcent, wp_dict["ELG_QSO"], label="True EQx")
-    axs[1,2].plot(rpcent, wp_pair_ELGQSO, label="Pair EQx")
+    axs[1,2].loglog(rpcent, wp_dict["ELG_QSO"], label="True EQx")
+    axs[1,2].loglog(rpcent, wp_pair_ELGQSO, label="Pair EQx")
     axs[1,2].legend()
 
     # plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")

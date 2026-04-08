@@ -71,7 +71,7 @@ def N_sat_generic(M_h, M_cut, kappa, M_1, alpha, A_s=1.0):
     """
     if M_h - kappa * M_cut < 0:
         return 0
-    return A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
+    return A_s * ((M_h - kappa * M_cut) / M_1) ** alpha * 0 # TODO: UNDO
 
 
 @njit(fastmath=True)

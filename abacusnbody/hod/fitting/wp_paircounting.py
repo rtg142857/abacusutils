@@ -71,7 +71,16 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     """
     HOD function (Zheng et al. (2005) with p_max) for QSO centrals taken from arXiv:2007.09012.
     """
-    return 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
+    mass_bin_edges = 10**10 * np.logspace(0,6,31)
+    mass_lower = mass_bin_edges[9]
+    mass_upper = mass_bin_edges[10]
+    below_cut = M_h - mass_lower < 0
+    above_cut = M_h - mass_upper > 0
+    hod_value = np.ones(np.size(M_h))
+    hod_value[below_cut] = 0
+    hod_value[above_cut] = 0
+    return hod_value
+    # return 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
 
 def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     """
@@ -151,7 +160,7 @@ def get_npart(hod_params: np.ndarray, tracer_list: list, other_stuff_dict_here: 
     """
     npart = {}
     for tracer in tracer_list:
-        npart[tracer] = get_npart_given_tracer(hod_params=hod_params, tracer=tracer, other_stuff_dict_here=other_stuff_dict_here) * 402584 / 403024 # TODO: UNDO
+        npart[tracer] = get_npart_given_tracer(hod_params=hod_params, tracer=tracer, other_stuff_dict_here=other_stuff_dict_here)
     return npart
 
 #######################################################################################

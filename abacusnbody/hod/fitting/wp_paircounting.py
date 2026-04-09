@@ -151,7 +151,7 @@ def get_npart(hod_params: np.ndarray, tracer_list: list, other_stuff_dict_here: 
     """
     npart = {}
     for tracer in tracer_list:
-        npart[tracer] = get_npart_given_tracer(hod_params=hod_params, tracer=tracer, other_stuff_dict_here=other_stuff_dict_here)
+        npart[tracer] = get_npart_given_tracer(hod_params=hod_params, tracer=tracer, other_stuff_dict_here=other_stuff_dict_here) * 402584 / 403024 # TODO: UNDO
     return npart
 
 #######################################################################################
@@ -205,7 +205,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
-    elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"): # none of these should be doublecounted, and yet final result seems to be double, but only at low rp?
+    elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"):
         ccp = paircounts["cencen_ELGcross"]
         csp_lcen_esat = paircounts["censat_ELGcross"][0]
         csp_ecen_lsat = paircounts["censat_ELGcross"][1]

@@ -47,9 +47,9 @@ HOD_params:
 
     # parameters for setting up the HOD of LRGs
     LRG_params:
-        logM_cut: 12.21 #12.8 # 13.0 #13.3
+        logM_cut: 12.8 # 13.0 #13.3
         logM1: 14.0 # 14.24 # 14.4
-        sigma: 0.56 #0.1 # 0.25 #0.6 # 0.6 # 0.8
+        sigma: 0.1 # 0.25 #0.6 # 0.6 # 0.8
         alpha: 0.78 # 0.4 # 1.0
         kappa: 0.63 # 0.98 # 0.4
         alpha_c: 0
@@ -128,7 +128,7 @@ clustering_params:
 fitting_params:
     nwalkers: 720 #36
     num_steps: 200 #100000
-    target_dict_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/"
+    target_dict_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/z0.8-1.1/"
     sampler_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/samplers/"
     paircounts_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/"
 

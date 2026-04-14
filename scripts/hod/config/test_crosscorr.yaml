@@ -127,7 +127,7 @@ clustering_params:
 # Specifically for fitting the HOD parameters
 fitting_params:
     nwalkers: 36 #720 #36
-    num_steps: 100 #200 #100000
+    num_steps: 1000 #200 #100000
     target_dict_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/z0.8-1.1/"
     sampler_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/samplers/"
     paircounts_save_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/"

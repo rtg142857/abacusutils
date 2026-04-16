@@ -256,8 +256,9 @@ def main(path_config_filename):
     plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
     # plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
     # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    plt.loglog(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
     plt.loglog(rpcent, wp_pair_QSOQSO, label="Pair QSOa")
+    plt.loglog(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
+
     plt.legend()
     plt.title("wp(rp)")
     plt.xlabel("r (Mpc/h)")

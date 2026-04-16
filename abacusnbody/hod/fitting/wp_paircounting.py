@@ -73,7 +73,7 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     """
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
     mass_lower = mass_bin_edges[10]
-    mass_upper = mass_bin_edges[31]
+    mass_upper = mass_bin_edges[30]
     below_cut = M_h - mass_lower < 0
     above_cut = M_h - mass_upper > 0
     hod_value = np.ones(np.size(M_h))

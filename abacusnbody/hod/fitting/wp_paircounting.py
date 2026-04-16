@@ -91,7 +91,7 @@ def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     below_cut = M_h - kappa * M_cut < 0
     hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
     hod_value[below_cut] = 0
-    return hod_value
+    return hod_value * 0 # TODO: UNDO
 
 def phi_fun(logM_h, logM_cut, sigma):
     """

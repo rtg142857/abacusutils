@@ -132,8 +132,8 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     HOD function (Zheng et al. (2005) with p_max) for QSO centrals taken from arXiv:2007.09012.
     """
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    mass_lower = mass_bin_edges[6]
-    mass_upper = mass_bin_edges[7]
+    mass_lower = mass_bin_edges[5]
+    mass_upper = mass_bin_edges[10]
     if M_h - mass_lower < 0:
         return 0
     elif M_h - mass_upper > 0:

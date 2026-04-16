@@ -136,8 +136,8 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     mass_upper = mass_bin_edges[5]
     if M_h - mass_lower < 0:
         return 0
-    elif M_h - mass_upper > 0:
-        return 0
+    # elif M_h - mass_upper > 0:
+    #     return 0
     else:
         return 1
     return 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))

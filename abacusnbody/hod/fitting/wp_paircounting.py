@@ -78,7 +78,7 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     above_cut = M_h - mass_upper > 0
     hod_value = np.ones(np.size(M_h))
     hod_value[below_cut] = 0
-    hod_value[above_cut] = 0
+    # hod_value[above_cut] = 0
     return hod_value
     return 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
 

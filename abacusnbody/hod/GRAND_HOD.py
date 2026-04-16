@@ -133,7 +133,7 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     """
     mass_bin_edges = 10**10 * np.logspace(0,6,31)
     mass_lower = mass_bin_edges[10]
-    mass_upper = mass_bin_edges[15]
+    mass_upper = mass_bin_edges[20]
     if M_h - mass_lower < 0:
         return 0
     elif M_h - mass_upper > 0:

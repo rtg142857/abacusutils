@@ -63,7 +63,8 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Optimization done", flush=True)
     best_fit = OptimizeResult["x"]
-    print("Best params:", best_fit, flush=True)
+    print("Best params:")#, best_fit, flush=True)
+    print_hod_values(best_fit)
     print("Chi squared:", OptimizeResult["fun"], flush=True)
     print("Iterations:", OptimizeResult["nit"], flush=True)
     print("Successful:", OptimizeResult["success"], flush=True)
@@ -74,7 +75,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     np.save(save_path+"stoch_xall.npy", OptimizeResult["xall"])
     np.save(save_path+"stoch_funall.npy", OptimizeResult["funall"])
 
-    print("Saving HOD values...")
+    print("Saving HOD values...", flush=True)
     M_h = np.logspace(10, 16, 90)
     hod_values = get_hod_values_given_parameters(M_h, best_fit, tracer_list, other_stuff_dict_here)
     for key, val in hod_values.items():

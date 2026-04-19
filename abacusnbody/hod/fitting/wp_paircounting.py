@@ -67,7 +67,7 @@ def N_sat_ELG(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0
     hod_value[below_cut] = 0
     return hod_value
 
-def N_cen_QSO(M_h, logM_cut, sigma):
+def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     """
     HOD function (Zheng et al. (2005) with p_max) for QSO centrals taken from arXiv:2007.09012.
     """
@@ -80,7 +80,7 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     # hod_value[below_cut] = 0
     # hod_value[above_cut] = 0
     # return hod_value
-    return 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
+    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
 
 def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     """
@@ -125,8 +125,8 @@ def get_hods_given_tracer_and_params(M_h: np.ndarray, hod_params: np.ndarray, tr
             hod_cen = N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma)
             hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)
         case "QSO":
-            logM_cut, logM1, sigma, alpha, kappa = tuple(hod_params[13:18])
-            hod_cen = N_cen_QSO(M_h, logM_cut, sigma)
+            logM_cut, logM1, sigma, alpha, kappa, p_max = tuple(hod_params[13:19])
+            hod_cen = N_cen_QSO(M_h, logM_cut, sigma, p_max)
             hod_sat = N_sat_QSO(M_h, logM_cut, kappa, logM1, alpha)
     return hod_cen, hod_sat
 

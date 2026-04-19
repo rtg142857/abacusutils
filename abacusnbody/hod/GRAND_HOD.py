@@ -127,7 +127,7 @@ def N_cen_ELG_v2(M_h, p_max, logM_cut, sigma, gamma):
 
 
 @njit(fastmath=True)
-def N_cen_QSO(M_h, logM_cut, sigma):
+def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     """
     HOD function (Zheng et al. (2005) with p_max) for QSO centrals taken from arXiv:2007.09012.
     """
@@ -140,7 +140,7 @@ def N_cen_QSO(M_h, logM_cut, sigma):
     #     return 0
     # else:
     #     return 1
-    return 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
+    return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
 
 
 @njit(fastmath=True)
@@ -247,6 +247,7 @@ def gen_cent(
 
     if want_QSO:
         logM_cut_Q, sigma_Q = QSO_hod_dict['logM_cut'], QSO_hod_dict['sigma']
+        pmax_Q = QSO_hod_dict["p_max"]
         alpha_c_Q, Ac_Q, Bc_Q, ic_Q = (
             QSO_hod_dict['alpha_c'],
             QSO_hod_dict['Acent'],
@@ -304,7 +305,7 @@ def gen_cent(
                 if want_QSO:
                     logM_cut_Q_temp = logM_cut_Q + Ac_Q * deltac[i] + Bc_Q * fenv[i]
                     QSO_marker += (
-                        N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q) * ic_Q * multis[i]
+                        N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q) * ic_Q * multis[i]
                     )
 
                 if randoms[i] <= LRG_marker:
@@ -1686,6 +1687,7 @@ def gen_gals(
 
         QSO_hod_dict['logM_cut'] = logM_cut_Q
         QSO_hod_dict['logM1'] = logM1_Q
+        QSO_hod_dict['p_max'] = QSO_HOD.get('p_max', 1.0)
 
         QSO_hod_dict['Acent'] = QSO_HOD.get('Acent', 0.0)
         QSO_hod_dict['Asat'] = QSO_HOD.get('Asat', 0.0)

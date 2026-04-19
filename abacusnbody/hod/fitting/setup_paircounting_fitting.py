@@ -218,7 +218,8 @@ def get_priors(type="bounds"):
                         [10,16],
                         [0,5],
                         [0,5],
-                        [0,5]
+                        [0,5],
+                        [0,1]
             ])
         case "mean":
             return np.array([ # Yuan et al.
@@ -239,6 +240,7 @@ def get_priors(type="bounds"):
                 14.4,
                 0.5,
                 1.0,
+                0.5,
                 0.5
             ])
         case "std":
@@ -260,8 +262,33 @@ def get_priors(type="bounds"):
                 0.5,
                 0.2,
                 0.3,
-                0.2
+                0.2,
+                0.5
             ])
+
+def print_hod_values(hod_params):
+    print("LRG params:")
+    print("logM_cut:", hod_params[0])
+    print("logM1:", hod_params[1])
+    print("sigma:", hod_params[2])
+    print("alpha:", hod_params[3])
+    print("kappa:", hod_params[4])
+    print("ELG params:")
+    print("p_max:", hod_params[5])
+    print("Q:", hod_params[6])
+    print("logM_cut:", hod_params[7])
+    print("kappa:", hod_params[8])
+    print("sigma:", hod_params[9])
+    print("logM1:", hod_params[10])
+    print("alpha:", hod_params[11])
+    print("gamma:", hod_params[12])
+    print("QSO params:")
+    print("logM_cut:", hod_params[13])
+    print("logM1:", hod_params[14])
+    print("sigma:", hod_params[15])
+    print("alpha:", hod_params[16])
+    print("kappa:", hod_params[17])
+    print("p_max:", hod_params[18])
 
 def initialise_walkers(initial_params_random: bool, num_walkers):
     """
@@ -298,7 +325,8 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
         14.4,
         0.8,
         1.0,
-        0.4
+        0.4,
+        0.5
     ])
 
     rng = np.random.default_rng(seed=0)

@@ -29,9 +29,9 @@ def main(path_config_filename):
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
     ### Paths ###
-    save_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/samplers/"
+    save_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/"
     paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/" + sim_label + "/"
-    target_dict_path = config["fitting_params"]["target_dict_path"]
+    target_dict_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/Y1_z0.8-1.1/"
 
     print("Loading precomputed things...")
     paircounts = {}
@@ -40,6 +40,8 @@ def main(path_config_filename):
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)
     target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list)
+    print(target_wp)
+    print(target_jackknife_inverse)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=HOD_params_list, tracers=tracer_list, paircounts=paircounts,

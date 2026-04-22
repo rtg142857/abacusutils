@@ -30,7 +30,7 @@ def main(path_config_filename):
 
     ### Paths ###
     save_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/samplers/"
-    paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/"
+    paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/" + sim_label + "/"
     target_dict_path = config["fitting_params"]["target_dict_path"]
 
     print("Loading precomputed things...")

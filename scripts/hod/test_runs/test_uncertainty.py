@@ -56,7 +56,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
             rwp_data = rpcent * target_wp[label_dict[yx_label]]
             rwp_error_mat = target_jackknife[label_dict[yx_label]]
-            rwp_error = np.diagonal(rwp_error_mat) * rpcent
+            rwp_error = np.sqrt(np.diagonal(rwp_error_mat)) * rpcent
             axs[y, x].errorbar(rpcent[i0:i1], rwp_data[i0:i1], yerr=rwp_error[i0:i1], color="orange", label=f"Data ("+label_dict[yx_label]+")")
             axs[y, x].plot(rpcent[:i0], rwp_data[:i0], marker="o", color="black", label="Data (unused)")
             axs[y, x].set_xscale('log')

@@ -88,7 +88,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=best_fit, tracers=tracer_list, paircounts=paircounts,
-            target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params)
+            target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=(i0, i1))
 
     return best_fit
 

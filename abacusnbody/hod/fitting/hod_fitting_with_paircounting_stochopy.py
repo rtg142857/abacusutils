@@ -117,7 +117,7 @@ def plot_HODs(save_path, M_h, hod_values, tracers):
         plt.legend()
     plt.savefig(save_path)
 
-def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params):
+def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params, wp_limit=(0, 24)):
     import matplotlib.pyplot as plt
 
     npart = get_npart(hod_params, tracers, other_stuff_dict_here)
@@ -129,8 +129,9 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
     label_dict = {"0_0": "LRG_LRG", "0_1": "ELG_ELG", "0_2": "QSO_QSO", "1_0": "LRG_ELG", "1_1": "LRG_QSO", "1_2": "ELG_QSO"}
 
-    i0 = 5 # 
-    i1 = np.size(target_wp["LRG_LRG"])
+    # i0 = 5 # 
+    # i1 = np.size(target_wp["LRG_LRG"])
+    i0, i1 = wp_limit
 
     fig, axs = plt.subplots(2, 3, figsize=(15, 8))
     for y in range(2):
@@ -141,9 +142,9 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
             rwp_data = rpcent * target_wp[label_dict[yx_label]]
             rwp_error_mat = np.linalg.inv(target_jackknife_inverse[label_dict[yx_label]])
-            rwp_error = np.diagonal(rwp_error_mat) * rpcent
-            axs[y, x].errorbar(rpcent[i0:i1], rwp_data[i0:i1], yerr=rwp_error[i0:i1], color="orange", label=f"Data ("+label_dict[yx_label]+")")
-            axs[y, x].plot(rpcent[:i0], rwp_data[:i0], marker="o", color="black", label="Data (unused)")
+            rwp_error = np.sqrt(np.diagonal(rwp_error_mat)) * rpcent
+            axs[y, x].errorbar(rpcent[i0:i1], rwp_data, yerr=rwp_error, color="orange", label=f"Data ("+label_dict[yx_label]+")")
+            #axs[y, x].plot(rpcent[:i0], rwp_data[:i0], marker="o", color="black", label="Data (unused)")
             axs[y, x].set_xscale('log')
             axs[y, x].legend()
 

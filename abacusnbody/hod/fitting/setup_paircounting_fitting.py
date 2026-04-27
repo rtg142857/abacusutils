@@ -40,10 +40,10 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         for tracer in tracer_list:
             fitting_ngal = npart[tracer] / boxsize**3
             target_ngal = target_ngal_dict[tracer]
-            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal)
+            # total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal) TODO: UNDO
 
         # making sure there's only one central galaxy; this might make the n_g chi squared redundant?
-        total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here)
+        # total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here) TODO: UNDO
     else:
         total_log_prob = -np.inf
 

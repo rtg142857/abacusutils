@@ -6,7 +6,7 @@ from pathlib import Path
 from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart, get_hods_given_tracer_and_params
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, bounds=(0, 24)):
+def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24)):
     if params_inside_priors(hod_params):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
@@ -34,7 +34,7 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
                     fitting_wp = wp_dict[tr1+"_"+tr2]
                     target_wp = target_wp_dict[tr1+"_"+tr2]
                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
-                    total_log_prob += negative_chi_squared_wp_single_tracer_pair(fitting_wp, target_wp, target_jk_inv, bounds=bounds)
+                    total_log_prob += negative_chi_squared_wp_single_tracer_pair(fitting_wp, target_wp, target_jk_inv, wp_limit=wp_limit)
         
         # n_g chi squared
         for tracer in tracer_list:
@@ -63,7 +63,7 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
     else:
         return 0
 
-def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, bounds=(0, 24)):
+def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24)):
     # Only look at a subset of the data points to improve chi squared
     # For the fitting data+variance, this is handled during setup
     # i0 = 5 # 0
@@ -71,7 +71,7 @@ def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp
     # mock = fitting_wp[i0:i1]
     # data = target_wp[i0:i1]
     # C_matrix = target_jackknife_inverse[i0:i1, i0:i1]
-    i0, i1 = bounds
+    i0, i1 = wp_limit
     mock = fitting_wp[i0:i1]
     data = target_wp
     C_matrix = target_jackknife_inverse

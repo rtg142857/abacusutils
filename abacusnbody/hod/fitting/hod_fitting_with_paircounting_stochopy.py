@@ -32,7 +32,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     tracer_list = ["LRG", "ELG", "QSO"]
 
     i0, i1 = 5, 24 # these are the lower and upper bounds for which wp values are going to be fit
-    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list, bounds=(i0, i1))
+    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=(i0, i1))
     target_ngal = get_target_number_density(tracers=tracer_list)
 
     clustering_params = config["clustering_params"]
@@ -59,7 +59,7 @@ def fit_HOD(path_config_filename, save_chains=False):
                            other_stuff_dict_here=other_stuff_dict_here,
                            nwalkers=nwalkers,
                            num_steps=num_steps,
-                           bounds=(i0, i1))
+                           wp_limit=(i0, i1))
     end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 
@@ -92,7 +92,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return best_fit
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
 
     bounds = get_priors(type="bounds")
     x0 = get_priors(type="mean") # just needs one initial guess apparently
@@ -101,7 +101,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0, method="cmaes",
                               args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1, "wp_limit": wp_limit})
 
     return OptimizeResult
 

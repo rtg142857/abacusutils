@@ -6,7 +6,7 @@ from pathlib import Path
 from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart, get_hods_given_tracer_and_params
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False):
+def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, bounds=(0, 24)):
     if params_inside_priors(hod_params):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
@@ -34,7 +34,7 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
                     fitting_wp = wp_dict[tr1+"_"+tr2]
                     target_wp = target_wp_dict[tr1+"_"+tr2]
                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
-                    total_log_prob += negative_chi_squared_wp_single_tracer_pair(fitting_wp, target_wp, target_jk_inv)
+                    total_log_prob += negative_chi_squared_wp_single_tracer_pair(fitting_wp, target_wp, target_jk_inv, bounds=bounds)
         
         # n_g chi squared
         for tracer in tracer_list:
@@ -63,13 +63,18 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
     else:
         return 0
 
-def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray):
+def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, bounds=(0, 24)):
     # Only look at a subset of the data points to improve chi squared
-    i0 = 5 # 0
-    i1 = np.size(fitting_wp)
+    # For the fitting data+variance, this is handled during setup
+    # i0 = 5 # 0
+    # i1 = np.size(fitting_wp)
+    # mock = fitting_wp[i0:i1]
+    # data = target_wp[i0:i1]
+    # C_matrix = target_jackknife_inverse[i0:i1, i0:i1]
+    i0, i1 = bounds
     mock = fitting_wp[i0:i1]
-    data = target_wp[i0:i1]
-    C_matrix = target_jackknife_inverse[i0:i1, i0:i1]
+    data = target_wp
+    C_matrix = target_jackknife_inverse
 
     temp = np.matmul(C_matrix, mock-data)
     chi2 = np.dot(mock-data, temp)
@@ -97,11 +102,12 @@ def params_inside_priors(params):
     return True
 
 
-def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
+def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], bounds=(0, 24)):
     """
     Returns dictionaries indexed by "LRG_LRG", "LRG_ELG", etc.
     One for the wp, one for the jackknife.
     """
+    lb, ub=bounds
     wp_dict = {}
     inverse_jackknife_dict = {}
     for i1, tr1 in enumerate(tracers):
@@ -117,6 +123,8 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
                 estimator = TwoPointCorrelationFunction.load(path)
                 rebinned_estimator = estimator[:(estimator.shape[0] // 2) * 2:2] # getting it to be 24 bins
                 sep, wp, cov = twopoint_estimator.project_to_wp(rebinned_estimator, return_cov=True)
+                wp = wp[lb, ub]
+                cov = cov[lb:ub, lb:ub]
                 cov_inv = np.linalg.inv(cov)
                 wp_dict[tr1+"_"+tr2] = wp
                 inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv

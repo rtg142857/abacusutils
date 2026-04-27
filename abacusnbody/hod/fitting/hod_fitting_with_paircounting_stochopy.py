@@ -31,7 +31,8 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     tracer_list = ["LRG", "ELG", "QSO"]
 
-    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list)
+    i0, i1 = 5, 24 # these are the lower and upper bounds for which wp values are going to be fit
+    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list, bounds=(i0, i1))
     target_ngal = get_target_number_density(tracers=tracer_list)
 
     clustering_params = config["clustering_params"]
@@ -57,7 +58,8 @@ def fit_HOD(path_config_filename, save_chains=False):
                            clustering_parameters=clustering_params,
                            other_stuff_dict_here=other_stuff_dict_here,
                            nwalkers=nwalkers,
-                           num_steps=num_steps)
+                           num_steps=num_steps,
+                           bounds=(i0, i1))
     end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 

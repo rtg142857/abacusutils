@@ -140,7 +140,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
             rwp_flamingo = rpcent * wp_dict[label_dict[yx_label]]
             axs[y, x].plot(rpcent, rwp_flamingo, "-b", label="FlamingoHOD")
 
-            rwp_data = rpcent * target_wp[label_dict[yx_label]]
+            rwp_data = rpcent[i0:i1] * target_wp[label_dict[yx_label]]
             rwp_error_mat = np.linalg.inv(target_jackknife_inverse[label_dict[yx_label]])
             rwp_error = np.sqrt(np.diagonal(rwp_error_mat)) * rpcent
             axs[y, x].errorbar(rpcent[i0:i1], rwp_data, yerr=rwp_error, color="orange", label=f"Data ("+label_dict[yx_label]+")")

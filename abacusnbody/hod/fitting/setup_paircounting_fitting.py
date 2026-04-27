@@ -121,9 +121,10 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], bounds=(0,
 
                 path = target_dict_path + tr1 + "_" + tr2 + ".npy"
                 estimator = TwoPointCorrelationFunction.load(path)
-                rebinned_estimator = estimator[:(estimator.shape[0] // 2) * 2:2] # getting it to be 24 bins
-                sep, wp, cov = twopoint_estimator.project_to_wp(rebinned_estimator, return_cov=True)
-                wp = wp[lb, ub]
+                if estimator.shape[0] != 24:
+                    estimator = estimator[:(estimator.shape[0] // 2) * 2:2] # getting it to be 24 bins
+                sep, wp, cov = twopoint_estimator.project_to_wp(estimator, return_cov=True)
+                wp = wp[lb:ub]
                 cov = cov[lb:ub, lb:ub]
                 cov_inv = np.linalg.inv(cov)
                 wp_dict[tr1+"_"+tr2] = wp

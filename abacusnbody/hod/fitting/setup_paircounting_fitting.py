@@ -102,12 +102,12 @@ def params_inside_priors(params):
     return True
 
 
-def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], bounds=(0, 24)):
+def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(0, 24)):
     """
     Returns dictionaries indexed by "LRG_LRG", "LRG_ELG", etc.
     One for the wp, one for the jackknife.
     """
-    lb, ub=bounds
+    lb, ub=wp_limit
     wp_dict = {}
     inverse_jackknife_dict = {}
     for i1, tr1 in enumerate(tracers):

@@ -29,7 +29,7 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         # w_p chi squared
         for i1, tr1 in enumerate(tracer_list):
             for i2, tr2 in enumerate(tracer_list):
-                if i1 <= i2:
+                if (tr1, tr2) == ("LRG", "LRG"):#i1 <= i2:
                     #crosscorr or autocorr
                     fitting_wp = wp_dict[tr1+"_"+tr2]
                     target_wp = target_wp_dict[tr1+"_"+tr2]

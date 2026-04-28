@@ -70,6 +70,8 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("Chi squared:", OptimizeResult["fun"], flush=True)
     print("Iterations:", OptimizeResult["nit"], flush=True)
     print("Successful:", OptimizeResult["success"], flush=True)
+    print("Final chi^2 calculations:")
+    chi2 = log_probability(best_fit, paircounts, tracer_list, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimum=True, wp_limit=(i0, i1), verbose=True)
     print("Output message:", OptimizeResult["message"], flush=True)
 
     print("Saving output...", flush=True)

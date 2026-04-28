@@ -6,7 +6,7 @@ from pathlib import Path
 from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart, get_hods_given_tracer_and_params
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24)):
+def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24), verbose=False):
     if params_inside_priors(hod_params):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
@@ -29,21 +29,30 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         # w_p chi squared
         for i1, tr1 in enumerate(tracer_list):
             for i2, tr2 in enumerate(tracer_list):
-                if (tr1, tr2) == ("LRG", "LRG"):#i1 <= i2:
+                if (tr1, tr2) == ("LRG", "LRG"):#i1 <= i2: #TODO: UNDO
                     #crosscorr or autocorr
                     fitting_wp = wp_dict[tr1+"_"+tr2]
                     target_wp = target_wp_dict[tr1+"_"+tr2]
                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
                     total_log_prob += negative_chi_squared_wp_single_tracer_pair(fitting_wp, target_wp, target_jk_inv, wp_limit=wp_limit)
+                    if verbose:
+                        print(f"Log prob from {tr1}_{tr2} wp is:")
+                        print(negative_chi_squared_wp_single_tracer_pair(fitting_wp, target_wp, target_jk_inv, wp_limit=wp_limit, verbose=True))
         
         # n_g chi squared
         for tracer in tracer_list:
             fitting_ngal = npart[tracer] / boxsize**3
             target_ngal = target_ngal_dict[tracer]
-            # total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal) TODO: UNDO
+            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal)
+            if verbose:
+                print(f"Log prob from {tracer} ngal is:")
+                print(negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal))
 
         # making sure there's only one central galaxy; this might make the n_g chi squared redundant?
-        # total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here) TODO: UNDO
+        total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here)
+        if verbose:
+            print(f"Log prob from central occupation is:")
+            print(negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
     else:
         total_log_prob = -np.inf
 
@@ -63,7 +72,7 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
     else:
         return 0
 
-def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24)):
+def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24), verbose=False):
     # Only look at a subset of the data points to improve chi squared
     # For the fitting data+variance, this is handled during setup
     # i0 = 5 # 0
@@ -78,6 +87,11 @@ def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp
 
     temp = np.matmul(C_matrix, mock-data)
     chi2 = np.dot(mock-data, temp)
+    if verbose:
+        print("Difference in wp between mock and target:")
+        print(mock-data)
+        print("C^-1 matrix:")
+        print(C_matrix)
     return -chi2
 
 def negative_chi_squared_central_occupation(hod_params, tracers, other_stuff_dict_here):

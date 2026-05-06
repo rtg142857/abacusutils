@@ -31,11 +31,13 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     tracer_list = ["LRG", "ELG", "QSO"]
 
-    i0, i1 = 5, 24 # these are the lower and upper bounds for which wp values are going to be fit
+    clustering_params = config["clustering_params"]
+    rp_values = np.logspace(-2, 2, 24) # Hardcoded; TODO: Fix
+    i0 = np.count_nonzero(rp_values < 0.8)
+    i1 = 24 - np.count_nonzero(rp_values > 50)
+    #i0, i1 = 5, 24 # these are the lower and upper bounds for which wp values are going to be fit
     target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=(i0, i1))
     target_ngal = get_target_number_density(tracers=tracer_list)
-
-    clustering_params = config["clustering_params"]
 
     print("Loading precomputed things...")
     paircounts = {}

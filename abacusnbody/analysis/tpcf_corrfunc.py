@@ -336,6 +336,7 @@ def calc_wp_fast(
             boxsize=lbox,
             periodic=True,
             max_cells_per_dim=num_cells,
+            npibins=pimax
         )
         DD_counts = results['npairs']
     else:
@@ -359,6 +360,7 @@ def calc_wp_fast(
             boxsize=lbox,
             periodic=True,
             max_cells_per_dim=num_cells,
+            npibins=pimax
         )
         DD_counts = results['npairs']
     print('corrfunc took time ', time.time() - cf_start)

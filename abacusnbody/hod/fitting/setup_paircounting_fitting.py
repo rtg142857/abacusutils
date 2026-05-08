@@ -141,7 +141,7 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(
                 wp = wp[lb:ub]
                 cov = cov[lb:ub, lb:ub]
                 ### FOR DEBUGGING; TODO: UNDO
-                cov = np.diag(np.diag(cov)) # Making the array diagonal-only, so no covariance between points
+                # cov = np.diag(np.diag(cov)) # Making the array diagonal-only, so no covariance between points
                 cov_inv = np.linalg.inv(cov)
                 wp_dict[tr1+"_"+tr2] = wp
                 inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv

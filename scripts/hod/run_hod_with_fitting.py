@@ -9,13 +9,15 @@ $ python ./run_hod.py --help
 
 import argparse
 import time
+import os
 
 import numpy as np
 import yaml
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusutils.abacusnbody.hod.fitting.hod_fitting_old import fit_HOD
+from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import fit_HOD
+from abacusnbody.hod.fitting.paircounting import get_paircounts
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
@@ -29,9 +31,12 @@ def main(path_config_filename):
     clustering_params = config['clustering_params']
     Paths = config["Paths"]
     Labels = config["Labels"]
+    sim_label = Labels["sim_label"]
     Params = config["Params"]
     Misc = config["Misc"]
     seed = Misc["random_seed"]
+    fitting_params = config["fitting_params"]
+    paircount_path = fitting_params["paircounts_save_path"]
 
     # additional parameter choices
     want_rsd = HOD_params['want_rsd']
@@ -47,21 +52,32 @@ def main(path_config_filename):
     # create a new FlamingoHOD object
     newBall = FlamingoHOD(path_config_filename)
 
-    print("Getting NFW draw for satellites", flush=True)#############################################################
-    max_nfw = 40
-    NFW_draw = nfw_draw(10000, max_nfw, seed)
-
-    print("Throwaway run for jit to compile, write to disk", flush=True)##############################################
-    # throw away run for jit to compile, don't write to disk
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
-    )
+    paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
+                        "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    all_paircounts_exist = True
+    for label in paircount_labels:
+        if not os.path.exists(paircount_path + sim_label + f"/{label}.npy"):
+            all_paircounts_exist = False
+    if not all_paircounts_exist:
+        print("Paircounts missing; computing them now", flush=True)
+        print("Making tracer mock...", flush=True)
+        max_nfw = 40
+        NFW_draw = nfw_draw(10000, max_nfw, seed)
+        mock_dict = newBall.run_hod(
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True, tabulation_mock=True
+        )
+        print("Paircounting...")
+        get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
     print("Doing HOD fitting...", flush=True)#########################################################################
-    max_like_params = fit_HOD(newBall=newBall, path_config_filename=path_config_filename, NFW_draw=NFW_draw, save_chains=True)
+    max_like_params = fit_HOD(path_config_filename=path_config_filename, save_chains=True)
 
     print("Done HOD fitting!", flush=True)
     newBall.update_HOD_params(max_like_params)
+
+    print("Getting NFW draw for satellites", flush=True)#############################################################
+    max_nfw = 40
+    NFW_draw = nfw_draw(10000, max_nfw, seed)
 
     print("Making final mock...", flush=True)##########################################################################
     mock_dict = newBall.run_hod(

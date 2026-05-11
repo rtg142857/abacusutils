@@ -330,13 +330,13 @@ def calc_wp_fast(
             Nthread,
             binfile=rpbins,
             pimax=pimax,
+            npibins=pimax,
             X1=x1,
             Y1=y1,
             Z1=z1,
             boxsize=lbox,
             periodic=True,
             max_cells_per_dim=num_cells,
-            npibins=pimax
         )
         DD_counts = results['npairs']
     else:
@@ -351,6 +351,7 @@ def calc_wp_fast(
             Nthread,
             binfile=rpbins,
             pimax=pimax,
+            npibins=pimax,
             X1=x1,
             Y1=y1,
             Z1=z1,
@@ -359,8 +360,7 @@ def calc_wp_fast(
             Z2=z2,
             boxsize=lbox,
             periodic=True,
-            max_cells_per_dim=num_cells,
-            npibins=pimax
+            max_cells_per_dim=num_cells
         )
         DD_counts = results['npairs']
     print('corrfunc took time ', time.time() - cf_start)

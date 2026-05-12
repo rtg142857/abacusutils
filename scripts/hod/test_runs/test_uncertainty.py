@@ -40,6 +40,7 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(
     lb, ub=wp_limit
     wp_dict = {}
     inverse_jackknife_dict = {}
+    jackknife_dict = {}
     for i1, tr1 in enumerate(tracers):
         for i2, tr2 in enumerate(tracers):
             if i1 <= i2:
@@ -61,7 +62,8 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(
                 cov_inv = np.linalg.inv(cov)
                 wp_dict[tr1+"_"+tr2] = wp
                 inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv
-    return wp_dict, inverse_jackknife_dict
+                jackknife_dict[tr1+"_"+tr2] = cov_inv
+    return wp_dict, inverse_jackknife_dict, 
 
 def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params, wp_limit=(0, 24)):
     import matplotlib.pyplot as plt

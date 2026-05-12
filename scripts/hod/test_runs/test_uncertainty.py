@@ -173,7 +173,7 @@ def main(path_config_filename):
     print("Plotting HODs...", flush=True)
     M_h=np.logspace(10, 16, 100)
     hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
-    plot_HODs(save_path+"HODs.png", M_h=M_h, hod_values=HOD_params_list, tracers=tracer_list)
+    plot_HODs(save_path+"HODs.png", M_h=M_h, hod_values=hod_values, tracers=tracer_list)
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

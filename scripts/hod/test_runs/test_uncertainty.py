@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 import argparse
-from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import make_other_stuff_dict
+from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import make_other_stuff_dict, plot_HODs
 from abacusnbody.hod.fitting.setup_paircounting_fitting import get_npart, get_wp, log_probability, get_target_number_density
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
@@ -171,7 +171,9 @@ def main(path_config_filename):
             target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=wp_limit)
     
     print("Plotting HODs...", flush=True)
-    plot_HODs(save_path+"HODs.png", M_h=np.logspace(10, 16, 100), hod_values=HOD_params_list, tracers=tracer_list)
+    M_h=np.logspace(10, 16, 100)
+    hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
+    plot_HODs(save_path+"HODs.png", M_h=M_h, hod_values=HOD_params_list, tracers=tracer_list)
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

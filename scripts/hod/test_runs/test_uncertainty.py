@@ -114,9 +114,12 @@ def main(path_config_filename):
     # HOD_params_list = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
     #               Ep["p_max"], Ep["Q"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["alpha"], Ep["gamma"],
     #               Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"], Qp["p_max"]]
-    HOD_params_list = [12.85, 14.1, 0.02, 1.64, 0.015,
-                  0.85, 45., 10.83, 2.8, 2.39, 14.77, 0.07, 84.77,
-                  13.37, 14.322, 0.74, 0.38, 4.1, 0.49]
+    # HOD_params_list = [12.85, 14.1, 0.02, 1.64, 0.015,
+    #               0.85, 45., 10.83, 2.8, 2.39, 14.77, 0.07, 84.77,
+    #               13.37, 14.322, 0.74, 0.38, 4.1, 0.49]
+    HOD_params_list = [12.8, 14.0, 0.1, 0.78, 0.63,
+                  0.68, 19., 11.83, 0.82, 10**-0.24, 14.0, 0.7, 5.8,
+                  12.2, 14.0, 10**-1.63, 1.04, 0.63, 0.85]
 
     tracer_list = ["LRG", "ELG", "QSO"]
     clustering_params = config["clustering_params"]

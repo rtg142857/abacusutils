@@ -101,6 +101,18 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
     plt.savefig(save_path)
 
+def plot_HODs(save_path, M_h, hod_values, tracers):
+    import matplotlib.pyplot as plt
+    tracer_cols = {"LRG": "black", "ELG": "green", "QSO": "orange"}
+    for tracer in tracers:
+        cen = hod_values[tracer+"_cen"]
+        sat = hod_values[tracer+"_sat"]
+        plt.loglog(M_h, cen, color=tracer_cols[tracer], label=tracer+" cen")
+        plt.loglog(M_h, sat, color=tracer_cols[tracer], linestyle='dashed', label=tracer+" sat")
+        plt.ylim(10**-3, 10**3)
+        plt.legend()
+    plt.savefig(save_path)
+
 def main(path_config_filename):
     # load the yaml parameters
     config = yaml.safe_load(open(path_config_filename))
@@ -114,12 +126,12 @@ def main(path_config_filename):
     # HOD_params_list = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
     #               Ep["p_max"], Ep["Q"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["alpha"], Ep["gamma"],
     #               Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"], Qp["p_max"]]
-    # HOD_params_list = [12.85, 14.1, 0.02, 1.64, 0.015,
-    #               0.85, 45., 10.83, 2.8, 2.39, 14.77, 0.07, 84.77,
-    #               13.37, 14.322, 0.74, 0.38, 4.1, 0.49]
-    HOD_params_list = [12.8, 14.0, 0.1, 0.78, 0.63,
-                  0.68, 19., 11.83, 0.82, 10**-0.24, 14.0, 0.7, 5.8,
-                  12.2, 14.0, 10**-1.63, 1.04, 0.63, 0.85]
+    HOD_params_list = [12.85, 14.1, 0.02, 1.64, 0.015,
+                  0.85, 45., 10.83, 2.8, 2.39, 14.77, 0.07, 84.77,
+                  13.37, 14.322, 0.74, 0.38, 4.1, 0.49]
+    # HOD_params_list = [12.8, 14.0, 0.1, 0.78, 0.63,
+    #               0.68, 19., 11.83, 0.82, 10**-0.24, 14.0, 0.7, 5.8,
+    #               12.2, 14.0, 10**-1.63, 1.04, 0.63, 0.85]
 
     tracer_list = ["LRG", "ELG", "QSO"]
     clustering_params = config["clustering_params"]
@@ -157,6 +169,9 @@ def main(path_config_filename):
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=HOD_params_list, tracers=tracer_list, paircounts=paircounts,
             target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=wp_limit)
+    
+    print("Plotting HODs...", flush=True)
+    plot_HODs(save_path+"HODs.png", M_h=np.logspace(10, 16, 100), hod_values=HOD_params_list, tracers=tracer_list)
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

@@ -103,6 +103,7 @@ def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackkn
 
 def plot_HODs(save_path, M_h, hod_values, tracers):
     import matplotlib.pyplot as plt
+    plt.clf()
     tracer_cols = {"LRG": "black", "ELG": "green", "QSO": "orange"}
     for tracer in tracers:
         cen = hod_values[tracer+"_cen"]
@@ -171,6 +172,7 @@ def main(path_config_filename):
             target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=wp_limit)
     
     print("Plotting HODs...", flush=True)
+    
     M_h=np.logspace(10, 16, 100)
     hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
     plot_HODs(save_path+"HODs.png", M_h=M_h, hod_values=hod_values, tracers=tracer_list)

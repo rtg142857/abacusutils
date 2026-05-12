@@ -132,12 +132,13 @@ def main(path_config_filename):
     target_dict_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/Y1_z0.8-1.1/"
 
     print("Loading precomputed things...")
+    wp_limit = (4, 18)
     paircounts = {}
     for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
         for pair_type in ["", "_ELGauto", "_ELGcross"]:
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)
-    target_wp, target_jackknife_inverse, target_jackknife = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=(3,18))
+    target_wp, target_jackknife_inverse, target_jackknife = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=wp_limit)
     print(target_wp)
     for key in target_jackknife.keys():
         print(key+":")
@@ -145,14 +146,13 @@ def main(path_config_filename):
         print(np.diag(target_jackknife[key]))
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     print("Getting chi squared:")
-    wp_limit = (3, 18)
     target_ngal = get_target_number_density(tracers=tracer_list)
     clustering_params = config["clustering_params"]
     minimum=True
     logprob = log_probability(paircounts, tracer_list, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimum, wp_limit)
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=HOD_params_list, tracers=tracer_list, paircounts=paircounts,
-            target_wp=target_wp, target_jackknife=target_jackknife, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=(3,18))
+            target_wp=target_wp, target_jackknife=target_jackknife, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=wp_limit)
 
 class ArgParseFormatter(
     argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter

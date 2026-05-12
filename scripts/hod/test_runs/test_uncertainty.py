@@ -150,6 +150,7 @@ def main(path_config_filename):
     clustering_params = config["clustering_params"]
     minimum=True
     logprob = log_probability(HOD_params_list, paircounts, tracer_list, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimum, wp_limit)
+    print(logprob)
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=HOD_params_list, tracers=tracer_list, paircounts=paircounts,
             target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=wp_limit)

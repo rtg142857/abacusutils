@@ -152,6 +152,7 @@ def main(path_config_filename):
     paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/" + sim_label + "/"
     fitting_params = config["fitting_params"]
     target_dict_path = fitting_params["target_dict_path"]
+    target_dict_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/z0.8-1.1/"
 
     print("Loading precomputed things...")
     wp_limit = (4, 18)

@@ -63,8 +63,8 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(
                 wp_dict[tr1+"_"+tr2] = wp
                 inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv
                 jackknife_dict[tr1+"_"+tr2] = cov_inv
-                print(tr1, tr2)
-                print(sep[lb:ub] * wp)
+                # print(tr1, tr2)
+                # print(sep[lb:ub] * wp)
     return wp_dict, inverse_jackknife_dict, jackknife_dict
 
 def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params, wp_limit=(0, 24)):
@@ -162,17 +162,17 @@ def main(path_config_filename):
             paircounts[pair+pair_type] = np.load(filename)
     target_wp, target_jackknife_inverse, target_jackknife = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=wp_limit)
     #print(target_wp)
-    for key in target_jackknife.keys():
-        print(key+" wp*rp:")
-        # print(np.diag(target_jackknife_inverse[key]))
-        # print(np.diag(target_jackknife[key]))
-        print(target_wp[key] * rpcent[wp_limit[0]:wp_limit[1]])
+    # for key in target_jackknife.keys():
+    #     print(key+" wp*rp:")
+    #     # print(np.diag(target_jackknife_inverse[key]))
+    #     # print(np.diag(target_jackknife[key]))
+    #     print(target_wp[key] * rpcent[wp_limit[0]:wp_limit[1]])
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     print("Getting chi squared:")
     target_ngal = get_target_number_density(tracers=tracer_list)
     clustering_params = config["clustering_params"]
     minimum=True
-    logprob = log_probability(HOD_params_list, paircounts, tracer_list, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimum, wp_limit)
+    logprob = log_probability(HOD_params_list, paircounts, tracer_list, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimum, wp_limit, verbose=True)
     print(logprob)
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=HOD_params_list, tracers=tracer_list, paircounts=paircounts,

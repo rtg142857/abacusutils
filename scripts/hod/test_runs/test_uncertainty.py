@@ -136,6 +136,9 @@ def main(path_config_filename):
 
     tracer_list = ["LRG", "ELG", "QSO"]
     clustering_params = config["clustering_params"]
+    bin_params = clustering_params["bin_params"]
+    rpbins = np.logspace(bin_params["logmin"], bin_params["logmax"], bin_params["nbins"] + 1)
+    rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
     Labels = config["Labels"]
     subsample_dir = sim_params["subsample_dir"]
@@ -155,11 +158,12 @@ def main(path_config_filename):
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)
     target_wp, target_jackknife_inverse, target_jackknife = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=wp_limit)
-    print(target_wp)
+    #print(target_wp)
     for key in target_jackknife.keys():
-        print(key+":")
-        print(np.diag(target_jackknife_inverse[key]))
-        print(np.diag(target_jackknife[key]))
+        print(key+" wp*rp:")
+        # print(np.diag(target_jackknife_inverse[key]))
+        # print(np.diag(target_jackknife[key]))
+        print(target_wp[key] * rpcent)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     print("Getting chi squared:")
     target_ngal = get_target_number_density(tracers=tracer_list)

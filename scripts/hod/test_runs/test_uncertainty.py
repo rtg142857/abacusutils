@@ -63,6 +63,8 @@ def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(
                 wp_dict[tr1+"_"+tr2] = wp
                 inverse_jackknife_dict[tr1+"_"+tr2] = cov_inv
                 jackknife_dict[tr1+"_"+tr2] = cov_inv
+                print(tr1, tr2)
+                print(sep * wp)
     return wp_dict, inverse_jackknife_dict, jackknife_dict
 
 def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params, wp_limit=(0, 24)):

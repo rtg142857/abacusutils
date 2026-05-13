@@ -163,7 +163,7 @@ def main(path_config_filename):
         print(key+" wp*rp:")
         # print(np.diag(target_jackknife_inverse[key]))
         # print(np.diag(target_jackknife[key]))
-        print(target_wp[key] * rpcent)
+        print(target_wp[key] * rpcent[wp_limit[0]:wp_limit[1]])
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     print("Getting chi squared:")
     target_ngal = get_target_number_density(tracers=tracer_list)

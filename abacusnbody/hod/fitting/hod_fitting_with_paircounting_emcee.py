@@ -34,7 +34,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
-    ndim = 18
+    ndim = 19
 
     clustering_params = config["clustering_params"]
 

@@ -338,7 +338,8 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     vprint("Getting galaxy pairs", verbose)
     GG = get_galaxy_pairs(tracer1=tracer1, tracer2=tracer2, paircounts=paircounts,
                           hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, num_sat_parts=num_sat_parts, verbose=verbose)
-    vprint("Sum of ggs: "+str(np.sum(GG)), verbose)
+    if verbose:
+        vprint("Sum of ggs: "+str(np.sum(GG)), verbose)
 
     # randoms
     vprint("Creating randoms", verbose)
@@ -349,15 +350,18 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         # crosscorr
         rands = create_randoms_for_wp(npart = npart, tracer1=tracer1, tracer2=tracer2, r_bin_edges = rpbins,pi_max = pimax,boxsize=boxsize)
     wp_rands = np.reshape(rands,newshape=(len(rpbins)-1,pimax))
-    vprint("Sum of randoms: "+str(np.sum(wp_rands)), verbose)
+    if verbose:
+        vprint("Sum of randoms: "+str(np.sum(wp_rands)), verbose)
 
     # finishing
     vprint("Getting xi", verbose)
     xi = np.divide(GG, wp_rands) - 1
-    vprint("Xi: "+str(xi), verbose)
+    if verbose:
+        vprint("Xi: "+str(xi), verbose)
     vprint("Getting wp", verbose)
     wp = xi_to_wps(xi,rpbins,pimax)
-    vprint("WP:, "+str(wp), verbose)
+    if verbose:
+        vprint("WP:, "+str(wp), verbose)
     return wp
 
 def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, verbose=False) -> dict:

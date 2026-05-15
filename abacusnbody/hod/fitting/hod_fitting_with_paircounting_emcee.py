@@ -28,9 +28,11 @@ def fit_HOD(path_config_filename, save_chains=False):
     target_dict_path = fitting_params["target_dict_path"]
     paircount_path = fitting_params["paircounts_save_path"] + sim_label + "/"
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
+    tracers=["LRG", "ELG", "QSO"]
 
-    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"])
-    target_ngal = get_target_number_density(tracers=["LRG", "ELG", "QSO"])
+    wp_limit = (12, 20)
+    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracers, wp_limit=wp_limit)
+    target_ngal = get_target_number_density(tracers=tracers)
 
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
@@ -61,13 +63,14 @@ def fit_HOD(path_config_filename, save_chains=False):
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
                            paircounts=paircounts,
-                           tracer_list=["LRG", "ELG", "QSO"],
+                           tracer_list=tracers,
                            clustering_parameters=clustering_params,
                            other_stuff_dict_here=other_stuff_dict_here,
                            backend=backend,
                            nwalkers=nwalkers,
                            num_steps=num_steps,
-                           ndim=ndim)
+                           ndim=ndim,
+                           wp_limit=wp_limit)
     end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 
@@ -82,13 +85,13 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return max_like_params(sampler)
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24)):
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     print("Initialising sampler...", flush=True)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), backend=backend)#, pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)#, pool=pool)
 
     print("Running chain...", flush=True)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors

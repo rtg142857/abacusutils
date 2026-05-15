@@ -8,7 +8,7 @@ import time
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 
-from setup_paircounting_fitting import *
+from abacusnbody.hod.fitting.setup_paircounting_fitting import *
 
 import emcee
 

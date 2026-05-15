@@ -103,6 +103,9 @@ def plot_sampler(sampler: emcee.EnsembleSampler):
     """
     tau = sampler.get_autocorr_time()
     print("Sampler autocorrelation time (burn in estimate):",tau, flush=True)
+    if np.any(np.isnan(tau)):
+        print("NaN autocorrelation time; not burnt in")
+        return
     discard_value = int(3 * np.average(tau))
     thin_value = int(0.5 * np.average(tau))
     flat_samples = sampler.get_chain(discard=discard_value, thin=thin_value, flat=True)

@@ -205,10 +205,11 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp = paircounts["censat_ELGauto"]
         ssp = paircounts["satsat_ELGauto"]
         ss1p = paircounts["satsat_onehalo_ELGauto"]
-        vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-        vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
-        vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
-        vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+        if verbose:
+            vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+            vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+            vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+            vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 # these paircounts are not doublecounted, but the others (including the randoms) are
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
@@ -220,11 +221,12 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp_ecen_lsat = paircounts["censat_ELGcross"][1]
         ssp = paircounts["satsat_ELGcross"]
         ss1p = paircounts["satsat_onehalo_ELGcross"]
-        vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-        vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat)), verbose)
-        vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat)), verbose)
-        vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
-        vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+        if verbose:
+            vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+            vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat)), verbose)
+            vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat)), verbose)
+            vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+            vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         if tracer1 == "ELG":
             CS_ecen_lsat = create_weighting_factor(csp_ecen_lsat,hod_cen1,hod_sat2)
@@ -242,25 +244,28 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp = paircounts["censat"]
         ssp = paircounts["satsat"]
         ss1p = paircounts["satsat_onehalo"]
-        vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-        vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
-        vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
-        vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+        if verbose:
+            vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+            vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+            vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+            vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) + create_weighting_factor(csp, hod_sat1, hod_cen2) # could be LRG-QSO cross so we need both
         SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
-    vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)
-    vprint("Sum of CS after HOD integration: "+str(np.sum(CS)), verbose)
-    vprint("Sum of SS after HOD integration: "+str(np.sum(SS)), verbose)
-    vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
+    if verbose:
+        vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)
+        vprint("Sum of CS after HOD integration: "+str(np.sum(CS)), verbose)
+        vprint("Sum of SS after HOD integration: "+str(np.sum(SS)), verbose)
+        vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
 
     GG = CC + CS + SS + SS1
-    vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
-    vprint(f"GG values:", verbose)
-    vprint(GG, verbose)
-    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/pair_ddrppi", GG)
+    if verbose:
+        vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
+        vprint(f"GG values:", verbose)
+        vprint(GG, verbose)
+    # np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/pair_ddrppi", GG)
 
     return CC + CS + SS + SS1
 

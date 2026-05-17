@@ -56,8 +56,12 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
     else:
         total_log_prob = -np.inf
 
+    if np.isnan(total_log_prob): # could be due to e.g. npart being zero (would give nans in the wp)
+        total_log_prob = -np.inf
+
     if minimise:
         total_log_prob = total_log_prob * -1
+
     return total_log_prob
 
 def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):

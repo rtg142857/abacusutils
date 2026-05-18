@@ -12,7 +12,7 @@ from abacusnbody.hod.fitting.setup_paircounting_fitting import *
 
 from stochopy.optimize import minimize
 
-nthread = 64 # For debugging
+#nthread = 64 # For debugging
 
 def fit_HOD(path_config_filename, save_chains=False):
     # Initialise the fitting using emcee

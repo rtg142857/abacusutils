@@ -100,12 +100,17 @@ def fit_HOD(path_config_filename, save_chains=False):
 
 def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
 
+    method = "cpso"
     bounds = get_priors(type="bounds")
-    x0 = get_priors(type="mean") # just needs one initial guess apparently
+    match method:
+        case "cmaes":
+            x0 = get_priors(type="mean") # just one initial guess
+        case "cpso":
+            x0 = None#get_priors(type=) # trying without 
     minimum = True
 
     print("Running optimisation...", flush=True)
-    OptimizeResult = minimize(log_probability, bounds, x0, method="cmaes",
+    OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
                               args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
                               options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
 

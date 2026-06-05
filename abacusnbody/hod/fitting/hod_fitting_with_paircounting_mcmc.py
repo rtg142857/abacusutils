@@ -109,7 +109,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     print("Running optimisation...", flush=True)
     OptimizeResult = sample(log_probability, bounds, x0, method="hmc",
                               args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
-                              options={"maxiter": num_steps, "return_all": True})
+                              options={"maxiter": num_steps, "return_all": True, "workers": -1})
 
     return OptimizeResult
 

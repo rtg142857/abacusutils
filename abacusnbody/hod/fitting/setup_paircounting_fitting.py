@@ -364,8 +364,8 @@ def initialise_walkers(initial_params_random: bool, num_walkers):
     if (initial_params_random):
         for i in range(num_walkers):
             for j in range(np.shape(priors)[0]):
-                #pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
-                pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
+                pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
+                #pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
 
     else:
         #if len(initial_params)!=np.shape(priors)[0]:

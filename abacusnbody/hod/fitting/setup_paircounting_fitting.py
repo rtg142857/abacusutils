@@ -53,6 +53,11 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         if verbose:
             print(f"Log prob from central occupation is:")
             print(negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
+
+        total_log_prob += log_prior(hod_params)
+        if verbose:
+            print(f"Log prob from prior is:")
+            print(log_prior(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
     else:
         total_log_prob = -np.inf
 
@@ -111,6 +116,16 @@ def negative_chi_squared_central_occupation(hod_params, tracers, other_stuff_dic
     amount_greater_than_1 = np.maximum(np.ones(len(cenHOD_sum)), cenHOD_sum) - 1
     chi2 = np.dot(amount_greater_than_1, amount_greater_than_1) * 10 ** 7 # guess at what works
     return -chi2
+
+def log_prior(params):
+    # A has to be positive
+    LlogM_cut, LlogM1, Lsigma, Lalpha, Lkappa, Ep_max, EQ, ElogM_cut, Ekappa, Esigma, ElogM1, Ealpha, Egamma, QlogM_cut, QlogM1, Qsigma, Qalpha, Qkappa, Qp_max = tuple(params)
+    if Ep_max - 1/EQ <= 0.0:
+        return (Ep_max - 1/EQ) * 10 ** 7 # guess at what works
+    gaussian_mu = 0.5
+    gaussian_sigma = 0.2
+    gaussian = 1/(gaussian_sigma*(2*np.pi)**0.5) * np.exp(-(Lkappa-gaussian_mu)**2 / (2 * gaussian_sigma**2))
+    return np.log(gaussian)
 
 def params_inside_priors(params):
     priors = get_priors()

@@ -103,7 +103,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)
 
     print("Plotting wps...", flush=True)
-    plot_wp(save_path+"wps.png", hod_params=best_fit, tracers=tracer_list, paircounts=paircounts,
+    plot_wp(save_path+"wps.png", hod_params=best_fit, param_set=param_set, paircounts=paircounts,
             target_wp=target_wp, target_jackknife_inverse=target_jackknife_inverse, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, wp_limit=(i0, i1))
 
     return best_fit
@@ -146,11 +146,11 @@ def plot_HODs(save_path, M_h, hod_values, tracers):
         plt.legend()
     plt.savefig(save_path)
 
-def plot_wp(save_path, hod_params, tracers, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params, wp_limit=(0, 24)):
+def plot_wp(save_path, hod_params, param_set, paircounts, target_wp, target_jackknife_inverse, other_stuff_dict_here, clustering_params, wp_limit=(0, 24)):
     import matplotlib.pyplot as plt
 
-    npart = get_npart(hod_params, tracers, other_stuff_dict_here)
-    wp_dict = get_wp(hod_params, paircounts, tracers, npart, other_stuff_dict_here, clustering_params)
+    npart = get_npart(hod_params, param_set, other_stuff_dict_here)
+    wp_dict = get_wp(hod_params, paircounts, param_set, npart, other_stuff_dict_here, clustering_params)
 
     bin_params = clustering_params["bin_params"]
     rpbins = np.logspace(bin_params["logmin"], bin_params["logmax"], bin_params["nbins"] + 1)

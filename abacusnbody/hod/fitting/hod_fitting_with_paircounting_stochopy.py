@@ -117,6 +117,9 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
             x0 = [1.27314746e+01, 1.37869038e+01, 7.37897281e-02, 1.35030823e+00, 2.94064664e+00, 
        4.93588538e-01, 1.18648813e+01, 2.80654619e-01, 4.97620174e+00, 1.15249929e+01, 2.23047182e-02, 5.46581661e+00,
        1.42474565e+01, 1.48874045e+01, 9.64330200e-01, 1.96001803e-01, 5.42685958e-01]
+            alt_x0 = param_set.get_initial_params(positions=1)
+            print(f"x0 size: {x0.size}")
+            print(f"alt_x0 size: {alt_x0.size}")
 #get_priors(type="mean") # just one initial guess
         case "cpso":
             x0 = None#get_priors(type=) # trying without 

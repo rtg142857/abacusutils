@@ -1,149 +1,26 @@
 import numpy as np
 from scipy.special import erfc, erf
+from params import Params
 
 def vprint(input, verbose):
     if verbose:
         print(input, flush=True)
 
-def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
-    """
-    Standard Zheng et al. (2005) central HOD parametrization for LRGs.
-    """
-    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
-
-def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
-    """
-    Standard Zheng et al. (2005) satellite HOD parametrization for LRGs, modified with n_cent_LRG
-    """
-    # mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    # mass_lower = mass_bin_edges[9]
-    # mass_upper = mass_bin_edges[10]
-    # below_cut = M_h - mass_lower < 0
-    # above_cut = M_h - mass_upper > 0
-    # hod_value = np.ones(np.size(M_h))
-    # hod_value[below_cut] = 0
-    # hod_value[above_cut] = 0
-    M_cut = 10 ** logM_cut
-    M_1 = 10 ** logM_1
-    below_cut = M_h - kappa * M_cut < 0
-    hod_value = (
-        ((M_h - kappa * M_cut) / M_1) ** alpha
-        * 0.5
-        * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
-    )
-    hod_value[below_cut] = 0
-    return hod_value
-
-def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
-    """
-    HOD function for ELG centrals taken from arXiv:1910.05095.
-    """
-    logM_h = np.log10(M_h)
-    phi = phi_fun(logM_h, logM_cut, sigma)
-    Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
-    return (
-        2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01))
-    # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
-
-def N_sat_ELG(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0):
-    """
-    Standard power law modulated by an exponential fall off at small M
-    """
-    # return (M_h/M_1)**alpha/(1+np.exp(-A_s*(np.log10(M_h)-np.log10(kappa*M_cut)))) + beta*(M_h/M_1)**(-alpha1)/100
-    # mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    # mass_lower = mass_bin_edges[9]
-    # mass_upper = mass_bin_edges[10]
-    # below_cut = M_h - mass_lower < 0
-    # above_cut = M_h - mass_upper > 0
-    # hod_value = np.ones(np.size(M_h))
-    # hod_value[below_cut] = 0
-    # hod_value[above_cut] = 0
-    M_cut = 10 ** logM_cut
-    M_1 = 10 ** logM_1
-    below_cut = M_h - kappa * M_cut < 0
-    
-    hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha # + beta*(M_h/M_1)**(-alpha1)/100
-    hod_value[below_cut] = 0
-    return hod_value
-
-def N_cen_QSO(M_h, logM_cut, sigma, p_max):
-    """
-    HOD function (Zheng et al. (2005) with p_max) for QSO centrals taken from arXiv:2007.09012.
-    """
-    # mass_bin_edges = 10**10 * np.logspace(0,6,31)
-    # mass_lower = mass_bin_edges[10]
-    # mass_upper = mass_bin_edges[30]
-    # below_cut = M_h - mass_lower < 0
-    # above_cut = M_h - mass_upper > 0
-    # hod_value = np.ones(np.size(M_h))
-    # hod_value[below_cut] = 0
-    # hod_value[above_cut] = 0
-    # return hod_value
-    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))
-
-def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
-    """
-    Standard Zheng et al. (2005) satellite HOD parametrization for all tracers with an optional amplitude parameter, A_s.
-    """
-    M_cut = 10 ** logM_cut
-    M_1 = 10 ** logM_1
-    below_cut = M_h - kappa * M_cut < 0
-    hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha
-    hod_value[below_cut] = 0
-    return hod_value
-
-def phi_fun(logM_h, logM_cut, sigma):
-    """
-    Aiding function for N_cen_ELG_v1().
-    """
-    phi = Gaussian_fun(logM_h, logM_cut, sigma)
-    return phi
-
-def Phi_fun(logM_h, logM_cut, sigma, gamma):
-    """
-    Aiding function for N_cen_ELG_v1().
-    """
-    x = gamma * (logM_h - logM_cut) / sigma
-    Phi = 0.5 * (1 + erf(x / np.sqrt(2)))
-    return Phi
-
-def Gaussian_fun(x, mean, sigma):
-    """
-    Gaussian function with centered at `mean' with standard deviation `sigma'.
-    """
-    return 0.3989422804014327 / sigma * np.exp(-((x - mean) ** 2) / 2 / sigma**2)
-
-def get_hods_given_tracer_and_params(M_h: np.ndarray, hod_params: np.ndarray, tracer: str):
-    match tracer:
-        case "LRG":
-            logM_cut, logM1, sigma, alpha, kappa = tuple(hod_params[:5])
-            hod_cen = N_cen_LRG(M_h, logM_cut, sigma)
-            hod_sat = N_sat_LRG_modified(M_h, logM_cut, logM1, sigma, alpha, kappa)
-        case "ELG":
-            p_max, Q, logM_cut, kappa, sigma, logM1, alpha, gamma = tuple(hod_params[5:13])
-            hod_cen = N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma)
-            hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)
-        case "QSO":
-            logM_cut, logM1, sigma, alpha, kappa, p_max = tuple(hod_params[13:19])
-            hod_cen = N_cen_QSO(M_h, logM_cut, sigma, p_max)
-            hod_sat = N_sat_QSO(M_h, logM_cut, kappa, logM1, alpha)
-    return hod_cen, hod_sat
-
 #######################################################################################
 # Number density stuff
-def get_npart_given_tracer(hod_params, tracer, other_stuff_dict_here):
+def get_npart_given_tracer(hod_params: np.ndarray, tracer: str, param_set: Params, other_stuff_dict_here: dict):
     hmf_big = other_stuff_dict_here["hmf_big"]
     mass_bin_centres_big = other_stuff_dict_here["mass_bin_centres_big"]
 
-    hod_cen_big, hod_sat_big = get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer)
+    # TODO: include param_set as an arg
+    hod_cen_big, hod_sat_big = param_set.get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer) #get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer)
 
     npart_cen = np.sum(hmf_big * hod_cen_big)
     npart_sat = np.sum(hmf_big * hod_sat_big)
     npart_total = npart_cen + npart_sat
     return npart_total
 
-def get_npart(hod_params: np.ndarray, tracer_list: list, other_stuff_dict_here: dict) -> dict:
+def get_npart(hod_params: np.ndarray, param_set: Params, other_stuff_dict_here: dict) -> dict:
     """
     Returns a dict of the number of particles
     Keys: LRG, ELG, etc.
@@ -158,17 +35,18 @@ def get_npart(hod_params: np.ndarray, tracer_list: list, other_stuff_dict_here: 
         mass_bin_edges
         hmf_big
     """
+    tracer_list = param_set.tracer_list
     npart = {}
     for tracer in tracer_list:
-        npart[tracer] = get_npart_given_tracer(hod_params=hod_params, tracer=tracer, other_stuff_dict_here=other_stuff_dict_here)
+        npart[tracer] = get_npart_given_tracer(hod_params=hod_params, tracer=tracer, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
     return npart
 
 #######################################################################################
 # wp stuff
 
-def get_accurate_tracer_HOD(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int) -> tuple[np.ndarray, np.ndarray]:
+def get_accurate_tracer_HOD(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray]:
 
-    hod_cen_big, hod_sat_big = get_hods_given_tracer_and_params(M_h, hod_params, tracer)
+    hod_cen_big, hod_sat_big = param_set.get_hods_given_tracer_and_params(M_h, hod_params, tracer)
 
     hod_cen = create_accurate_HOD(hod_cen_big,hmf_big,mass_bin_edges,num_mass_bins_big)
     hod_sat = create_accurate_HOD(hod_sat_big,hmf_big,mass_bin_edges,num_mass_bins_big)
@@ -309,7 +187,7 @@ def xi_to_wps(xis,r_bin_edges,pi_max):
     wp_out = 2.0 * dpi * np.sum(xis, axis=1)
     return(wp_out)
 
-def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, tracer2: str | None = None, verbose=False) -> np.ndarray:
+def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, npart: dict, param_set: Params, other_stuff_dict_here: dict, clustering_params: dict, tracer2: str | None = None, verbose=False) -> np.ndarray:
     # getting important values from the given dicts
     bin_params = clustering_params['bin_params']
     rpbins = np.logspace(bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1)
@@ -327,12 +205,12 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     vprint("Getting HODs", verbose)
     if tracer2 == None or tracer2 == tracer1:
         # autocorr
-        hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+        hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
         hod_cen2, hod_sat2 = hod_cen1, hod_sat1
     else:
         # crosscorr
-        hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
-        hod_cen2, hod_sat2 = get_accurate_tracer_HOD(hod_params, tracer2, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+        hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
+        hod_cen2, hod_sat2 = get_accurate_tracer_HOD(hod_params, tracer2, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
 
     # Galaxy pairs
     vprint("Getting galaxy pairs", verbose)
@@ -364,7 +242,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         vprint("WP:, "+str(wp), verbose)
     return wp
 
-def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, verbose=False) -> dict:
+def get_wp(hod_params: np.ndarray, paircounts: dict, param_set: Params, npart: dict, other_stuff_dict_here: dict, clustering_params: dict, verbose=False) -> dict:
     """
     Returns a dict of wp autocorr and crosscorr
     Keys: LRG_LRG, LRG_ELG, etc.
@@ -388,6 +266,7 @@ def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: d
         pi_bin_size (currently hardcoded to 1 tbqh)
     Verbose: bool
     """
+    tracer_list = param_set.tracer_list
     wp_dict = {}
 
     for i in range(len(tracer_list)):
@@ -397,10 +276,10 @@ def get_wp(hod_params: np.ndarray, paircounts: dict, tracer_list: list, npart: d
             if i == j:
                 # autocorr
                 vprint("Doing autocorr for"+tracer_list[i], verbose)
-                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], paircounts = paircounts, npart = npart, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, verbose=verbose)
+                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], paircounts = paircounts, npart = npart, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, verbose=verbose)
             if i < j:
                 # crosscorr
                 vprint(f"Doing crosscorr for {tracer_list[i]}, {tracer_list[j]}", verbose)
-                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], tracer2 = tracer_list[j], paircounts = paircounts, npart = npart, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, verbose=verbose)
+                wp_dict[f"{tracer_list[i]}_{tracer_list[j]}"] = get_wp_given_tracer(hod_params, tracer1 = tracer_list[i], tracer2 = tracer_list[j], paircounts = paircounts, npart = npart, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here, clustering_params=clustering_params, verbose=verbose)
 
     return wp_dict

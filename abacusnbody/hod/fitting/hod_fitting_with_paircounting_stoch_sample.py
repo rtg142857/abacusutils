@@ -56,7 +56,7 @@ def fit_HOD(path_config_filename, save_chains=False):
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
                            paircounts=paircounts,
-                           tracer_list=tracer_list,
+                           param_set=param_set,
                            clustering_parameters=clustering_params,
                            other_stuff_dict_here=other_stuff_dict_here,
                            nwalkers=nwalkers,
@@ -96,7 +96,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return best_fit
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
 
     bounds = get_priors(type="bounds")
     method = "hmc"
@@ -108,7 +108,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
 
     print("Running optimisation...", flush=True)
     OptimizeResult = sample(log_probability, bounds, x0, method="hmc",
-                              args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
+                              args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
                               options={"maxiter": num_steps, "return_all": True})
 
     return OptimizeResult

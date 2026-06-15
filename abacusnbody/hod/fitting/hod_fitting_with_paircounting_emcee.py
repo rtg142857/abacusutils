@@ -49,6 +49,7 @@ def fit_HOD(path_config_filename, save_chains=False):
         # filename = paircount_path + pair + ".npy"
         # paircounts[pair] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    param_set = Params(tracer_list=tracers)
 
     print("Setting up backend...", flush=True)
     start_time = time.time()
@@ -63,7 +64,7 @@ def fit_HOD(path_config_filename, save_chains=False):
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
                            paircounts=paircounts,
-                           tracer_list=tracers,
+                           param_set=param_set,
                            clustering_parameters=clustering_params,
                            other_stuff_dict_here=other_stuff_dict_here,
                            backend=backend,
@@ -85,13 +86,13 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return max_like_params(sampler)
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24)):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24)):
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     print("Initialising sampler...", flush=True)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)#, pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)#, pool=pool)
 
     print("Running chain...", flush=True)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors

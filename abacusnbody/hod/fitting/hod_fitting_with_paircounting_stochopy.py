@@ -48,6 +48,7 @@ def fit_HOD(path_config_filename, save_chains=False):
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    param_set = Params(tracer_list=tracer_list)
 
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
@@ -58,7 +59,7 @@ def fit_HOD(path_config_filename, save_chains=False):
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
                            paircounts=paircounts,
-                           tracer_list=tracer_list,
+                           param_set=param_set,
                            clustering_parameters=clustering_params,
                            other_stuff_dict_here=other_stuff_dict_here,
                            nwalkers=nwalkers,
@@ -70,7 +71,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("Optimization done", flush=True)
     best_fit = OptimizeResult["x"]
     print("Best params:")#, best_fit, flush=True)
-    print_hod_values(best_fit)
+    param_set.print_hod_values(best_fit)
     print("Chi squared:", OptimizeResult["fun"], flush=True)
     print("Iterations:", OptimizeResult["nit"], flush=True)
     print("Successful:", OptimizeResult["success"], flush=True)
@@ -98,13 +99,18 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return best_fit
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, tracer_list: list, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
 
     method = "de"
-    bounds = get_priors(type="bounds")
+    bounds = param_set.prior_bounds
     match method:
         case "cmaes":
-            x0 = get_priors(type="mean") # just one initial guess
+            x0 = [1.27314746e+01, 1.37869038e+01, 7.37897281e-02, 1.35030823e+00,
+       2.94064664e+00, 4.93588538e-01, 6.70849996e+01, 1.18648813e+01,
+       2.80654619e-01, 4.97620174e+00, 1.15249929e+01, 2.23047182e-02,
+       5.46581661e+00, 1.42474565e+01, 1.48874045e+01, 9.64330200e-01,
+       1.96001803e-01, 5.42685958e-01, 9.00385209e-01]
+#get_priors(type="mean") # just one initial guess
         case "cpso":
             x0 = None#get_priors(type=) # trying without 
         case "de":
@@ -113,7 +119,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
 
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
-                              args=(paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
+                              args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
                               options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
 
     return OptimizeResult

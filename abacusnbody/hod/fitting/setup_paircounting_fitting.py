@@ -3,11 +3,13 @@ import h5py
 import os
 from pathlib import Path
 
-from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart, get_hods_given_tracer_and_params
+from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart # check both of these for param changes #, get_hods_given_tracer_and_params
+from abacusnbody.hod.fitting.params import Params
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24), verbose=False):
-    if params_inside_priors(hod_params):
+def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24), verbose=False):
+    tracer_list = param_set.tracer_list
+    if params_inside_priors(hod_params, param_set=param_set):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
         # mock_dict = newBall.run_hod(
@@ -19,8 +21,8 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
         # pi_bin_size = clustering_parameters["pi_bin_size"]
         # wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
 
-        npart = get_npart(hod_params, tracer_list, other_stuff_dict_here)
-        wp_dict = get_wp(hod_params, paircounts, tracer_list, npart, other_stuff_dict_here, clustering_parameters)
+        npart = get_npart(hod_params, param_set, other_stuff_dict_here)
+        wp_dict = get_wp(hod_params, paircounts, param_set, npart, other_stuff_dict_here, clustering_parameters)
         
         total_log_prob = 0.0
 
@@ -49,7 +51,7 @@ def log_probability(hod_params, paircounts, tracer_list, target_wp_dict, target_
                 print(negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal))
 
         # making sure there's only one central galaxy; this might make the n_g chi squared redundant?
-        total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here)
+        total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
         if verbose:
             print(f"Log prob from central occupation is:")
             print(negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
@@ -103,10 +105,10 @@ def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp
         print(C_matrix)
     return -chi2
 
-def negative_chi_squared_central_occupation(hod_params, tracers, other_stuff_dict_here):
-
+def negative_chi_squared_central_occupation(hod_params, param_set: Params, other_stuff_dict_here):
+    tracers = param_set.tracer_list
     M_h = np.logspace(10, 16, 90) # doesn't need to be the same as in other cases
-    hod_values = get_hod_values_given_parameters(M_h, hod_params, tracers, other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters(M_h, hod_params, param_set, other_stuff_dict_here)
 
     cenHOD_sum = np.zeros(len(hod_values["LRG_cen"]))
 
@@ -127,8 +129,8 @@ def log_prior(params):
     gaussian = 1/(gaussian_sigma*(2*np.pi)**0.5) * np.exp(-(Lkappa-gaussian_mu)**2 / (2 * gaussian_sigma**2))
     return np.log(gaussian)
 
-def params_inside_priors(params):
-    priors = get_priors()
+def params_inside_priors(params, param_set: Params):
+    priors = param_set.prior_bounds
     for i in range(len(params)):
         if params[i] <= priors[i][0] or params[i] >= priors[i][1]:
             return False
@@ -242,176 +244,179 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     stuff["hmf_big"] = hmf_big
     return stuff
 
-def get_priors(type="bounds"):
-    match type:
-        case "bounds":
-            return np.array([[10,16],
-                        [10,16],
-                        [0,5],
-                        [0,5],
-                        [0,5],
-                        [0,1],
-                        [0,100],
-                        [10,16],
-                        [0,5],
-                        [0, 5],
-                        [10,16],
-                        [0,5],
-                        [0,100],
-                        [10,16],
-                        [10,16],
-                        [0,5],
-                        [0,5],
-                        [0,5],
-                        [0,1]
-            ])
-        case "mean":
-            return np.array([ # Yuan et al.
-                13.3, # LRGs
-                14.4,
-                0.5,
-                1.0,
-                0.5,
-                0.7, # ELGs
-                20.0,
-                13.3,
-                0.8,
-                0.5,
-                14.4,
-                0.7,
-                6.0,
-                13.3, # QSOs
-                14.4,
-                0.5,
-                1.0,
-                0.5,
-                0.5
-            ])
-        case "std":
-            return np.array([ # Yuan et al.
-                0.5, #LRGs
-                0.5,
-                0.2,
-                0.3,
-                0.2,
-                0.5, # ELGs
-                0.5,
-                0.5,
-                0.2,
-                0.3,
-                0.5,
-                0.2,
-                1.0,
-                0.5, # QSOs
-                0.5,
-                0.2,
-                0.3,
-                0.2,
-                0.5
-            ])
+# def get_priors(type="bounds"):
+#     match type:
+#         case "bounds":
+#             return np.array([[10,16],
+#                         [10,16],
+#                         [0,5],
+#                         [0,5],
+#                         [0,5],
+#                         [0,1],
+#                         [0,100],
+#                         [10,16],
+#                         [0,5],
+#                         [0, 5],
+#                         [10,16],
+#                         [0,5],
+#                         [0,100],
+#                         [10,16],
+#                         [10,16],
+#                         [0,5],
+#                         [0,5],
+#                         [0,5],
+#                         [0,1]
+#             ])
+#         case "mean":
+#             return np.array([ # Yuan et al.
+#                 13.3, # LRGs
+#                 14.4,
+#                 0.5,
+#                 1.0,
+#                 0.5,
+#                 0.7, # ELGs
+#                 20.0,
+#                 13.3,
+#                 0.8,
+#                 0.5,
+#                 14.4,
+#                 0.7,
+#                 6.0,
+#                 13.3, # QSOs
+#                 14.4,
+#                 0.5,
+#                 1.0,
+#                 0.5,
+#                 0.5
+#             ])
+#         case "std":
+#             return np.array([ # Yuan et al.
+#                 0.5, #LRGs
+#                 0.5,
+#                 0.2,
+#                 0.3,
+#                 0.2,
+#                 0.5, # ELGs
+#                 0.5,
+#                 0.5,
+#                 0.2,
+#                 0.3,
+#                 0.5,
+#                 0.2,
+#                 1.0,
+#                 0.5, # QSOs
+#                 0.5,
+#                 0.2,
+#                 0.3,
+#                 0.2,
+#                 0.5
+#             ])
 
-def print_hod_values(hod_params):
-    print("LRG params:")
-    print("logM_cut:", hod_params[0])
-    print("logM1:", hod_params[1])
-    print("sigma:", hod_params[2])
-    print("alpha:", hod_params[3])
-    print("kappa:", hod_params[4])
-    print("ELG params:")
-    print("p_max:", hod_params[5])
-    print("Q:", hod_params[6])
-    print("logM_cut:", hod_params[7])
-    print("kappa:", hod_params[8])
-    print("sigma:", hod_params[9])
-    print("logM1:", hod_params[10])
-    print("alpha:", hod_params[11])
-    print("gamma:", hod_params[12])
-    print("QSO params:")
-    print("logM_cut:", hod_params[13])
-    print("logM1:", hod_params[14])
-    print("sigma:", hod_params[15])
-    print("alpha:", hod_params[16])
-    print("kappa:", hod_params[17])
-    print("p_max:", hod_params[18])
+# def print_hod_values(hod_params):
+#     print("LRG params:")
+#     print("logM_cut:", hod_params[0])
+#     print("logM1:", hod_params[1])
+#     print("sigma:", hod_params[2])
+#     print("alpha:", hod_params[3])
+#     print("kappa:", hod_params[4])
+#     print("ELG params:")
+#     print("p_max:", hod_params[5])
+#     print("Q:", hod_params[6])
+#     print("logM_cut:", hod_params[7])
+#     print("kappa:", hod_params[8])
+#     print("sigma:", hod_params[9])
+#     print("logM1:", hod_params[10])
+#     print("alpha:", hod_params[11])
+#     print("gamma:", hod_params[12])
+#     print("QSO params:")
+#     print("logM_cut:", hod_params[13])
+#     print("logM1:", hod_params[14])
+#     print("sigma:", hod_params[15])
+#     print("alpha:", hod_params[16])
+#     print("kappa:", hod_params[17])
+#     print("p_max:", hod_params[18])
 
-def initialise_walkers(initial_params_random: bool, num_walkers):
-    """
-    Initialise the positions of the walkers for fitting the HOD parameters
-    Do this randomly within the prior space if initial_params_random=True
-    Else populate in a small region around some provided params
+# def initialise_walkers(initial_params_random: bool, num_walkers):
+#     """
+#     Initialise the positions of the walkers for fitting the HOD parameters
+#     Do this randomly within the prior space if initial_params_random=True
+#     Else populate in a small region around some provided params
 
-    Params:
-    np.array([(LRGs:) logM_cut, logM1, sigma, alpha, kappa,
-        (ELGs): p_max, Q, logM_cut, kappa, sigma, logM1, alpha, gamma,
-        (QSOs): logM_cut, logM1, sigma, alpha, kappa])
-    """
-    priors = get_priors(type="bounds")
+#     Params:
+#     np.array([(LRGs:) logM_cut, logM1, sigma, alpha, kappa,
+#         (ELGs): p_max, Q, logM_cut, kappa, sigma, logM1, alpha, gamma,
+#         (QSOs): logM_cut, logM1, sigma, alpha, kappa])
+#     """
+#     priors = get_priors(type="bounds")
 
-    mean_priors = get_priors(type="mean")
+#     mean_priors = get_priors(type="mean")
 
-    std_priors = get_priors(type="std")
+#     std_priors = get_priors(type="std")
 
-    initial_params = np.array([
-        13.3,
-        14.4,
-        0.8,
-        1.0,
-        0.4,
-        0.7,
-        20.0,
-        13.3,
-        0.8,
-        0.5,
-        14.4,
-        0.7,
-        6.0,
-        13.3,
-        14.4,
-        0.8,
-        1.0,
-        0.4,
-        0.5
-    ])
+#     initial_params = np.array([
+#         13.3,
+#         14.4,
+#         0.8,
+#         1.0,
+#         0.4,
+#         0.7,
+#         20.0,
+#         13.3,
+#         0.8,
+#         0.5,
+#         14.4,
+#         0.7,
+#         6.0,
+#         13.3,
+#         14.4,
+#         0.8,
+#         1.0,
+#         0.4,
+#         0.5
+#     ])
 
-    rng = np.random.default_rng(seed=0)
+#     rng = np.random.default_rng(seed=0)
 
-    pos = np.zeros((num_walkers,np.shape(initial_params)[0]))
-    if (initial_params_random):
-        for i in range(num_walkers):
-            for j in range(np.shape(priors)[0]):
-                pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
-                #pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
+#     pos = np.zeros((num_walkers,np.shape(initial_params)[0]))
+#     if (initial_params_random):
+#         for i in range(num_walkers):
+#             for j in range(np.shape(priors)[0]):
+#                 pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
+#                 #pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
 
-    else:
-        #if len(initial_params)!=np.shape(priors)[0]:
-        #    raise ValueError("Your initial parameter values and priors have different shapes")
-        for i in range(num_walkers):
-            # Populate in a 10% region around parameters provided
-            # Potential to make the size of this region an input variable if necessary
-            pos[i,:] = initial_params*(0.95 + 0.1*np.random.random(np.shape(initial_params)[0]))
-    #print(pos)
+#     else:
+#         #if len(initial_params)!=np.shape(priors)[0]:
+#         #    raise ValueError("Your initial parameter values and priors have different shapes")
+#         for i in range(num_walkers):
+#             # Populate in a 10% region around parameters provided
+#             # Potential to make the size of this region an input variable if necessary
+#             pos[i,:] = initial_params*(0.95 + 0.1*np.random.random(np.shape(initial_params)[0]))
+#     #print(pos)
 
-    # Check none of the walkers lie outside the prior space
-    #for i in range(num_walkers):
-    #    for j in range(np.shape(priors)[0]):
-    #        if pos[i,j] < priors[j,0]:
-    #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too low")
-    #        if pos[i,j] > priors[j,1]:
-    #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
-    print(pos, flush=True)
-    return pos
+#     # Check none of the walkers lie outside the prior space
+#     #for i in range(num_walkers):
+#     #    for j in range(np.shape(priors)[0]):
+#     #        if pos[i,j] < priors[j,0]:
+#     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too low")
+#     #        if pos[i,j] > priors[j,1]:
+#     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
+#     print(pos, flush=True)
+#     return pos
 
-def get_hod_values_given_parameters(M_h: np.ndarray, params, tracers, other_stuff_dict_here):
+def get_hod_values_given_parameters(M_h: np.ndarray, params: np.ndarray, param_set: Params, other_stuff_dict_here: dict) -> dict:
     """
     Returns a dict with "LRG_cen", "LRG_sat", ...
+    Distinct from get_hods_given_tracer_and_params in that it calculates the incompleteness factor.
     """
+    tracers = param_set.tracer_list
     target_numden = get_target_number_density(tracers)
-    npart = get_npart(params, tracers, other_stuff_dict_here)
+    npart = get_npart(params, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
     hod_dict = {}
     for tracer in tracers:
         incompleteness = target_numden[tracer] / (npart[tracer] / other_stuff_dict_here["boxsize"]**3)
 
-        cen_hod, sat_hod = get_hods_given_tracer_and_params(M_h, params, tracer)
+        cen_hod, sat_hod = param_set.get_hods_given_tracer_and_params(M_h, params, tracer)
+        #cen_hod, sat_hod = get_hods_given_tracer_and_params(M_h, params, tracer)
         # print(f"{tracer} sat_hod: {sat_hod}")
         # print(f"{tracer} incompleteness: {incompleteness}")
         hod_dict[tracer+"_cen"] = cen_hod * incompleteness

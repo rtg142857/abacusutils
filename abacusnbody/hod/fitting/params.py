@@ -167,12 +167,12 @@ class Params:
                     self.tracer_dict["ELG"] = {
                         "p_max": SingleParam(name="p_max", idx=0, lb=0, ub=1, mean=0.7, std=0.5),
                         #"Q": SingleParam(name="logM1", idx=1, lb=0, ub=100, mean=20, std=5),
-                        "logM_cut": SingleParam(name="logM_cut", idx=2, lb=10, ub=16, mean=13.3, std=0.5),
-                        "kappa": SingleParam(name="kappa", idx=3, lb=0, ub=5, mean=0.8, std=0.2),
-                        "sigma": SingleParam(name="sigma", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
-                        "logM1": SingleParam(name="logM1", idx=5, lb=10, ub=16, mean=14.4, std=0.5),
-                        "alpha": SingleParam(name="alpha", idx=6, lb=0, ub=5, mean=1.0, std=0.3),
-                        "gamma": SingleParam(name="gamma", idx=7, lb=0, ub=100, mean=6.0, std=1.0)
+                        "logM_cut": SingleParam(name="logM_cut", idx=1, lb=10, ub=16, mean=13.3, std=0.5),
+                        "kappa": SingleParam(name="kappa", idx=2, lb=0, ub=5, mean=0.8, std=0.2),
+                        "sigma": SingleParam(name="sigma", idx=3, lb=0, ub=5, mean=0.5, std=0.2),
+                        "logM1": SingleParam(name="logM1", idx=4, lb=10, ub=16, mean=14.4, std=0.5),
+                        "alpha": SingleParam(name="alpha", idx=5, lb=0, ub=5, mean=1.0, std=0.3),
+                        "gamma": SingleParam(name="gamma", idx=6, lb=0, ub=100, mean=6.0, std=1.0)
                     }
                 case "QSO":
                     self.tracer_dict["QSO"] = {

@@ -64,7 +64,7 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
         total_log_prob += log_prior(hod_params)
         if verbose:
             print(f"Log prob from prior is:")
-            print(log_prior(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
+            print(log_prior(hod_params))#, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
     else:
         total_log_prob = -np.inf
 

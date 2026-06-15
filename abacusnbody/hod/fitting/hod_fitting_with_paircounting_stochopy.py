@@ -77,6 +77,14 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("Successful:", OptimizeResult["success"], flush=True)
     print("Final chi^2 calculations:")
     chi2 = log_probability(best_fit, paircounts, param_set, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimise=True, wp_limit=(i0, i1), verbose=True)
+    print("Chi^2 calculations from best value found previously:")
+    x0 = [1.27314746e+01, 1.37869038e+01, 7.37897281e-02, 1.35030823e+00,
+       2.94064664e+00, 4.93588538e-01, 6.70849996e+01, 1.18648813e+01,
+       2.80654619e-01, 4.97620174e+00, 1.15249929e+01, 2.23047182e-02,
+       5.46581661e+00, 1.42474565e+01, 1.48874045e+01, 9.64330200e-01,
+       1.96001803e-01, 5.42685958e-01, 9.00385209e-01]
+    chi2 = log_probability(x0, paircounts, param_set, target_wp, target_jackknife_inverse, target_ngal, other_stuff_dict_here, clustering_params, minimise=True, wp_limit=(i0, i1), verbose=True)
+    print(f"chi^2 of that best shot: {chi2}")
     print("Output message:", OptimizeResult["message"], flush=True)
 
     print("Saving output...", flush=True)

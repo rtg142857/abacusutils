@@ -124,14 +124,19 @@ def negative_chi_squared_central_occupation(hod_params, param_set: Params, other
     chi2 = np.dot(amount_greater_than_1, amount_greater_than_1) * 10 ** 7 # guess at what works
     return -chi2
 
-def log_prior(params):
-    # A has to be positive
-    LlogM_cut, LlogM1, Lsigma, Lalpha, Lkappa, Ep_max, EQ, ElogM_cut, Ekappa, Esigma, ElogM1, Ealpha, Egamma, QlogM_cut, QlogM1, Qsigma, Qalpha, Qkappa, Qp_max = tuple(params)
-    if Ep_max - 1/EQ <= 0.0:
-        return (Ep_max - 1/EQ) * 10 ** 7 # guess at what works
+def log_prior(params, param_set: Params):
+    # A has to be positive (NOW REDUNDANT with Q removed)
+    #LlogM_cut, LlogM1, Lsigma, Lalpha, Lkappa, Ep_max, EQ, ElogM_cut, Ekappa, Esigma, ElogM1, Ealpha, Egamma, QlogM_cut, QlogM1, Qsigma, Qalpha, Qkappa, Qp_max = tuple(params)
+    # if Ep_max - 1/EQ <= 0.0:
+    #     return (Ep_max - 1/EQ) * 10 ** 7 # guess at what works
+
+    # LRG kappa
+    LRG_params = param_set.get_params_of_specific_tracer(params, "LRG")
+    Lkappa = param_set.param_from_name(LRG_params, tracer="LRG", param_name="kappa")
     gaussian_mu = 0.5
     gaussian_sigma = 0.2
     gaussian = 1/(gaussian_sigma*(2*np.pi)**0.5) * np.exp(-(Lkappa-gaussian_mu)**2 / (2 * gaussian_sigma**2))
+
     return np.log(gaussian)
 
 def params_inside_priors(params, param_set: Params):

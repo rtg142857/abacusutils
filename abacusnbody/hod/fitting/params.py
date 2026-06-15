@@ -166,7 +166,7 @@ class Params:
                 case "ELG":
                     self.tracer_dict["ELG"] = {
                         "p_max": SingleParam(name="p_max", idx=0, lb=0, ub=1, mean=0.7, std=0.5),
-                        "Q": SingleParam(name="logM1", idx=1, lb=0, ub=100, mean=20, std=5),
+                        #"Q": SingleParam(name="logM1", idx=1, lb=0, ub=100, mean=20, std=5),
                         "logM_cut": SingleParam(name="logM_cut", idx=2, lb=10, ub=16, mean=13.3, std=0.5),
                         "kappa": SingleParam(name="kappa", idx=3, lb=0, ub=5, mean=0.8, std=0.2),
                         "sigma": SingleParam(name="sigma", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
@@ -181,7 +181,7 @@ class Params:
                         "sigma": SingleParam(name="sigma", idx=2, lb=0, ub=5, mean=0.5, std=0.2),
                         "alpha": SingleParam(name="alpha", idx=3, lb=0, ub=5, mean=1.0, std=0.3),
                         "kappa": SingleParam(name="kappa", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
-                        "p_max": SingleParam(name="p_max", idx=5, lb=0, ub=5, mean=0.5, std=0.2)
+                        #"p_max": SingleParam(name="p_max", idx=5, lb=0, ub=5, mean=0.5, std=0.2)
                     }
             for val in self.tracer_dict[tracer].values():
                 self.prior_bounds.append([val.lb, val.ub])
@@ -241,10 +241,11 @@ class Params:
             return params_of_tracer[self.tracer_dict[tracer][param_name].idx]
         else:
             return default
-    
-    def get_hods_given_tracer_and_params(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str):
-        # First get the range of indices corresponding to the particular tracer
-        self.tracer_list
+        
+    def get_params_of_specific_tracer(self, hod_params: np.ndarray, tracer: str):
+        """
+        Given the str of the tracer you want and a list of HOD params, slices out the tuple of params corresponding to that tracer.
+        """
         if tracer == self.tracer_list[0]:
             param_array_lower_idx = 0
             param_array_upper_idx = len(self.tracer_dict[tracer])
@@ -256,8 +257,14 @@ class Params:
             param_array_upper_idx = len(self.tracer_dict[self.tracer_list[0]]) + len(self.tracer_dict[self.tracer_list[1]]) + len(self.tracer_dict[self.tracer_list[2]])
         else:
             raise Exception
+        
+        return tuple(hod_params[param_array_lower_idx:param_array_upper_idx])
 
-        params_of_tracer = tuple(hod_params[param_array_lower_idx:param_array_upper_idx])
+    
+    def get_hods_given_tracer_and_params(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str):
+        # First get the range of indices corresponding to the particular tracer
+
+        params_of_tracer = self.get_params_of_specific_tracer(hod_params, tracer)
 
         match tracer:
             case "LRG":

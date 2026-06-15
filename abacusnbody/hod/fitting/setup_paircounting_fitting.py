@@ -61,10 +61,10 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
             print(f"Log prob from central occupation is:")
             print(negative_chi_squared_central_occupation(hod_params, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here))
 
-        total_log_prob += log_prior(hod_params)
+        total_log_prob += log_prior(hod_params, param_set=param_set)
         if verbose:
             print(f"Log prob from prior is:")
-            print(log_prior(hod_params))#, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
+            print(log_prior(hod_params, param_set=param_set))#, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
     else:
         total_log_prob = -np.inf
 

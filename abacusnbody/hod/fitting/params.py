@@ -31,7 +31,7 @@ def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
     M_1 = 10 ** logM_1
     below_cut = M_h - kappa * M_cut < 0
     hod_value = (
-        ((M_h - kappa * M_cut) / M_1) ** alpha
+        ((M_h - kappa * M_cut) / M_1) ** alpha # might warn about an invalid value if M_h - kappa * M_cut < 0, but that's handled elsewhere
         * 0.5
         * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
     )
@@ -67,7 +67,7 @@ def N_sat_ELG(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0
     M_1 = 10 ** logM_1
     below_cut = M_h - kappa * M_cut < 0
     
-    hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha # + beta*(M_h/M_1)**(-alpha1)/100
+    hod_value = A_s * ((M_h - kappa * M_cut) / M_1) ** alpha # + beta*(M_h/M_1)**(-alpha1)/100 # might warn about an invalid value if M_h - kappa * M_cut < 0, but that's handled elsewhere
     hod_value[below_cut] = 0
     return hod_value
 

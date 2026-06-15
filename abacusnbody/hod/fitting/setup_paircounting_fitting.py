@@ -23,7 +23,9 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
 
         npart = get_npart(hod_params, param_set, other_stuff_dict_here)
         for tr in tracer_list:
-            if npart[tr] == 0:
+            if npart[tr] == 0: # causes get_wp to throw some warnings, so we catch it early
+                if minimise:
+                    return np.inf
                 return -np.inf
         wp_dict = get_wp(hod_params, paircounts, param_set, npart, other_stuff_dict_here, clustering_parameters)
         

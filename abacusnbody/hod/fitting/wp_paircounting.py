@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import erfc, erf
-from params import Params
+from abacusnbody.hod.fitting.params import Params
 
 def vprint(input, verbose):
     if verbose:

@@ -183,7 +183,7 @@ class Params:
                         "kappa": SingleParam(name="kappa", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
                         "p_max": SingleParam(name="p_max", idx=5, lb=0, ub=5, mean=0.5, std=0.2)
                     }
-            for val in self.tracer_dict.values():
+            for val in self.tracer_dict[tracer].values():
                 self.prior_bounds.append([val.lb, val.ub])
         #self.prior_bounds = np.array(self.prior_bounds)
                 # case "LRG":

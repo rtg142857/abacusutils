@@ -1978,6 +1978,7 @@ class FlamingoHOD:
         """
         Takes in an array of 18 parameters: the LRG, ELG, and QSO HOD params in that order:
         Updates the FlamingoHOD object's HOD parameter values accordingly.
+        TODO: FIX! Make it use the params module
         """
         self.tracers["LRG"]["logM_cut"] = params[0]
         self.tracers["LRG"]["logM1"] = params[1]

@@ -101,7 +101,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
 def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, nwalkers: int, num_steps: int, wp_limit=(0, 24)):
 
-    method = "de"
+    method = "cmaes"
     bounds = param_set.prior_bounds
     match method:
         case "cmaes":
@@ -120,7 +120,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
                               args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": 1}) # TODO: Change back to workers -1
 
     return OptimizeResult
 

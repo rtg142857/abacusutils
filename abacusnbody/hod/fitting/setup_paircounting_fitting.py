@@ -22,6 +22,9 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
         # wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
 
         npart = get_npart(hod_params, param_set, other_stuff_dict_here)
+        for tr in tracer_list:
+            if npart[tr] == 0:
+                return -np.inf
         wp_dict = get_wp(hod_params, paircounts, param_set, npart, other_stuff_dict_here, clustering_parameters)
         
         total_log_prob = 0.0

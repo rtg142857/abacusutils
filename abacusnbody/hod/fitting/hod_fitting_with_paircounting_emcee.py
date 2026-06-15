@@ -36,7 +36,6 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
-    ndim = 19
 
     clustering_params = config["clustering_params"]
 
@@ -50,6 +49,7 @@ def fit_HOD(path_config_filename, save_chains=False):
         # paircounts[pair] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     param_set = Params(tracer_list=tracers)
+    ndim = len(param_set.prior_bounds)
 
     print("Setting up backend...", flush=True)
     start_time = time.time()

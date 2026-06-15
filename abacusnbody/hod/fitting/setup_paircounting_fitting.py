@@ -56,10 +56,10 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
                 print(negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal))
 
         # making sure there's only one central galaxy; this might make the n_g chi squared redundant?
-        total_log_prob += negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
+        total_log_prob += negative_chi_squared_central_occupation(hod_params, param_set=param_set, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
         if verbose:
             print(f"Log prob from central occupation is:")
-            print(negative_chi_squared_central_occupation(hod_params, tracers=tracer_list, other_stuff_dict_here=other_stuff_dict_here))
+            print(negative_chi_squared_central_occupation(hod_params, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here))
 
         total_log_prob += log_prior(hod_params)
         if verbose:

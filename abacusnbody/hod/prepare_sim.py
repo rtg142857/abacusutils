@@ -504,6 +504,7 @@ def prepare_slab(
     #Mpart = header['ParticleMassHMsun']  # msun / h
     #H0 = header['H0']
     #h = H0 / 100.0
+    Lbox = cat.boxsize_h
     h = cat.h
 
     # # form a halo table of the columns i care about
@@ -518,7 +519,6 @@ def prepare_slab(
 
     # only generate fenv ranks and c ranks if the user wants to enable secondary biases
     if want_AB:
-        raise Exception("AB not implemented yet")
         nbins = 100
         mbins = np.logspace(np.log10(mcut), 15.5, nbins + 1)
 
@@ -537,10 +537,13 @@ def prepare_slab(
         #             fenv_rank[mmask] = new_fenv_rank / np.max(new_fenv_rank) - 0.5
         # halos['fenv_rank'] = fenv_rank
 
-        allpos = halos['x_L2com']
-        allmasses = halos['N'] * Mpart
+        #allpos = halos['x_L2com']
+        #allmasses = halos['N'] * Mpart
+        allpos = halos["pos"]
+        allmasses = halos["M200_crit"]
 
         if halo_lc:
+            raise Exception("Lightcone not implemented yet")
             # origin dependent and simulation dependent
             origins = np.array(header['LightConeOrigins']).reshape(-1, 3)
             alldist = np.sqrt(np.sum((allpos - origins[0]) ** 2.0, axis=1))
@@ -631,7 +634,7 @@ def prepare_slab(
         Menv = do_Menv_from_tree(
             allpos,
             allmasses,
-            r_inner=halos['r98_L2com'],
+            r_inner=halos['r98'],
             r_outer=rad_outer,
             halo_lc=halo_lc,
             Lbox=Lbox,
@@ -640,7 +643,8 @@ def prepare_slab(
         )
         gc.collect()
 
-        if halo_lc and len(index_bounds) > 0:
+        if halo_lc: # and len(index_bounds) > 0: (index_bounds only defined if halo_lc)
+            raise Exception("Lightcone not implemented yet")
             mask = rand_norm == 0.0
             rand_norm[mask] = 1.0
             tmp = Menv[index_bounds]
@@ -653,7 +657,9 @@ def prepare_slab(
 
         # compute delta concentration
         print('computing c rank')
-        halos_c = halos['r98_L2com'] / halos['r25_L2com']
+        #halos_c = halos['r98_L2com'] / halos['r25_L2com']
+        halos_c = halos["concentration_abacus"]
+
         deltac_rank = np.zeros(len(halos))
         for ibin in range(nbins):
             mmask = (allmasses > mbins[ibin]) & (allmasses < mbins[ibin + 1])
@@ -682,7 +688,7 @@ def prepare_slab(
                 if np.sum(mmask) == 1:
                     deltac_rank[mmask] = 0
                 else:
-                    GroupPos = (halos[mmask]['x_L2com'] / cell).astype(int) % N_dim
+                    GroupPos = (halos[mmask]['pos'] / cell).astype(int) % N_dim
                     halo_shears = interpn(
                         (np.arange(N_dim), np.arange(N_dim), np.arange(N_dim)),
                         shearmark,

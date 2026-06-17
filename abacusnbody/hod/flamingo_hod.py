@@ -261,11 +261,9 @@ class FlamingoHOD:
             self.lbox = meta['BoxSize']
 
         if self.want_AB:
-            raise Exception("AB not implemented yet")
             assert 'hfenv' in self.halo_data.keys()
             assert 'hdeltac' in self.halo_data.keys()
         if self.want_shear:
-            raise Exception("Shear not implemented yet")
             assert 'hshear' in self.halo_data.keys()
 
         self.halo_mass_func_wshear, edges = np.histogramdd(
@@ -416,11 +414,9 @@ class FlamingoHOD:
         hc = np.empty([Nhalos_tot])
         hrvir = np.empty([Nhalos_tot])
         if self.want_AB:
-            raise Exception("Assembly bias not implemented yet")
             hdeltac = np.empty([Nhalos_tot])
             hfenv = np.empty([Nhalos_tot])
         if self.want_shear:
-            raise Exception("Shear not implemented yet")
             hshear = np.empty([Nhalos_tot])
 
         # Particles not implemented yet
@@ -530,13 +526,11 @@ class FlamingoHOD:
             hc[halo_ticker : halo_ticker + Nhalos[i]] = halo_c
             hrvir[halo_ticker : halo_ticker + Nhalos[i]] = halo_rvir
             if self.want_AB:
-                raise Exception("AB not implemented yet")
                 halo_deltac = maskedhalos['deltac_rank']  # halo concentration
                 halo_fenv = maskedhalos['fenv_rank']  # halo velocities, km/s
                 hdeltac[halo_ticker : halo_ticker + Nhalos[i]] = halo_deltac
                 hfenv[halo_ticker : halo_ticker + Nhalos[i]] = halo_fenv
             if self.want_shear:
-                raise Exception("Shear not implemented yet")
                 halo_shear = maskedhalos['shear_rank']  # halo velocities, km/s
                 hshear[halo_ticker : halo_ticker + Nhalos[i]] = halo_shear
             halo_ticker += Nhalos[i]
@@ -674,15 +668,13 @@ class FlamingoHOD:
             'pinds': pinds,
         }
         if self.want_AB:
-            raise Exception("AB not implemented yet")
             halo_data['hdeltac'] = hdeltac
             halo_data['hfenv'] = hfenv
-            particle_data['pdeltac'] = pdeltac
-            particle_data['pfenv'] = pfenv
+            # particle_data['pdeltac'] = pdeltac
+            # particle_data['pfenv'] = pfenv
         if self.want_shear:
-            raise Exception("Shear not implemented yet")
             halo_data['hshear'] = hshear
-            particle_data['pshear'] = pshear
+            # particle_data['pshear'] = pshear
 
         if self.want_ranks:
             raise Exception("Particles not implemented yet")

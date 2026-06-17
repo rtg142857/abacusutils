@@ -161,6 +161,7 @@ class SwiftHaloCatalog(object):
         #     raise Exception(r25_solver[3])
         
         r98_over_r25 = r98 / r25 #r98_solver[0] / r25_solver[0] # both the top and bottom are divided by rvir, so they cancel out
+        self.halos["r98"] = r98
         self.halos["concentration_abacus"] = r98_over_r25
 
 

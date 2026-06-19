@@ -29,7 +29,11 @@ def fit_HOD(path_config_filename, save_chains=False):
     paircount_path = fitting_params["paircounts_save_path"] + sim_label + "/"
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
 
-    tracer_list = ["LRG", "ELG", "QSO"]
+    tracer_flags = config["HOD_params"]["tracer_flags"]
+    tracer_list = []
+    for tracer_type in ["LRG", "ELG", "QSO"]:
+        if tracer_flags[tracer_type] == True:
+            tracer_list.append(tracer_type)
 
     clustering_params = config["clustering_params"]
     bin_params = clustering_params["bin_params"]

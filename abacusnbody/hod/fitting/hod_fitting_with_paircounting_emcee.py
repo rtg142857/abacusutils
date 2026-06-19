@@ -28,7 +28,12 @@ def fit_HOD(path_config_filename, save_chains=False):
     target_dict_path = fitting_params["target_dict_path"]
     paircount_path = fitting_params["paircounts_save_path"] + sim_label + "/"
     boxsize = config["Params"]["L"] * run_params["Cosmology"]["h"]
-    tracers=["LRG", "ELG", "QSO"]
+    
+    tracer_flags = config["HOD_params"]["tracer_flags"]
+    tracers = []
+    for tracer_type in ["LRG", "ELG", "QSO"]:
+        if tracer_flags[tracer_type] == True:
+            tracers.append(tracer_type)
 
     wp_limit = (12, 20)
     target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracers, wp_limit=wp_limit)
@@ -54,7 +59,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     print("Setting up backend...", flush=True)
     start_time = time.time()
     if save_chains:
-        filename = fitting_params["sampler_save_path"] + "emcee.hdf5"
+        filename = fitting_params["sampler_save_path"] + f"{sim_label}_emcee.hdf5"
         backend = emcee.backends.HDFBackend(filename)
         backend.reset(nwalkers, ndim)
     else:

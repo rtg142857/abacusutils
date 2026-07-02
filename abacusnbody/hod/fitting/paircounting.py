@@ -45,6 +45,8 @@ def split_cen_sat(mock_galaxies: dict):
     z = z[:Ncent]
     weight = weight[:Ncent]
 
+    assert np.all(id[:Ncent] == np.sort(id[:Ncent]))
+
     return x, y, z, Mvir, weight, x_sat, y_sat, z_sat, Mvir_sat, weight_sat
 
 def mass_mask(x,y,z,weight,Mvir,mass_bin_edges):
@@ -131,7 +133,47 @@ def wrap(x, L):
     x[lmL2] += L
     return x
 
-def npairs_satsat_onehalo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
+def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, boxsize, 
+                           mass_bin_edges, r_bin_edges, pi_max, d_pi=1):
+    """
+    We cannot use corrfunc for the one halo central-satellite term.
+    This is because it would be too inefficient to split by
+    halo id and use corrfunc on every single halo.
+
+    We can use the fact that both the central and satellite data here is always
+    ordered according to halo id
+
+    Weights and Ms have 2 arguments for sanity checking
+    """
+    # Only one pair per halo, from central to satellite
+
+    # If something ends up being wrong, one place to debug is to make sure every halo ID is being paired correctly
+    # sanity check
+    assert np.all(weight_cen1 == weight_sat2)
+    assert np.all(M_cen1 == M_sat2)
+
+    print("Calculating displacements and rp/pi...")
+
+    x_disp = wrap(x_cen1, x_sat2, boxsize)
+    y_disp = wrap(y_cen1, y_sat2, boxsize)
+    z_disp = wrap(z_cen1, z_sat2, boxsize)
+
+    distances_rp = ((x_disp)**2 + (y_disp)**2)**0.5
+    distances_pi = ((z_disp)**2)**0.5
+
+    print("Binning...")
+    bin_3d, _ = np.histogramdd(sample = np.array([M_cen1,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weight_cen1)
+
+    print("Transforming into M,M,rp,pi bins...")
+    n_pairs_mass_r_bins = np.zeros((len(mass_bin_edges)-1,len(mass_bin_edges)-1,len(r_bin_edges)-1,(pi_max//d_pi)))
+    for i in range(len(mass_bin_edges)-1):
+        for j in range(len(r_bin_edges)-1):
+            for k in range(pi_max//d_pi):
+                n_pairs_mass_r_bins[i,i,j,k] = bin_3d[i,j,k]
+
+    return n_pairs_mass_r_bins
+
+def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
                              cross=False, x2=None, y2=None, z2=None, weight2=None, Ms2=None):
     """
     We cannot use corrfunc for the one halo satellite-satellite term.
@@ -231,7 +273,7 @@ def correct_doublecounting(npairs, type):
             return npairs
         case "satsat":
             return npairs
-        case "satsat_onehalo":
+        case "satsat_1halo":
             return npairs/2
 
 
@@ -241,7 +283,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
     
     path_config_filename: the usual
     tracer_mock: mock dict of tracers, with one central and three satellite tracers per halo
-    type: "cencen", "censat", "satsat", "satsat_onehalo"
+    type: "cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"
     category: "" (LRG), "_ELGauto", "_ELGcross" (LRG-ELG)
     Nthread: Number of threads to use
     save: Boolean, whether to save to disk
@@ -308,7 +350,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
 
-        case "censat":
+        case "censat_full":
             # Only want one sat particle per halo
             x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
 
@@ -333,7 +375,18 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
                 npairs_mass_r_bins_test = np.array([npairs_mass_r_bins_test, npairs_mass_r_bins_test_cross])
 
-        case "satsat":
+        case "censat_1halo":
+            # Only one sat particle per halo is necessary
+            x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
+
+            npairs_mass_r_bins_test = npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, Lbox, mass_bin_edges, rpbins, pi_max, d_pi)
+
+            if category == "_ELGcross":
+                x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1))
+                npairs_mass_r_bins_cross = npairs_censat_1halo_wp(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, Lbox, mass_bin_edges, rpbins, pi_max, d_pi)
+                npairs_mass_r_bins_test = np.array([npairs_mass_r_bins_test, npairs_mass_r_bins_cross])
+
+        case "satsat_2halo":
             # Only want one sat particle per halo
             x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1, x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
 
@@ -345,12 +398,12 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
 
-        case "satsat_onehalo":
+        case "satsat_1halo":
             # Want all 3 sat particles per halo
             if category == "_ELGcross":
-                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2)
+                npairs_mass_r_bins_test = npairs_satsat_1halo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2)
             else:
-                npairs_mass_r_bins_test = npairs_satsat_onehalo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi)
+                npairs_mass_r_bins_test = npairs_satsat_1halo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi)
         
     time2 = time.time()
     if verbose:
@@ -371,9 +424,9 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=True
         verbose: Boolean, whether to print logs to stdout
     Returns:
         paircounts: Dict of paircounts, in the following format:
-        paircounts["cencen"], ''["censat"], ''["satsat"], ''["satsat_onehalo"] (for LRGs and QSOs)
+        paircounts["cencen"], ''["censat_full"], ''["censat_1halo"], ''["satsat_2halo"], ''["satsat_1halo"] (for LRGs and QSOs)
         paircounts["cencen_ELGauto"], ... (for ELGs specifically)
-        paircounts["cencen_ELGcross"], ... (where censat has an extra dimension, the first entry for LRG cen-ELG sat and the second for ELG cen-LRG sat)
+        paircounts["cencen_ELGcross"], ... (where censats have an extra dimension, the first entry for LRG cen-ELG sat and the second for ELG cen-LRG sat)
         Each value is a 3d numpy array of the following form:
         paircounts["cencen"][i,j,k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
 
@@ -392,7 +445,7 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=True
 
     paircounts = {}
 
-    pairs_list = ["cencen", "censat", "satsat", "satsat_onehalo"]
+    pairs_list = ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]
     category_list = ["", "_ELGauto", "_ELGcross"]
     for category in category_list:
         for pair in pairs_list:

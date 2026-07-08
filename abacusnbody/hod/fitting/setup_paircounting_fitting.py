@@ -50,10 +50,10 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
         for tracer in tracer_list:
             fitting_ngal = npart[tracer] / boxsize**3
             target_ngal = target_ngal_dict[tracer]
-            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal)
+            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tracer)
             if verbose:
                 print(f"Log prob from {tracer} ngal is:")
-                print(negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal))
+                print(negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tracer))
 
         # making sure there's only one central galaxy; this might make the n_g chi squared redundant?
         total_log_prob += negative_chi_squared_central_occupation(hod_params, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
@@ -76,13 +76,15 @@ def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, t
 
     return total_log_prob
 
-def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal):
+def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tracer):
     """
     Using the "rather lenient" sigma_n in Eq. 18 in https://arxiv.org/pdf/2110.11412 results in the wp dominating the chi squared
     Which is bad because it wants to push the incompleteness above 100%
     So we drop sigma_n by a factor of 100
+
+    Assume QSOs are complete
     """
-    if fitting_ngal < target_ngal:
+    if fitting_ngal < target_ngal or tracer == "QSO":
         sigma_n = 4 * 10 ** (-7) # 4 * 10 ** (-5)
         return -((fitting_ngal - target_ngal) / sigma_n) **2
     else:

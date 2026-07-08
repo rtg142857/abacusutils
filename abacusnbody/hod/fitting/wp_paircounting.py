@@ -12,8 +12,9 @@ def get_npart_given_tracer(hod_params: np.ndarray, tracer: str, param_set: Param
     hmf_big = other_stuff_dict_here["hmf_big"]
     mass_bin_centres_big = other_stuff_dict_here["mass_bin_centres_big"]
 
-    # TODO: include param_set as an arg
     hod_cen_big, hod_sat_big = param_set.get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer) #get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer)
+    if tracer == "ELG":
+        hod_sat_big = param_set.get_conformity_weighted_sat_hod(mass_bin_centres_big, hod_params, tracer)
 
     npart_cen = np.sum(hmf_big * hod_cen_big)
     npart_sat = np.sum(hmf_big * hod_sat_big)
@@ -51,6 +52,15 @@ def get_accurate_tracer_HOD(hod_params: np.ndarray, tracer: str, M_h: np.ndarray
     hod_cen = create_accurate_HOD(hod_cen_big,hmf_big,mass_bin_edges,num_mass_bins_big)
     hod_sat = create_accurate_HOD(hod_sat_big,hmf_big,mass_bin_edges,num_mass_bins_big)
     return hod_cen, hod_sat
+
+def get_accurate_ELG_sat_HOD_with_conformity(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray]:
+    assert tracer == "ELG"
+    _, hod_sat_ELGELG_big = param_set.get_hods_given_tracer_and_params(M_h, hod_params, tracer, ELG_ELG = True)
+    hod_sat_weighted_big = param_set.get_conformity_weighted_sat_hod(M_h, hod_params, tracer)
+
+    hod_sat_ELGELG = create_accurate_HOD(hod_sat_ELGELG_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+    hod_sat_weighted = create_accurate_HOD(hod_sat_weighted_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+    return hod_sat_ELGELG, hod_sat_weighted
 
 def create_accurate_HOD(hod,halos,mass_bin_edges,num_mass_bins_big):
     """
@@ -207,6 +217,10 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         # autocorr
         hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
         hod_cen2, hod_sat2 = hod_cen1, hod_sat1
+        if tracer1 == "ELG":
+            hod_sat_ELGELG, hod_sat_weighted = get_accurate_ELG_sat_HOD_with_conformity(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set)
+        # else:
+        #     hod_sat_ELGELG, hod_sat_weighted = None, None
     else:
         # crosscorr
         hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)

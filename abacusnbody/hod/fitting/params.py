@@ -171,8 +171,9 @@ class Params:
                         "kappa": SingleParam(name="kappa", idx=2, lb=0, ub=5, mean=0.8, std=0.2),
                         "sigma": SingleParam(name="sigma", idx=3, lb=0, ub=5, mean=0.5, std=0.2),
                         "logM1": SingleParam(name="logM1", idx=4, lb=10, ub=16, mean=14.4, std=0.5),
-                        "alpha": SingleParam(name="alpha", idx=5, lb=0, ub=5, mean=1.0, std=0.3),
-                        "gamma": SingleParam(name="gamma", idx=6, lb=0, ub=100, mean=6.0, std=1.0)
+                        "logM1_EE": SingleParam(name="logM1_EE", idx=5, lb=10, ub=16, mean=14.2, std=0.5),
+                        "alpha": SingleParam(name="alpha", idx=6, lb=0, ub=5, mean=1.0, std=0.3),
+                        "gamma": SingleParam(name="gamma", idx=7, lb=0, ub=100, mean=6.0, std=1.0)
                     }
                 case "QSO":
                     self.tracer_dict["QSO"] = {
@@ -181,7 +182,7 @@ class Params:
                         "sigma": SingleParam(name="sigma", idx=2, lb=0, ub=5, mean=0.5, std=0.2),
                         "alpha": SingleParam(name="alpha", idx=3, lb=0, ub=5, mean=1.0, std=0.3),
                         "kappa": SingleParam(name="kappa", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
-                        #"p_max": SingleParam(name="p_max", idx=5, lb=0, ub=5, mean=0.5, std=0.2)
+                        "p_max": SingleParam(name="p_max", idx=5, lb=0, ub=5, mean=0.5, std=0.2)
                     }
             for val in self.tracer_dict[tracer].values():
                 self.prior_bounds.append([val.lb, val.ub])
@@ -261,8 +262,8 @@ class Params:
         return tuple(hod_params[param_array_lower_idx:param_array_upper_idx])
 
     
-    def get_hods_given_tracer_and_params(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str):
-        # First get the range of indices corresponding to the particular tracer
+    def get_hods_given_tracer_and_params(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str, ELG_ELG: bool = False):
+        # First get the range of indices corresponding to the particular tracer; ELG_ELG indicates that we are getting the satellite HOD for an ELG with central ELG
 
         params_of_tracer = self.get_params_of_specific_tracer(hod_params, tracer)
 
@@ -282,10 +283,16 @@ class Params:
                 sigma = self.param_from_name(params_of_tracer, tracer, "sigma")
                 gamma = self.param_from_name(params_of_tracer, tracer, "gamma")
                 kappa = self.param_from_name(params_of_tracer, tracer, "kappa")
-                logM1 = self.param_from_name(params_of_tracer, tracer, "logM1")
+
                 alpha = self.param_from_name(params_of_tracer, tracer, "alpha")
+
                 hod_cen = N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma)
-                hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)
+                if ELG_ELG:
+                    logM1_EE = self.param_from_name(params_of_tracer, tracer, "logM1_EE")
+                    hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)
+                else:
+                    logM1 = self.param_from_name(params_of_tracer, tracer, "logM1")
+                    hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)
             case "QSO":
                 logM_cut = self.param_from_name(params_of_tracer, tracer, "logM_cut")
                 logM1 = self.param_from_name(params_of_tracer, tracer, "logM1")
@@ -296,6 +303,20 @@ class Params:
                 hod_cen = N_cen_QSO(M_h, logM_cut, sigma, p_max)
                 hod_sat = N_sat_QSO(M_h, logM_cut, kappa, logM1, alpha)
         return hod_cen, hod_sat
+    
+    def get_conformity_weighted_sat_hod(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str = "ELG"):
+        """
+        Gets the satellite HOD for ELGs, taken as an average of that with an LRG+QSO central (no conformity) and that with an ELG central (with fconformity).
+        Average is weighted in each mass bin by the proportion of central galaxies
+        """
+        assert tracer=="ELG"
+        ELG_hod_cen, ELG_hod_sat_noconform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=False)
+        _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=True)
+        LRG_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="LRG")
+        QSO_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="QSO")
+        nonELG_hod_cen = LRG_hod_cen + QSO_hod_cen
+        ELG_cen_ratio = np.nan_to_num(ELG_hod_cen / (nonELG_hod_cen + ELG_hod_cen))
+        return ELG_hod_sat_conform * ELG_cen_ratio + ELG_hod_sat_noconform * (1 - ELG_cen_ratio)
     
     def print_hod_values(self, hod_params: np.ndarray):
         i = 0

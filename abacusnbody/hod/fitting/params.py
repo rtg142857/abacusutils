@@ -148,9 +148,12 @@ class SingleParam:
 class Params:
     """
     Class for bookkeeping the list of parameters. If you want to remove or add params, change the init function.
+
+    Also stores the current HOD (initialised with update_hod) and M_h.
     """
-    def __init__(self, tracer_list):
+    def __init__(self, tracer_list: list[str], M_h: np.ndarray):
         self.tracer_list = tracer_list
+        self.M_h = M_h
         self.tracer_dict = {}
         self.prior_bounds = []
         for tracer in tracer_list:
@@ -186,36 +189,18 @@ class Params:
                     }
             for val in self.tracer_dict[tracer].values():
                 self.prior_bounds.append([val.lb, val.ub])
-        #self.prior_bounds = np.array(self.prior_bounds)
-                # case "LRG":
-                #     self.tracer_dict["LRG"] = [
-                #         SingleParam("logM_cut", idx=0, lb=10, ub=16, mean=13.3, std=0.5),
-                #         SingleParam("logM1", idx=1, lb=10, ub=16, mean=14.4, std=0.5),
-                #         SingleParam("sigma", idx=2, lb=0, ub=5, mean=0.5, std=0.2),
-                #         SingleParam("alpha", idx=3, lb=0, ub=5, mean=1.0, std=0.3),
-                #         SingleParam("kappa", idx=4, lb=0, ub=5, mean=0.5, std=0.2)
-                #     ]
-                # case "ELG":
-                #     self.tracer_dict["ELG"] = [
-                #         SingleParam("p_max", idx=0, lb=0, ub=1, mean=0.7, std=0.5),
-                #         SingleParam("logM1", idx=1, lb=0, ub=100, mean=20, std=5),
-                #         SingleParam("logM_cut", idx=2, lb=10, ub=16, mean=13.3, std=0.5),
-                #         SingleParam("kappa", idx=3, lb=0, ub=5, mean=0.8, std=0.2),
-                #         SingleParam("sigma", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
-                #         SingleParam("logM1", idx=5, lb=10, ub=16, mean=14.4, std=0.5),
-                #         SingleParam("alpha", idx=6, lb=0, ub=5, mean=1.0, std=0.3),
-                #         SingleParam("gamma", idx=7, lb=0, ub=100, mean=6.0, std=1.0)
-                #     ]
-                # case "QSO":
-                #     self.tracer_dict["QSO"] = [
-                #         SingleParam("logM_cut", idx=0, lb=10, ub=16, mean=13.3, std=0.5),
-                #         SingleParam("logM1", idx=1, lb=10, ub=16, mean=14.4, std=0.5),
-                #         SingleParam("sigma", idx=2, lb=0, ub=5, mean=0.5, std=0.2),
-                #         SingleParam("alpha", idx=3, lb=0, ub=5, mean=1.0, std=0.3),
-                #         SingleParam("kappa", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
-                #         SingleParam("p_max", idx=5, lb=0, ub=5, mean=0.5, std=0.2)
-                #     ]
-        #self.tracer_indices = {"LRG": 0, "ELG": 1, "QSO": 2}
+        
+        self.hod_dict = {}
+        for tracer in tracer_list:
+            self.hod_dict[tracer] = {}
+            self.hod_dict[tracer]["cen"] = np.zeros(len(M_h))
+            self.hod_dict[tracer]["sat"] = np.zeros(len(M_h))
+
+        # Conformity
+        if "ELG" in tracer_list:
+            self.hod_dict["ELG_sat_EE"] = np.zeros(len(M_h))
+            self.hod_dict["ELG_sat_avg"] = np.zeros(len(M_h))
+            self.hod_dict["ELG_sat_ss1"] = np.zeros(len(M_h))
     
     def get_initial_params(self, positions = 1) -> np.ndarray:
         """
@@ -304,19 +289,40 @@ class Params:
                 hod_sat = N_sat_QSO(M_h, logM_cut, kappa, logM1, alpha)
         return hod_cen, hod_sat
     
-    def get_conformity_weighted_sat_hod(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str = "ELG"):
+    def get_conformity_weighted_sat_hod(self, M_h: np.ndarray, hod_params: np.ndarray, tracer: str = "ELG") -> tuple[np.ndarray, np.ndarray]:
         """
         Gets the satellite HOD for ELGs, taken as an average of that with an LRG+QSO central (no conformity) and that with an ELG central (with fconformity).
         Average is weighted in each mass bin by the proportion of central galaxies
+
+        Returns a tuple: the ordinary average, and the value for ELG-ELG one-halo.
         """
         assert tracer=="ELG"
         ELG_hod_cen, ELG_hod_sat_noconform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=False)
         _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=True)
-        LRG_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="LRG")
+
+        QSO_params = self.get_params_of_specific_tracer(hod_params, "QSO")
+        LRG_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="LRG") * (1 - self.param_from_name(QSO_params, "QSO", "p_max", default=0)) # incompleteness factor for LRGs
         QSO_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="QSO")
+        
         nonELG_hod_cen = LRG_hod_cen + QSO_hod_cen
         ELG_cen_ratio = np.nan_to_num(ELG_hod_cen / (nonELG_hod_cen + ELG_hod_cen))
-        return ELG_hod_sat_conform * ELG_cen_ratio + ELG_hod_sat_noconform * (1 - ELG_cen_ratio)
+        ELG_hod_sat_avg = ELG_hod_sat_conform * ELG_cen_ratio + ELG_hod_sat_noconform * (1 - ELG_cen_ratio)
+
+        # derivation is complicated; average of X(X-1), where X is a linear combination of Poisson distributions
+        ELG_hod_sat_ss1_squared = ELG_hod_sat_avg**2 - ELG_hod_sat_avg + ELG_hod_sat_conform * ELG_cen_ratio**2 + ELG_hod_sat_noconform * (1-ELG_cen_ratio)**2
+        return ELG_hod_sat_avg, np.sqrt(ELG_hod_sat_ss1_squared)
+    
+    def update_hods(self, hod_params):
+        for tracer in self.tracer_list:
+            hod_cen, hod_sat = self.get_hods_given_tracer_and_params(self.M_h, hod_params, tracer, ELG_ELG=False)
+            self.hod_dict[tracer]["cen"] = hod_cen
+            self.hod_dict[tracer]["sat"] = hod_sat
+        if "ELG" in self.tracer_list:
+            _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(self.M_h, hod_params, tracer="ELG", ELG_ELG=True)
+            self.hod_dict["ELG_sat_EE"] = ELG_hod_sat_conform
+            self.hod_dict["ELG_sat_avg"] = self.get_conformity_weighted_sat_hod(self, self.M_h, tracer="ELG")
+            self.hod_dict["ELG_sat_ss1"] = TODO
+
     
     def print_hod_values(self, hod_params: np.ndarray):
         i = 0

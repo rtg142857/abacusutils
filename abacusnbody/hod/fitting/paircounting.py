@@ -413,7 +413,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
 def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=True, verbose=False):
     """
-    Returns a dict of paircounts, binned by M1, M2, and rp
+    Returns a dict of paircounts, binned by M1, M2, rp, and pi
     where M1 is the mass of the first halo and M2 is the mass of the second
 
     Args:
@@ -427,8 +427,8 @@ def get_paircounts(path_config_filename, tracer_mock: dict, Nthread=1, save=True
         paircounts["cencen"], ''["censat_full"], ''["censat_1halo"], ''["satsat_2halo"], ''["satsat_1halo"] (for LRGs and QSOs)
         paircounts["cencen_ELGauto"], ... (for ELGs specifically)
         paircounts["cencen_ELGcross"], ... (where censats have an extra dimension, the first entry for LRG cen-ELG sat and the second for ELG cen-LRG sat)
-        Each value is a 3d numpy array of the following form:
-        paircounts["cencen"][i,j,k] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, distance in bin k
+        Each value is a 4d numpy array of the following form:
+        paircounts["cencen"][i,j,k,l] = number of pairs with halo 1 in mass bin i, halo 2 in mass bin j, rp distance in bin k, pi distance in bin l
 
 
         Ignore below this line:

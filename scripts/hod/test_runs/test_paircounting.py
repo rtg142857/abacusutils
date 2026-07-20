@@ -269,7 +269,7 @@ def main(path_config_filename):
 
     print("Plotting HODs...")
     M_h = np.logspace(10, 16, 90)
-    hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
     print(hod_values)
     plot_HODs("HODs.png", M_h, hod_values, tracer_list)
 

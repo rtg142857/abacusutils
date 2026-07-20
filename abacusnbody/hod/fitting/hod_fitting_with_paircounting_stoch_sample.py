@@ -83,7 +83,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Saving HOD values...", flush=True)
     M_h = np.logspace(10, 16, 90)
-    hod_values = get_hod_values_given_parameters(M_h, best_fit, tracer_list, other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, best_fit, tracer_list, other_stuff_dict_here)
     for key, val in hod_values.items():
         np.save(save_path + key + ".npy", val)
 

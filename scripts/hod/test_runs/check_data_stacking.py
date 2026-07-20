@@ -2,7 +2,7 @@ import numpy as np
 import yaml
 import argparse
 from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import make_other_stuff_dict, plot_HODs
-from abacusnbody.hod.fitting.setup_paircounting_fitting import get_npart, get_wp, log_probability, get_target_number_density, get_hod_values_given_parameters
+from abacusnbody.hod.fitting.setup_paircounting_fitting import get_npart, get_wp, log_probability, get_target_number_density, get_hod_values_given_parameters_with_incompleteness
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
 def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"], wp_limit=(0, 24)):

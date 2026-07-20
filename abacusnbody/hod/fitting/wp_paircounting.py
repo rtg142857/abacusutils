@@ -9,12 +9,13 @@ def vprint(input, verbose):
 #######################################################################################
 # Number density stuff
 def get_npart_given_tracer(hod_params: np.ndarray, tracer: str, param_set: Params, other_stuff_dict_here: dict):
+    # because it uses big, we don't use the in-built HODs I guess
     hmf_big = other_stuff_dict_here["hmf_big"]
     mass_bin_centres_big = other_stuff_dict_here["mass_bin_centres_big"]
 
     hod_cen_big, hod_sat_big = param_set.get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer) #get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer)
     if tracer == "ELG":
-        hod_sat_big = param_set.get_conformity_weighted_sat_hod(mass_bin_centres_big, hod_params, tracer)
+        hod_sat_big, _ = param_set.get_conformity_weighted_sat_hod(mass_bin_centres_big, hod_params, tracer)
 
     npart_cen = np.sum(hmf_big * hod_cen_big)
     npart_sat = np.sum(hmf_big * hod_sat_big)
@@ -53,14 +54,15 @@ def get_accurate_tracer_HOD(hod_params: np.ndarray, tracer: str, M_h: np.ndarray
     hod_sat = create_accurate_HOD(hod_sat_big,hmf_big,mass_bin_edges,num_mass_bins_big)
     return hod_cen, hod_sat
 
-def get_accurate_ELG_sat_HOD_with_conformity(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray]:
+def get_accurate_ELG_sat_HOD_with_conformity(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     assert tracer == "ELG"
     _, hod_sat_ELGELG_big = param_set.get_hods_given_tracer_and_params(M_h, hod_params, tracer, ELG_ELG = True)
-    hod_sat_weighted_big = param_set.get_conformity_weighted_sat_hod(M_h, hod_params, tracer)
+    hod_sat_weighted_big, hod_sat_EE_SS1_big = param_set.get_conformity_weighted_sat_hod(M_h, hod_params, tracer)
 
     hod_sat_ELGELG = create_accurate_HOD(hod_sat_ELGELG_big, hmf_big, mass_bin_edges, num_mass_bins_big)
     hod_sat_weighted = create_accurate_HOD(hod_sat_weighted_big, hmf_big, mass_bin_edges, num_mass_bins_big)
-    return hod_sat_ELGELG, hod_sat_weighted
+    hod_sat_EE_SS1 = create_accurate_HOD(hod_sat_EE_SS1_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+    return hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_SS1
 
 def create_accurate_HOD(hod,halos,mass_bin_edges,num_mass_bins_big):
     """
@@ -87,51 +89,81 @@ def create_weighting_factor(mass_pair_array,hod1,hod2):
     weighting_factor = np.tensordot(np.outer(hod1,hod2),mass_pair_array,axes=([0,1],[0,1]))
     return weighting_factor
 
-def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, num_sat_parts: int, tracer2: str | None = None, verbose=False):
+def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, tracer2: str | None = None,
+                    hod_sat_ELGELG=None, hod_sat_weighted=None, hod_sat_EE_ss1=None,
+                    num_sat_parts=3, verbose=False):
     if tracer1 == "ELG" and (tracer2 == None or tracer2 == "ELG"):
         ccp = paircounts["cencen_ELGauto"]
-        csp = paircounts["censat_ELGauto"]
-        ssp = paircounts["satsat_ELGauto"]
-        ss1p = paircounts["satsat_onehalo_ELGauto"]
+        csp_full = paircounts["censat_full_ELGauto"]
+        csp_1halo = paircounts["censat_1halo_ELGauto"]
+        ssp = paircounts["satsat_2halo_ELGauto"]
+        ss1p = paircounts["satsat_1halo_ELGauto"]
         if verbose:
             vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-            vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+            vprint("Sum of full cs paircounts: "+str(np.sum(csp_full)), verbose)
+            vprint("Sum of 1-halo cs paircounts: "+str(np.sum(csp_1halo)), verbose)
             vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+
+        csp_2halo = csp_full - csp_1halo
+        CS_2halo = create_weighting_factor(csp_2halo, hod_cen1, hod_sat_weighted)
+        CS_1halo = create_weighting_factor(csp_1halo, hod_cen1, hod_sat_ELGELG)
+        
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
-        CS = create_weighting_factor(csp,hod_cen1,hod_sat2) * 2 # these paircounts are not doublecounted, but the others (including the randoms) are
-        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
-        SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
+        CS = (CS_2halo + CS_1halo) * 2 # these paircounts are not doublecounted, but the others (including the randoms) are
+        SS2 = create_weighting_factor(ssp,hod_sat_weighted,hod_sat_weighted)
+        SS1 = create_weighting_factor(ss1p,hod_sat_EE_ss1,hod_sat_EE_ss1) / ((num_sat_parts*(num_sat_parts-1))/2)
 
     elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"):
         ccp = paircounts["cencen_ELGcross"]
-        csp_lcen_esat = paircounts["censat_ELGcross"][0]
-        csp_ecen_lsat = paircounts["censat_ELGcross"][1]
-        ssp = paircounts["satsat_ELGcross"]
-        ss1p = paircounts["satsat_onehalo_ELGcross"]
+        csp_lcen_esat_full = paircounts["censat_full_ELGcross"][0]
+        csp_ecen_lsat_full = paircounts["censat_full_ELGcross"][1]
+        csp_lcen_esat_1halo = paircounts["censat_1halo_ELGcross"][0]
+        csp_ecen_lsat_1halo = paircounts["censat_1halo_ELGcross"][1]
+        ssp = paircounts["satsat_2halo_ELGcross"]
+        ss1p = paircounts["satsat_1halo_ELGcross"]
         if verbose:
             vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-            vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat)), verbose)
-            vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat)), verbose)
+            vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat_full)), verbose)
+            vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat_full)), verbose)
+            vprint("Sum of 1-halo cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat_1halo)), verbose)
+            vprint("Sum of 1-halo cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat_1halo)), verbose)
             vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         if tracer1 == "ELG":
-            CS_ecen_lsat = create_weighting_factor(csp_ecen_lsat,hod_cen1,hod_sat2)
-            CS_lcen_esat = create_weighting_factor(csp_lcen_esat,hod_cen2,hod_sat1)
-        else:
-            CS_ecen_lsat = create_weighting_factor(csp_lcen_esat,hod_cen1,hod_sat2)
-            CS_lcen_esat = create_weighting_factor(csp_ecen_lsat,hod_cen2,hod_sat1)
-        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2) #/ (num_sat_parts**2) 
-        SS1 = np.zeros(shape=np.shape(SS)) #create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
+            # CS_lcen_esat can probably be combined 2halo and 1halo for optimisation, because create_weighting_factor is a bottleneck
+            CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen1,hod_sat2)
+            CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen2,hod_sat1)
 
-        CS = CS_ecen_lsat + CS_lcen_esat
+            csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
+            CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
+            csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
+            CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen2, hod_sat_weighted)
+
+        else:
+            CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen1,hod_sat2)
+            CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen2,hod_sat1)
+
+            csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
+            CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
+            csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
+            CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
+
+        CS = CS_ecen_lsat_2halo + CS_ecen_lsat_1halo + CS_lcen_esat_2halo + CS_lcen_esat_1halo
+
+        if tracer1 == "ELG":
+            SS2 = create_weighting_factor(ssp,hod_sat_weighted,hod_sat2) # actually full SS1+SS2
+        else:
+            SS2 = create_weighting_factor(ssp, hod_sat1, hod_sat_weighted) # likewise
+        SS1 = np.zeros(shape=np.shape(SS)) #create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
 
     else:
         ccp = paircounts["cencen"]
-        csp = paircounts["censat"]
-        ssp = paircounts["satsat"]
-        ss1p = paircounts["satsat_onehalo"]
+        csp = paircounts["censat_full"]
+        ssp = paircounts["satsat_2halo"]
+        ss1p = paircounts["satsat_1halo"]
         if verbose:
             vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
             vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
@@ -139,23 +171,23 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) + create_weighting_factor(csp, hod_sat1, hod_cen2) # could be LRG-QSO cross so we need both
-        SS = create_weighting_factor(ssp,hod_sat1,hod_sat2)
+        SS2 = create_weighting_factor(ssp,hod_sat1,hod_sat2)
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
     if verbose:
         vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)
         vprint("Sum of CS after HOD integration: "+str(np.sum(CS)), verbose)
-        vprint("Sum of SS after HOD integration: "+str(np.sum(SS)), verbose)
+        vprint("Sum of SS2 after HOD integration: "+str(np.sum(SS2)), verbose)
         vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
 
-    GG = CC + CS + SS + SS1
+    GG = CC + CS + SS2 + SS1
     if verbose:
         vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
         vprint(f"GG values:", verbose)
         vprint(GG, verbose)
     # np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/pair_ddrppi", GG)
 
-    return CC + CS + SS + SS1
+    return GG
 
 
 
@@ -217,8 +249,6 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         # autocorr
         hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
         hod_cen2, hod_sat2 = hod_cen1, hod_sat1
-        if tracer1 == "ELG":
-            hod_sat_ELGELG, hod_sat_weighted = get_accurate_ELG_sat_HOD_with_conformity(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set)
         # else:
         #     hod_sat_ELGELG, hod_sat_weighted = None, None
     else:
@@ -226,10 +256,17 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         hod_cen1, hod_sat1 = get_accurate_tracer_HOD(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
         hod_cen2, hod_sat2 = get_accurate_tracer_HOD(hod_params, tracer2, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
 
+    if tracer1 == "ELG" or tracer2 == "ELG":
+        hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_ss1 = get_accurate_ELG_sat_HOD_with_conformity(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set)
+    else:
+        hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_ss1 = None, None, None
+
     # Galaxy pairs
     vprint("Getting galaxy pairs", verbose)
     GG = get_galaxy_pairs(tracer1=tracer1, tracer2=tracer2, paircounts=paircounts,
-                          hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, num_sat_parts=num_sat_parts, verbose=verbose)
+                          hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, 
+                          hod_sat_ELGELG=hod_sat_ELGELG, hod_sat_weighted=hod_sat_weighted, hod_sat_EE_ss1=hod_sat_EE_ss1,
+                          num_sat_parts=num_sat_parts, verbose=verbose)
     if verbose:
         vprint("Sum of ggs: "+str(np.sum(GG)), verbose)
 

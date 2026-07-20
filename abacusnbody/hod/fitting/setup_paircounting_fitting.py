@@ -9,6 +9,8 @@ from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
 def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24), verbose=False):
     tracer_list = param_set.tracer_list
+    #param_set.update_hods(hod_params)
+
     if params_inside_priors(hod_params, param_set=param_set):
         # newBall.update_HOD_params(params)
         # print(params, flush=True) # Debugging
@@ -115,7 +117,7 @@ def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp
 def negative_chi_squared_central_occupation(hod_params, param_set: Params, other_stuff_dict_here):
     tracers = param_set.tracer_list
     M_h = np.logspace(10, 16, 90) # doesn't need to be the same as in other cases
-    hod_values = get_hod_values_given_parameters(M_h, hod_params, param_set, other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, hod_params, param_set, other_stuff_dict_here)
 
     cenHOD_sum = np.zeros(len(hod_values["LRG_cen"]))
 
@@ -418,7 +420,7 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
 #     print(pos, flush=True)
 #     return pos
 
-def get_hod_values_given_parameters(M_h: np.ndarray, params: np.ndarray, param_set: Params, other_stuff_dict_here: dict) -> dict:
+def get_hod_values_given_parameters_with_incompleteness(M_h: np.ndarray, params: np.ndarray, param_set: Params, other_stuff_dict_here: dict) -> dict:
     """
     Returns a dict with "LRG_cen", "LRG_sat", ...
     Distinct from get_hods_given_tracer_and_params in that it calculates the incompleteness factor.

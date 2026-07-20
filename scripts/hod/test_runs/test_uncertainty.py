@@ -2,7 +2,7 @@ import numpy as np
 import yaml
 import argparse
 from abacusnbody.hod.fitting.hod_fitting_with_paircounting_stochopy import make_other_stuff_dict, plot_HODs
-from abacusnbody.hod.fitting.setup_paircounting_fitting import get_npart, get_wp, log_probability, get_target_number_density, get_hod_values_given_parameters
+from abacusnbody.hod.fitting.setup_paircounting_fitting import get_npart, get_wp, log_probability, get_target_number_density, get_hod_values_given_parameters_with_incompleteness
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
 # def get_target_dicts(target_dict_path, tracers=["LRG", "ELG", "QSO"]):
@@ -182,7 +182,7 @@ def main(path_config_filename):
     print("Plotting HODs...", flush=True)
     
     M_h=np.logspace(10, 16, 100)
-    hod_values = get_hod_values_given_parameters(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, HOD_params_list, tracer_list, other_stuff_dict_here)
     plot_HODs(save_path+"HODs.png", M_h=M_h, hod_values=hod_values, tracers=tracer_list)
 
 class ArgParseFormatter(

@@ -157,7 +157,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             SS2 = create_weighting_factor(ssp,hod_sat_weighted,hod_sat2) # actually full SS1+SS2
         else:
             SS2 = create_weighting_factor(ssp, hod_sat1, hod_sat_weighted) # likewise
-        SS1 = np.zeros(shape=np.shape(SS)) #create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
+        SS1 = np.zeros(shape=np.shape(SS2)) #create_weighting_factor(ss1p,hod_sat1,hod_sat2) / (num_sat_parts**2)
 
     else:
         ccp = paircounts["cencen"]

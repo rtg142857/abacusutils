@@ -312,16 +312,16 @@ class Params:
         ELG_hod_sat_ss1_squared = ELG_hod_sat_avg**2 - ELG_hod_sat_avg + ELG_hod_sat_conform * ELG_cen_ratio**2 + ELG_hod_sat_noconform * (1-ELG_cen_ratio)**2
         return ELG_hod_sat_avg, np.sqrt(ELG_hod_sat_ss1_squared)
     
-    def update_hods(self, hod_params):
-        for tracer in self.tracer_list:
-            hod_cen, hod_sat = self.get_hods_given_tracer_and_params(self.M_h, hod_params, tracer, ELG_ELG=False)
-            self.hod_dict[tracer]["cen"] = hod_cen
-            self.hod_dict[tracer]["sat"] = hod_sat
-        if "ELG" in self.tracer_list:
-            _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(self.M_h, hod_params, tracer="ELG", ELG_ELG=True)
-            self.hod_dict["ELG_sat_EE"] = ELG_hod_sat_conform
-            self.hod_dict["ELG_sat_avg"] = self.get_conformity_weighted_sat_hod(self, self.M_h, tracer="ELG")
-            self.hod_dict["ELG_sat_ss1"] = TODO
+    # def update_hods(self, hod_params):
+    #     for tracer in self.tracer_list:
+    #         hod_cen, hod_sat = self.get_hods_given_tracer_and_params(self.M_h, hod_params, tracer, ELG_ELG=False)
+    #         self.hod_dict[tracer]["cen"] = hod_cen
+    #         self.hod_dict[tracer]["sat"] = hod_sat
+    #     if "ELG" in self.tracer_list:
+    #         _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(self.M_h, hod_params, tracer="ELG", ELG_ELG=True)
+    #         self.hod_dict["ELG_sat_EE"] = ELG_hod_sat_conform
+    #         self.hod_dict["ELG_sat_avg"] = self.get_conformity_weighted_sat_hod(self, self.M_h, tracer="ELG")
+    #         self.hod_dict["ELG_sat_ss1"] = TODO
 
     
     def print_hod_values(self, hod_params: np.ndarray):

@@ -138,6 +138,9 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
             x0 = None
     minimum = True
 
+    initial_guess_c2 = log_probability(np.ndarray(x0), paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit)
+    print(f"Chi squared of initial guess: {initial_guess_c2}", flush=True)
+
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
                               args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),

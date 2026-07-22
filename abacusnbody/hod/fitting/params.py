@@ -181,7 +181,7 @@ class Params:
                         "sigma": SingleParam(name="sigma", idx=2, lb=0, ub=5, mean=0.5, std=0.2),
                         "alpha": SingleParam(name="alpha", idx=3, lb=0, ub=5, mean=1.0, std=0.3),
                         "kappa": SingleParam(name="kappa", idx=4, lb=0, ub=5, mean=0.5, std=0.2),
-                        "p_max": SingleParam(name="p_max", idx=5, lb=0, ub=1, mean=0.5, std=0.2)
+                        #"p_max": SingleParam(name="p_max", idx=5, lb=0, ub=1, mean=0.5, std=0.2)
                     }
             for val in self.tracer_dict[tracer].values():
                 self.prior_bounds.append([val.lb, val.ub])

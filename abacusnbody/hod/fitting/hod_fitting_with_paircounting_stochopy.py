@@ -123,11 +123,9 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     #    1.42474565e+01, 1.48874045e+01, 9.64330200e-01, 1.96001803e-01, 5.42685958e-01]
     #         x0 = [12.71631964, 13.80127516,  0.03398003,  1.37542625,  0.47764538,
     #    14.52401744, 15.83453532,  1.03107951,  0.11468305,  0.32196389]
-            x0 = [1.27729037e+01, 1.38302123e+01, 1.79462582e-01, 1.42590907e+00,
-       5.03456451e-01, 9.06547075e-01, 1.18030776e+01, 3.31815789e-02,
-       1.26268406e-01, 1.59296737e+01, 3.72812240e-01, 4.26071671e+01,
-       1.50005105e+01, 1.54727365e+01, 1.11966426e+00, 8.51818585e-01,
-       6.18101050e-02, 2.91416933e-01]
+            x0 = [1.27729037e+01, 1.38302123e+01, 1.79462582e-01, 1.42590907e+00, 5.03456451e-01,
+        9.06547075e-01, 1.18030776e+01, 3.31815789e-02, 1.26268406e-01, 1.59296737e+01, 3.72812240e-01, 4.26071671e+01,
+        1.50005105e+01, 1.54727365e+01, 1.11966426e+00, 8.51818585e-01, 6.18101050e-02, 2.91416933e-01]
 
 
 
@@ -144,7 +142,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
                               args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimum, wp_limit),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": 32})
 
     return OptimizeResult
 

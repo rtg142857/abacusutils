@@ -84,7 +84,7 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tracer):
 
     Assume QSOs are complete
     """
-    if fitting_ngal < target_ngal or tracer == "QSO":
+    if fitting_ngal < target_ngal:# or tracer == "QSO":
         sigma_n = 4 * 10 ** (-6) #4 * 10 ** (-7) # 4 * 10 ** (-5)
         return -((fitting_ngal - target_ngal) / sigma_n) **2
     else:

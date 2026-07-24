@@ -40,25 +40,6 @@ def convert_ddrppi(output):
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
 
-# Now change Cen_HOD definition
-
-# def Cen_HOD(params,mass_bins):
-#     """
-#     takes params: [M_cut, sigma_logm, something, something, something]
-#     """
-#     Mmin, sigma_logm = params[:2]
-#     result = cumulative_spline_kernel(np.log10(mass_bins), mean = Mmin, sig=sigma_logm/np.sqrt(2))
-#     return(result)
-
-# def Sat_HOD(params,cen_hod,mass_bins):
-#     """
-#     takes params: [Mmin, sigma_logm, logM0, logM1, alpha]
-#     """
-#     M0, M1, alpha = params[2:].copy()
-#     M0 = 10**M0
-#     M1 = 10**M1
-#     result = cen_hod * (((mass_bins-M0)/M1)**alpha)
-#     return(result)
 
 def main(path_config_filename):
     # load the yaml parameters
@@ -70,8 +51,8 @@ def main(path_config_filename):
     Ep = HOD_params["ELG_params"]
     Qp = HOD_params["QSO_params"]
     HOD_params_list = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
-                  Ep["p_max"], Ep["Q"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["alpha"], Ep["gamma"],
-                  Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"]]
+                  Ep["p_max"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["logM1_EE"], Ep["alpha"], Ep["gamma"],
+                  Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"], Qp["pmax"]]
     clustering_params = config['clustering_params']
     Paths = config["Paths"]
     Labels = config["Labels"]
@@ -97,8 +78,8 @@ def main(path_config_filename):
     sim_label = Labels["sim_label"]
 
     temp_stuff = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/"
-    mock_wp_exists = os.path.isfile(temp_stuff + "mock_wp_LL.npy") and os.path.isfile(temp_stuff + "mock_wp_LE.npy") and os.path.isfile(temp_stuff + "mock_wp_EE.npy")
-    pair_wp_exists = os.path.isfile(temp_stuff + "pair_wp.npy")
+    # mock_wp_exists = os.path.isfile(temp_stuff + "mock_wp_LL.npy") and os.path.isfile(temp_stuff + "mock_wp_LE.npy") and os.path.isfile(temp_stuff + "mock_wp_EE.npy")
+    # pair_wp_exists = os.path.isfile(temp_stuff + "pair_wp.npy")
 
     # paircount_path = "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/paircounts/Debugging_fitting/"
     # paircounts_exist = os.path.isfile(paircount_path + "cencen.npy")
@@ -111,12 +92,15 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
 
-    paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
-                        "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    # paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
+    #                     "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    pairs_list = ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]
+    category_list = ["", "_ELGauto", "_ELGcross"]
     all_paircounts_exist = True
-    for label in paircount_labels:
-        if not os.path.exists(paircount_path + sim_label + f"/{label}.npy"):
-            all_paircounts_exist = False
+    for pair_label in pairs_list:
+        for category in category_list:
+            if not os.path.exists(paircount_path + sim_label + f"/{pair_label}{category}.npy"):
+                all_paircounts_exist = False
     if not all_paircounts_exist:
         print("Paircounts missing; computing them now", flush=True)
         print("Making tracer mock...", flush=True)
@@ -133,28 +117,32 @@ def main(path_config_filename):
     print("Loading paircounts from the tabulation mock", flush=True)###############################################
     paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
     paircounts = {}
-    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
+    for pair in ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]:
         for pair_type in ["", "_ELGauto", "_ELGcross"]:
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
-    npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
+    tracer_list = param_set.tracer_list
+
+    npart = get_npart(hod_params, param_set, other_stuff_dict_here)
+    # npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
-    wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
-    wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
-    wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
-    wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_pair_LRGLRG)
-    np.save(temp_stuff + "pair_wp_LRG_ELG.npy", wp_pair_ELGLRG)
-    np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_pair_ELGELG)
-    np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_pair_LRGQSO)
-    np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_pair_ELGQSO)
-    np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_pair_QSOQSO)
+    wp_dict_pair = get_wp(hod_params, paircounts, param_set, npart, other_stuff_dict_here, clustering_parameters)
+    # wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
+    # wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    # wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
+    # wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    # wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    # wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
+    np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_dict_pair["LRG_LRG"])
+    np.save(temp_stuff + "pair_wp_LRG_ELG.npy", wp_dict_pair["LRG_ELG"])
+    np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_dict_pair["ELG_ELG"])
+    np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_dict_pair["LRG_QSO"])
+    np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_dict_pair["ELG_QSO"])
+    np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_dict_pair["QSO_QSO"])
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)
@@ -181,8 +169,8 @@ def main(path_config_filename):
         #     mock_dict_sat[tracer] = {}
         #     for field in ["x", "y", "z", "vx", "vy", "vz", "mass", "id"]:
         #         mock_dict_sat[tracer][field] = mock_dict[tracer][field][Ncent:]
-        wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
-        print("wp_dict with cens: ",wp_dict)
+        wp_dict_true = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=32) # TODO: Revert
+        print("wp_dict with cens: ",wp_dict_true)
         # print("Getting ddrppi of the mock:")
         # lrgs = mock_dict["LRG"]
         # elgs = mock_dict["ELG"]
@@ -200,7 +188,7 @@ def main(path_config_filename):
 
         # np.save(temp_stuff + "mock_wp_LRG_ELG", wp_dict["LRG_ELG"])
         for i in ["LRG_LRG", "LRG_ELG", "LRG_QSO", "ELG_ELG", "ELG_QSO", "QSO_QSO"]:
-            np.save(temp_stuff + f"mock_wp_{i}", wp_dict[i])
+            np.save(temp_stuff + f"mock_wp_{i}", wp_dict_true[i])
         # wp_mock_LRGLRG = wp_dict["LRG_LRG"]
         # wp_mock_ELGLRG = wp_dict["LRG_ELG"]
         # wp_mock_ELGELG = wp_dict["ELG_ELG"]
@@ -225,39 +213,40 @@ def main(path_config_filename):
 
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
 
-    fig, axs = plt.subplots(2, 3)
-    axs[0,0].loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
-    axs[0,0].loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
-    axs[0,0].legend()
+    # fig, axs = plt.subplots(2, 3)
+    # axs[0,0].loglog(rpcent, wp_dict_true["LRG_LRG"], label="True LRGa")
+    # axs[0,0].loglog(rpcent, wp_dict_pair["LRG_LRG"], label="Pair LRGa")
+    # axs[0,0].legend()
 
-    axs[0,1].loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    axs[0,1].loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    axs[0,1].legend()
+    # axs[0,1].loglog(rpcent, wp_dict_true["ELG_ELG"], label="True ELGa")
+    # axs[0,1].loglog(rpcent, wp_dict_pair["ELG_ELG"], label="Pair ELGa")
+    # axs[0,1].legend()
     
-    axs[0,2].loglog(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
-    axs[0,2].loglog(rpcent, wp_pair_QSOQSO, label="Pair QSOa")
-    axs[0,2].legend()
+    # axs[0,2].loglog(rpcent, wp_dict_true["QSO_QSO"], label="True QSOa")
+    # axs[0,2].loglog(rpcent, wp_dict_pair["QSO_QSO"], label="Pair QSOa")
+    # axs[0,2].legend()
 
-    axs[1,0].loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
-    axs[1,0].loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
-    axs[1,0].legend()
+    # axs[1,0].loglog(rpcent, wp_dict_true["LRG_ELG"], label="True LEx")
+    # axs[1,0].loglog(rpcent, wp_dict_pair["LRG_ELG"], label="Pair LEx")
+    # axs[1,0].legend()
 
-    axs[1,1].loglog(rpcent, wp_dict["LRG_QSO"], label="True LQx")
-    axs[1,1].loglog(rpcent, wp_pair_LRGQSO, label="Pair LQx")
-    axs[1,1].legend()
+    # axs[1,1].loglog(rpcent, wp_dict_true["LRG_QSO"], label="True LQx")
+    # axs[1,1].loglog(rpcent, wp_dict_pair["LRG_QSO"], label="Pair LQx")
+    # axs[1,1].legend()
     
-    axs[1,2].loglog(rpcent, wp_dict["ELG_QSO"], label="True EQx")
-    axs[1,2].loglog(rpcent, wp_pair_ELGQSO, label="Pair EQx")
-    axs[1,2].legend()
+    # axs[1,2].loglog(rpcent, wp_dict_true["ELG_QSO"], label="True EQx")
+    # axs[1,2].loglog(rpcent, wp_dict_pair["ELG_QSO"], label="Pair EQx")
+    # axs[1,2].legend()
 
-    # plt.loglog(rpcent, wp_dict["LRG_LRG"], label="True LRGa")
-    # plt.loglog(rpcent, wp_dict["LRG_ELG"], label="True LEx")
-    # plt.loglog(rpcent, wp_dict["ELG_ELG"], label="True ELGa")
-    # plt.loglog(rpcent, wp_pair_LRGLRG, label="Pair LRGa")
-    # plt.loglog(rpcent, wp_pair_ELGLRG, label="Pair LEx")
-    # plt.loglog(rpcent, wp_pair_ELGELG, label="Pair ELGa")
-    # plt.loglog(rpcent, wp_pair_QSOQSO, label="Pair QSOa")
-    # plt.loglog(rpcent, wp_dict["QSO_QSO"], label="True QSOa")
+    plt.loglog(rpcent, wp_dict_true["LRG_LRG"], label="True LRGa")
+    plt.loglog(rpcent, wp_dict_true["LRG_ELG"], label="True LEx")
+    plt.loglog(rpcent, wp_dict_true["ELG_ELG"], label="True ELGa")
+    plt.loglog(rpcent, wp_dict_pair["LRG_LRG"], label="Pair LRGa")
+    plt.loglog(rpcent, wp_dict_pair["LRG_ELG"], label="Pair LEx")
+    plt.loglog(rpcent, wp_dict_pair["ELG_ELG"], label="Pair ELGa")
+
+    # plt.loglog(rpcent, wp_dict_pair["QSO_QSO"], label="Pair QSOa")
+    # plt.loglog(rpcent, wp_dict_true["QSO_QSO"], label="True QSOa")
 
     # plt.legend()
     plt.title("wp(rp)")

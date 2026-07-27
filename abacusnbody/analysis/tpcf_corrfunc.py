@@ -326,11 +326,11 @@ def calc_wp_fast(
         # results = DDrppi(autocorr, Nthread, pimax, rpbins, x1, y1, z1,
         #     boxsize = lbox, periodic = True, max_cells_per_dim = num_cells)
         results = DDrppi(
-            autocorr,
-            Nthread,
-            rpbins,
-            pimax,
-            pimax,
+            autocorr=autocorr,
+            nthreads=Nthread,
+            binfile=rpbins,
+            pimax=pimax,
+            npibins=pimax,
             # binfile=rpbins,
             # pimax=pimax,
             # npibins=pimax,

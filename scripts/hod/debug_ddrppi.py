@@ -24,7 +24,6 @@ results = DDrppi(
     nthreads=Nthread,
     binfile=binfile,
     pimax=pimax,
-    npibins=pimax,
     # binfile=rpbins,
     # pimax=pimax,
     # npibins=pimax,

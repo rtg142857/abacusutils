@@ -1,8 +1,12 @@
 import numpy as np
-from Corrfunc.theory import DDrppi
+from os.path import dirname, abspath, join as pjoin
+import Corrfunc
+from Corrfunc.theory.DDrppi import DDrppi
 
 Nthread = 1
-rpbins = np.logspace(-2, 2, 25)
+#rpbins = np.logspace(-2, 2, 25)
+binfile = pjoin(dirname(abspath(Corrfunc.__file__)),
+                "../theory/tests/", "bins")
 
 N = 100
 
@@ -19,7 +23,7 @@ Z = np.random.uniform(0, boxsize, N)
 results = DDrppi(
     autocorr=autocorr,
     nthreads=Nthread,
-    binfile=rpbins,
+    binfile=binfile,
     pimax=pimax,
     npibins=pimax,
     # binfile=rpbins,

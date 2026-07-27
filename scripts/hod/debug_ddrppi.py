@@ -5,8 +5,7 @@ from Corrfunc.theory.DDrppi import DDrppi
 
 Nthread = 1
 #rpbins = np.logspace(-2, 2, 25)
-binfile = pjoin(dirname(abspath(Corrfunc.__file__)),
-                "./theory/tests/", "bins")
+binfile = "bins.txt"
 
 N = 100
 

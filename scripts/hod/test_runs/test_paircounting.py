@@ -56,7 +56,7 @@ def main(path_config_filename):
     clustering_params = config['clustering_params']
     Paths = config["Paths"]
     Labels = config["Labels"]
-    Params = config["Params"]
+    #Params = config["Params"]
     Misc = config["Misc"]
     seed = Misc["random_seed"]
     tracer_list = ["LRG", "ELG", "QSO"]

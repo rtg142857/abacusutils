@@ -151,9 +151,9 @@ class Params:
 
     Also stores the current HOD (initialised with update_hod) and M_h.
     """
-    def __init__(self, tracer_list: list[str], M_h: np.ndarray):
+    def __init__(self, tracer_list: list[str]):#, M_h: np.ndarray):
         self.tracer_list = tracer_list
-        self.M_h = M_h
+        #self.M_h = M_h
         self.tracer_dict = {}
         self.prior_bounds = []
         for tracer in tracer_list:
@@ -190,17 +190,17 @@ class Params:
             for val in self.tracer_dict[tracer].values():
                 self.prior_bounds.append([val.lb, val.ub])
         
-        self.hod_dict = {}
-        for tracer in tracer_list:
-            self.hod_dict[tracer] = {}
-            self.hod_dict[tracer]["cen"] = np.zeros(len(M_h))
-            self.hod_dict[tracer]["sat"] = np.zeros(len(M_h))
+        # self.hod_dict = {}
+        # for tracer in tracer_list:
+        #     self.hod_dict[tracer] = {}
+        #     self.hod_dict[tracer]["cen"] = np.zeros(len(M_h))
+        #     self.hod_dict[tracer]["sat"] = np.zeros(len(M_h))
 
-        # Conformity
-        if "ELG" in tracer_list:
-            self.hod_dict["ELG_sat_EE"] = np.zeros(len(M_h))
-            self.hod_dict["ELG_sat_avg"] = np.zeros(len(M_h))
-            self.hod_dict["ELG_sat_ss1"] = np.zeros(len(M_h))
+        # # Conformity
+        # if "ELG" in tracer_list:
+        #     self.hod_dict["ELG_sat_EE"] = np.zeros(len(M_h))
+        #     self.hod_dict["ELG_sat_avg"] = np.zeros(len(M_h))
+        #     self.hod_dict["ELG_sat_ss1"] = np.zeros(len(M_h))
     
     def get_initial_params(self, positions = 1) -> np.ndarray:
         """

@@ -133,22 +133,32 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
 
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         if tracer1 == "ELG":
+            # JUST FOR TESTING logM1EE = logM1
+            assert np.all(np.isclose(hod_sat1, hod_sat_weighted))
+            assert np.all(np.isclose(hod_sat1, hod_sat_ELGELG))
+            assert np.all(np.isclose(hod_sat1, hod_sat_EE_ss1))
+
             # CS_lcen_esat can probably be combined 2halo and 1halo for optimisation, because create_weighting_factor is a bottleneck
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen1,hod_sat2)
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen2,hod_sat1)
 
             csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
-            CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
             csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
+            CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen2, hod_sat_weighted)
 
         else:
+            # JUST FOR TESTING logM1EE = logM1
+            assert np.all(np.isclose(hod_sat2, hod_sat_weighted))
+            assert np.all(np.isclose(hod_sat2, hod_sat_ELGELG))
+            assert np.all(np.isclose(hod_sat2, hod_sat_EE_ss1))
+
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen1,hod_sat2)
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen2,hod_sat1)
 
             csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
-            CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
+            CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
 
         CS = CS_ecen_lsat_2halo + CS_ecen_lsat_1halo + CS_lcen_esat_2halo + CS_lcen_esat_1halo

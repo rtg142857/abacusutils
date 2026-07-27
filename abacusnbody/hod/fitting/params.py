@@ -274,7 +274,7 @@ class Params:
                 hod_cen = N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma)
                 if ELG_ELG:
                     logM1_EE = self.param_from_name(params_of_tracer, tracer, "logM1_EE")
-                    hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)
+                    hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1_EE, alpha)
                 else:
                     logM1 = self.param_from_name(params_of_tracer, tracer, "logM1")
                     hod_sat = N_sat_ELG(M_h, logM_cut, kappa, logM1, alpha)

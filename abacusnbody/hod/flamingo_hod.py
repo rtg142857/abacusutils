@@ -976,6 +976,7 @@ class FlamingoHOD:
                     tracer_hod['sigma'],
                     tracer_hod['logM1'],
                     tracer_hod['alpha'],
+                    tracer_hod['p_max'],
                     tracer_hod.get('logM_cut_pr', 0),
                     tracer_hod.get('logM1_pr', 0),
                     tracer_hod.get('Acent', 0),
@@ -1157,6 +1158,7 @@ class FlamingoHOD:
         sigma,
         logM1,
         alpha,
+        p_max,
         logM_cut_pr,
         logM1_pr,
         Acent,
@@ -1186,7 +1188,7 @@ class FlamingoHOD:
                     Mh_temp = 10 ** logMs[i]
                     logM_cut_temp = logM_cut + Acent * deltacs[j] + Bcent * fenvs[k]
                     M1_temp = 10 ** (logM1 + Asat * deltacs[j] + Bsat * fenvs[k])
-                    ncent_temp = N_cen_QSO(Mh_temp, logM_cut_temp, sigma)
+                    ncent_temp = N_cen_QSO(Mh_temp, logM_cut_temp, sigma, p_max)
                     nsat_temp = N_sat_generic(
                         Mh_temp, 10**logM_cut_temp, kappa, M1_temp, alpha
                     )

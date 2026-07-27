@@ -1,17 +1,20 @@
 import numpy as np
 from Corrfunc.theory import DDrppi
 
-autocorr = 1
 Nthread = 1
 rpbins = np.logspace(-2, 2, 25)
-pimax = 80
-lbox = 100.0
-num_cells = 30
 
-Npart = 100
-x1 = np.random.uniform(low=0.0, high=lbox, size=Npart)
-y1 = np.random.uniform(low=0.0, high=lbox, size=Npart)
-z1 = np.random.uniform(low=0.0, high=lbox, size=Npart)
+N = 100
+
+boxsize = 420.0
+nthreads = 4
+autocorr = 1
+pimax = 40.0
+seed = 42
+np.random.seed(seed)
+X = np.random.uniform(0, boxsize, N)
+Y = np.random.uniform(0, boxsize, N)
+Z = np.random.uniform(0, boxsize, N)
 
 results = DDrppi(
     autocorr=autocorr,
@@ -22,12 +25,12 @@ results = DDrppi(
     # binfile=rpbins,
     # pimax=pimax,
     # npibins=pimax,
-    X1=x1,
-    Y1=y1,
-    Z1=z1,
-    boxsize=lbox,
+    X1=X,
+    Y1=Y,
+    Z1=Z,
+    boxsize=boxsize,
     periodic=True,
-    max_cells_per_dim=num_cells,
+    #max_cells_per_dim=num_cells,
 )
 DD_counts = results['npairs']
 print(f"DD_counts: {DD_counts}")

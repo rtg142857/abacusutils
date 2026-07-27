@@ -111,7 +111,7 @@ HOD_params:
         Asat: 0.2
         Bcent: -0.04
         Bsat: 0.17
-        ic: 0.3
+        ic: 1.0
 
 # clustering parameters
 clustering_params:

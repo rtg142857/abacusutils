@@ -52,7 +52,7 @@ def main(path_config_filename):
     Qp = HOD_params["QSO_params"]
     HOD_params_list = [Lp["logM_cut"], Lp["logM1"], Lp["sigma"], Lp["alpha"], Lp["kappa"],
                   Ep["p_max"], Ep["logM_cut"], Ep["kappa"], Ep["sigma"], Ep["logM1"], Ep["logM1_EE"], Ep["alpha"], Ep["gamma"],
-                  Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"], Qp["pmax"]]
+                  Qp["logM_cut"], Qp["logM1"], Qp["sigma"], Qp["alpha"], Qp["kappa"], Qp["p_max"]]
     clustering_params = config['clustering_params']
     Paths = config["Paths"]
     Labels = config["Labels"]
@@ -123,14 +123,14 @@ def main(path_config_filename):
             paircounts[pair+pair_type] = np.load(filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
-    tracer_list = param_set.tracer_list
+    param_set = Params(tracer_list=tracer_list)
 
-    npart = get_npart(hod_params, param_set, other_stuff_dict_here)
+    npart = get_npart(HOD_params_list, param_set, other_stuff_dict_here)
     # npart = get_npart(HOD_params_list, tracer_list=["LRG", "ELG", "QSO"], other_stuff_dict_here=other_stuff_dict_here)
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
-    wp_dict_pair = get_wp(hod_params, paircounts, param_set, npart, other_stuff_dict_here, clustering_parameters)
+    wp_dict_pair = get_wp(HOD_params_list, paircounts, param_set, npart, other_stuff_dict_here, clustering_params)
     # wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     # wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     # wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)

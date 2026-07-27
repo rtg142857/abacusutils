@@ -4,8 +4,8 @@ import Corrfunc
 from Corrfunc.theory.DDrppi import DDrppi
 
 Nthread = 1
-#rpbins = np.logspace(-2, 2, 25)
-binfile = "bins.txt"
+binfile = np.logspace(-2, 2, 25)
+#binfile = "bins.txt"
 
 N = 100000
 

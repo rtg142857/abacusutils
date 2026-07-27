@@ -7,7 +7,7 @@ Nthread = 1
 #rpbins = np.logspace(-2, 2, 25)
 binfile = "bins.txt"
 
-N = 100
+N = 100000
 
 boxsize = 420.0
 nthreads = 4

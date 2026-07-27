@@ -154,9 +154,9 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
 
     print("Calculating displacements and rp/pi...")
 
-    x_disp = wrap(x_cen1, x_sat2, boxsize)
-    y_disp = wrap(y_cen1, y_sat2, boxsize)
-    z_disp = wrap(z_cen1, z_sat2, boxsize)
+    x_disp = wrap(x_cen1-x_sat2, boxsize)
+    y_disp = wrap(y_cen1-y_sat2, boxsize)
+    z_disp = wrap(z_cen1-z_sat2, boxsize)
 
     distances_rp = ((x_disp)**2 + (y_disp)**2)**0.5
     distances_pi = ((z_disp)**2)**0.5

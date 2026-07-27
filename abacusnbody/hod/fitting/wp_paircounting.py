@@ -257,7 +257,7 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
         hod_cen2, hod_sat2 = get_accurate_tracer_HOD(hod_params, tracer2, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set=param_set)
 
     if tracer1 == "ELG" or tracer2 == "ELG":
-        hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_ss1 = get_accurate_ELG_sat_HOD_with_conformity(hod_params, tracer1, mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set)
+        hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_ss1 = get_accurate_ELG_sat_HOD_with_conformity(hod_params, "ELG", mass_bin_centres_big, hmf_big, mass_bin_edges, num_mass_bins_big, param_set)
     else:
         hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_ss1 = None, None, None
 

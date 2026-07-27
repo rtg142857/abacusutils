@@ -9,9 +9,9 @@ lbox = 100.0
 num_cells = 30
 
 Npart = 100
-x1 = np.random.uniform(low=0.0, high=lbox, size=(Npart,))
-y1 = np.random.uniform(low=0.0, high=lbox, size=(Npart,))
-z1 = np.random.uniform(low=0.0, high=lbox, size=(Npart,))
+x1 = np.random.uniform(low=0.0, high=lbox, size=Npart)
+y1 = np.random.uniform(low=0.0, high=lbox, size=Npart)
+z1 = np.random.uniform(low=0.0, high=lbox, size=Npart)
 
 results = DDrppi(
     autocorr=autocorr,
@@ -30,3 +30,4 @@ results = DDrppi(
     max_cells_per_dim=num_cells,
 )
 DD_counts = results['npairs']
+print(f"DD_counts: {DD_counts}")

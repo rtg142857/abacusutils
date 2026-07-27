@@ -248,10 +248,10 @@ def main(path_config_filename):
     # plt.loglog(rpcent, wp_dict_pair["QSO_QSO"], label="Pair QSOa")
     # plt.loglog(rpcent, wp_dict_true["QSO_QSO"], label="True QSOa")
 
-    # plt.legend()
+    plt.legend()
     plt.title("wp(rp)")
-    # plt.xlabel("r (Mpc/h)")
-    # plt.ylabel("wp (Mpc/h)")
+    plt.xlabel("r (Mpc/h)")
+    plt.ylabel("wp (Mpc/h)")
     plt.savefig("fig_wprp")
     plt.show()
     plt.clf()

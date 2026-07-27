@@ -301,7 +301,8 @@ class Params:
         _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=True)
 
         QSO_params = self.get_params_of_specific_tracer(hod_params, "QSO")
-        LRG_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="LRG") * (1 - self.param_from_name(QSO_params, "QSO", "p_max", default=0)) # incompleteness factor for LRGs
+        LRG_hod_cen_unweighted, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="LRG")
+        LRG_hod_cen = LRG_hod_cen_unweighted * (1 - self.param_from_name(QSO_params, "QSO", "p_max", default=0)) # incompleteness factor for LRGs
         QSO_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="QSO")
         
         nonELG_hod_cen = LRG_hod_cen + QSO_hod_cen

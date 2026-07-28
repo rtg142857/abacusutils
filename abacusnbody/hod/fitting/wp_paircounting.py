@@ -151,6 +151,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             # JUST FOR TESTING logM1EE = logM1
             assert np.all(np.isclose(hod_sat2, hod_sat_weighted))
             assert np.all(np.isclose(hod_sat2, hod_sat_ELGELG))
+            print(f"hod_sat2 (baseline ELG sat HOD): {hod_sat2}")
+            print(f"hod_sat_EE_ss1 (EE SS1 sat HOD): {hod_sat_EE_ss1}")
             assert np.all(np.isclose(hod_sat2, hod_sat_EE_ss1))
 
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen1,hod_sat2)

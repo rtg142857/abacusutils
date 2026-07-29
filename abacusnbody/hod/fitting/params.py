@@ -317,7 +317,9 @@ class Params:
         print(f"Cen-weighted conformity ELG sat HOD (should be the same as ELG sat HOD):\n{ELG_hod_sat_avg}")
 
         # derivation is complicated; average of X(X-1), where X is a linear combination of Poisson distributions
-        ELG_hod_sat_ss1_squared = ELG_hod_sat_avg**2 - ELG_hod_sat_avg + ELG_hod_sat_conform * ELG_cen_ratio**2 + ELG_hod_sat_noconform * (1-ELG_cen_ratio)**2
+        # actually the below derivation is wrong I think; check with Max
+        # ELG_hod_sat_ss1_squared = ELG_hod_sat_avg**2 - ELG_hod_sat_avg + ELG_hod_sat_conform * ELG_cen_ratio**2 + ELG_hod_sat_noconform * (1-ELG_cen_ratio)**2
+        ELG_hod_sat_ss1_squared = ELG_hod_sat_conform**2 * ELG_cen_ratio + ELG_hod_sat_noconform**2 * (1 - ELG_cen_ratio)
         print(f"ELG-ELG 1-halo satsat HOD (should be the same as ELG sat HOD):\n{np.sqrt(ELG_hod_sat_ss1_squared)}")
         return ELG_hod_sat_avg, np.sqrt(ELG_hod_sat_ss1_squared)
     

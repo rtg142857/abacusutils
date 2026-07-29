@@ -13,7 +13,7 @@ def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
     """
-    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
+    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) * 0 # FOR DEBUGGING; TODO: CHANGE
 
 def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
     """
@@ -45,6 +45,7 @@ def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     logM_h = np.log10(M_h)
     phi = phi_fun(logM_h, logM_cut, sigma)
     Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
+    return 0 # For debugging; TODO: CHANGE
     return (
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
     ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01))
@@ -297,12 +298,12 @@ class Params:
         Returns a tuple: the ordinary average, and the value for ELG-ELG one-halo.
         """
         assert tracer=="ELG"
-        print("Debugging: Finding conformity weighted sat HODs")
+        #print("Debugging: Finding conformity weighted sat HODs")
         ELG_hod_cen, ELG_hod_sat_noconform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=False)
-        print(f"ELG HOD cen:\n{ELG_hod_cen}")
-        print(f"ELG HOD sat baseline:\n{ELG_hod_sat_noconform}")
+        #print(f"ELG HOD cen:\n{ELG_hod_cen}")
+        #print(f"ELG HOD sat baseline:\n{ELG_hod_sat_noconform}")
         _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=True)
-        print(f"ELG HOD sat with conformity (SHOULD BE THE SAME AS BASELINE):\n{ELG_hod_sat_conform}")
+        #print(f"ELG HOD sat with conformity (SHOULD BE THE SAME AS BASELINE):\n{ELG_hod_sat_conform}")
 
         QSO_params = self.get_params_of_specific_tracer(hod_params, "QSO")
         LRG_hod_cen_unweighted, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="LRG")
@@ -310,17 +311,17 @@ class Params:
         QSO_hod_cen, _ = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="QSO")
         
         nonELG_hod_cen = LRG_hod_cen + QSO_hod_cen
-        print(f"Sum of non-ELG hod cens (SHOULD BE 1.0 at high end):\n{nonELG_hod_cen}")
+        #print(f"Sum of non-ELG hod cens (SHOULD BE 1.0 at high end):\n{nonELG_hod_cen}")
         ELG_cen_ratio = np.nan_to_num(ELG_hod_cen / (nonELG_hod_cen + ELG_hod_cen))
-        print(f"ELG cen ratio:\n{ELG_cen_ratio}")
+        #print(f"ELG cen ratio:\n{ELG_cen_ratio}")
         ELG_hod_sat_avg = ELG_hod_sat_conform * ELG_cen_ratio + ELG_hod_sat_noconform * (1 - ELG_cen_ratio)
-        print(f"Cen-weighted conformity ELG sat HOD (should be the same as ELG sat HOD):\n{ELG_hod_sat_avg}")
+        #print(f"Cen-weighted conformity ELG sat HOD (should be the same as ELG sat HOD):\n{ELG_hod_sat_avg}")
 
         # derivation is complicated; average of X(X-1), where X is a linear combination of Poisson distributions
         # actually the below derivation is wrong I think; check with Max
         # ELG_hod_sat_ss1_squared = ELG_hod_sat_avg**2 - ELG_hod_sat_avg + ELG_hod_sat_conform * ELG_cen_ratio**2 + ELG_hod_sat_noconform * (1-ELG_cen_ratio)**2
         ELG_hod_sat_ss1_squared = ELG_hod_sat_conform**2 * ELG_cen_ratio + ELG_hod_sat_noconform**2 * (1 - ELG_cen_ratio)
-        print(f"ELG-ELG 1-halo satsat HOD (should be the same as ELG sat HOD):\n{np.sqrt(ELG_hod_sat_ss1_squared)}")
+        #print(f"ELG-ELG 1-halo satsat HOD (should be the same as ELG sat HOD):\n{np.sqrt(ELG_hod_sat_ss1_squared)}")
         return ELG_hod_sat_avg, np.sqrt(ELG_hod_sat_ss1_squared)
     
     # def update_hods(self, hod_params):

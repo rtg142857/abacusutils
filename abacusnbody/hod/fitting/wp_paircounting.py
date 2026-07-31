@@ -161,7 +161,10 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
             csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
-            CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
+            CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen2, hod_sat1)
+            print(f"Sum of csp ecen lsat 2halo: {np.sum(csp_ecen_lsat_2halo)}")
+            print(f"hod_cen2 (ELG): {hod_cen2}")
+            print(f"hod_sat1 (LRG): {hod_sat1}")
 
         print(f"Sum of CS ecen lsat 2halo: {np.sum(CS_ecen_lsat_2halo)}")
         print(f"Sum of CS lcen esat 2halo: {np.sum(CS_lcen_esat_2halo)}")
@@ -173,8 +176,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         print(f"For checking: Sum of CS lcen esat full: {np.sum(create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2))}")
         print(f"For checking: Sum of CS ecen lsat full: {np.sum(create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2))}")
 
-        CS = (CS_ecen_lsat_2halo + CS_lcen_esat_2halo) / 2 + CS_ecen_lsat_1halo + CS_lcen_esat_1halo
-        # trying it, maybe it'll work
+        CS = (CS_ecen_lsat_2halo + CS_lcen_esat_2halo) + CS_ecen_lsat_1halo + CS_lcen_esat_1halo
+        # trying it, maybe it'll work # wait found the bug?
 
         if tracer1 == "ELG":
             SS2 = create_weighting_factor(ssp,hod_sat_weighted,hod_sat2) # actually full SS1+SS2

@@ -238,12 +238,12 @@ def main(path_config_filename):
     # axs[1,2].loglog(rpcent, wp_dict_pair["ELG_QSO"], label="Pair EQx")
     # axs[1,2].legend()
 
-    plt.loglog(rpcent, wp_dict_true["LRG_LRG"], label="True LRGa")
+    #plt.loglog(rpcent, wp_dict_true["LRG_LRG"], label="True LRGa")
     plt.loglog(rpcent, wp_dict_true["LRG_ELG"], label="True LEx")
-    plt.loglog(rpcent, wp_dict_true["ELG_ELG"], label="True ELGa")
-    plt.loglog(rpcent, wp_dict_pair["LRG_LRG"], label="Pair LRGa")
+    #plt.loglog(rpcent, wp_dict_true["ELG_ELG"], label="True ELGa")
+    #plt.loglog(rpcent, wp_dict_pair["LRG_LRG"], label="Pair LRGa")
     plt.loglog(rpcent, wp_dict_pair["LRG_ELG"], label="Pair LEx")
-    plt.loglog(rpcent, wp_dict_pair["ELG_ELG"], label="Pair ELGa")
+    #plt.loglog(rpcent, wp_dict_pair["ELG_ELG"], label="Pair ELGa")
 
     # plt.loglog(rpcent, wp_dict_pair["QSO_QSO"], label="Pair QSOa")
     # plt.loglog(rpcent, wp_dict_true["QSO_QSO"], label="True QSOa")

@@ -163,7 +163,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
 
-        CS = CS_ecen_lsat_2halo + CS_ecen_lsat_1halo + CS_lcen_esat_2halo + CS_lcen_esat_1halo
+        CS = (CS_ecen_lsat_2halo + CS_ecen_lsat_1halo + CS_lcen_esat_2halo + CS_lcen_esat_1halo) / 2 # why not
 
         if tracer1 == "ELG":
             SS2 = create_weighting_factor(ssp,hod_sat_weighted,hod_sat2) # actually full SS1+SS2

@@ -170,6 +170,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
 
         LL_way_hod_integration = create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2) + create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2)
         print(f"Just for checking, calculating sum of SS2 after HOD integration the LL way: {np.sum(LL_way_hod_integration)}")
+        print(f"For checking: Sum of CS lcen esat full: {np.sum(create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2))}")
+        print(f"For checking: Sum of CS ecen lsat full: {np.sum(create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2))}")
 
         CS = (CS_ecen_lsat_2halo + CS_lcen_esat_2halo) / 2 + CS_ecen_lsat_1halo + CS_lcen_esat_1halo
         # trying it, maybe it'll work

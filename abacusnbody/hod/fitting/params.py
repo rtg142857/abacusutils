@@ -36,7 +36,7 @@ def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
         * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
     )
     hod_value[below_cut] = 0
-    return hod_value * 0 # FOR DEBUGGING; TODO: CHANGE
+    return hod_value
 
 def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     """

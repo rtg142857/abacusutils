@@ -53,7 +53,7 @@ def n_sat_LRG_modified(M_h, logM_cut, M_cut, M_1, sigma, alpha, kappa):
         ((M_h - kappa * M_cut) / M_1) ** alpha
         * 0.5
         * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))
-    ) * 0 # for debugging; TODO: CHANGE
+    )
 
 
 @njit(fastmath=True)

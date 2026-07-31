@@ -163,6 +163,14 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
 
+        print(f"Sum of CS ecen lsat 2halo: {CS_ecen_lsat_2halo}")
+        print(f"Sum of CS lcen esat 2halo: {CS_lcen_esat_2halo}")
+        print(f"Sum of CS ecen lsat 1halo: {CS_ecen_lsat_1halo}")
+        print(f"Sum of CS lcen esat 1halo: {CS_lcen_esat_1halo}")
+
+        LL_way_hod_integration = create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2) + create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2)
+        print(f"Just for checking, calculating sum of SS2 after HOD integration the LL way: {LL_way_hod_integration}")
+
         CS = (CS_ecen_lsat_2halo + CS_lcen_esat_2halo) / 2 + CS_ecen_lsat_1halo + CS_lcen_esat_1halo
         # trying it, maybe it'll work
 
@@ -196,8 +204,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
     GG = CC + CS + SS2 + SS1
     if verbose:
         vprint(f"Sum of GG for {tracer1}, {tracer2}: "+str(np.sum(GG)), verbose)
-        vprint(f"GG values:", verbose)
-        vprint(GG, verbose)
+        #vprint(f"GG values:", verbose)
+        #vprint(GG, verbose)
     # np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/pair_ddrppi", GG)
 
     return GG
@@ -280,8 +288,8 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
                           hod_cen1=hod_cen1, hod_cen2=hod_cen2, hod_sat1=hod_sat1, hod_sat2=hod_sat2, 
                           hod_sat_ELGELG=hod_sat_ELGELG, hod_sat_weighted=hod_sat_weighted, hod_sat_EE_ss1=hod_sat_EE_ss1,
                           num_sat_parts=num_sat_parts, verbose=verbose)
-    if verbose:
-        vprint("Sum of ggs: "+str(np.sum(GG)), verbose)
+    # if verbose:
+    #     vprint("Sum of ggs: "+str(np.sum(GG)), verbose)
 
     # randoms
     vprint("Creating randoms", verbose)
@@ -298,8 +306,8 @@ def get_wp_given_tracer(hod_params: np.ndarray, tracer1: str, paircounts: dict, 
     # finishing
     vprint("Getting xi", verbose)
     xi = np.divide(GG, wp_rands) - 1
-    if verbose:
-        vprint("Xi: "+str(xi), verbose)
+    # if verbose:
+    #     vprint("Xi: "+str(xi), verbose)
     vprint("Getting wp", verbose)
     wp = xi_to_wps(xi,rpbins,pimax)
     if verbose:

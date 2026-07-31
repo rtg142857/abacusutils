@@ -163,13 +163,13 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
 
-        print(f"Sum of CS ecen lsat 2halo: {CS_ecen_lsat_2halo}")
-        print(f"Sum of CS lcen esat 2halo: {CS_lcen_esat_2halo}")
-        print(f"Sum of CS ecen lsat 1halo: {CS_ecen_lsat_1halo}")
-        print(f"Sum of CS lcen esat 1halo: {CS_lcen_esat_1halo}")
+        print(f"Sum of CS ecen lsat 2halo: {np.sum(CS_ecen_lsat_2halo)}")
+        print(f"Sum of CS lcen esat 2halo: {np.sum(CS_lcen_esat_2halo)}")
+        print(f"Sum of CS ecen lsat 1halo: {np.sum(CS_ecen_lsat_1halo)}")
+        print(f"Sum of CS lcen esat 1halo: {np.sum(CS_lcen_esat_1halo)}")
 
         LL_way_hod_integration = create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2) + create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2)
-        print(f"Just for checking, calculating sum of SS2 after HOD integration the LL way: {LL_way_hod_integration}")
+        print(f"Just for checking, calculating sum of SS2 after HOD integration the LL way: {np.sum(LL_way_hod_integration)}")
 
         CS = (CS_ecen_lsat_2halo + CS_lcen_esat_2halo) / 2 + CS_ecen_lsat_1halo + CS_lcen_esat_1halo
         # trying it, maybe it'll work

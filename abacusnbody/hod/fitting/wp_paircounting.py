@@ -105,6 +105,9 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
 
+        assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
+        assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
+
         csp_2halo = csp_full - csp_1halo
         CS_2halo = create_weighting_factor(csp_2halo, hod_cen1, hod_sat_weighted)
         CS_1halo = create_weighting_factor(csp_1halo, hod_cen1, hod_sat_ELGELG)

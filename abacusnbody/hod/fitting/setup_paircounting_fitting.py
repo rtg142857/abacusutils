@@ -420,10 +420,11 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
 #     print(pos, flush=True)
 #     return pos
 
-def get_hod_values_given_parameters_with_incompleteness(M_h: np.ndarray, params: np.ndarray, param_set: Params, other_stuff_dict_here: dict) -> dict:
+def get_hod_values_given_parameters_with_incompleteness(M_h: np.ndarray, params: np.ndarray, param_set: Params, other_stuff_dict_here: dict, conformity=False) -> dict:
     """
     Returns a dict with "LRG_cen", "LRG_sat", ...
     Distinct from get_hods_given_tracer_and_params in that it calculates the incompleteness factor.
+    If conformity=True (default False), the "ELG_sat_conformity" value holds the conformity.
     """
     tracers = param_set.tracer_list
     target_numden = get_target_number_density(tracers)
@@ -438,5 +439,9 @@ def get_hod_values_given_parameters_with_incompleteness(M_h: np.ndarray, params:
         # print(f"{tracer} incompleteness: {incompleteness}")
         hod_dict[tracer+"_cen"] = cen_hod * incompleteness
         hod_dict[tracer+"_sat"] = sat_hod * incompleteness
+
+        if tracer == "ELG" and conformity:
+            _, sat_hod_conformity = param_set.get_hods_given_tracer_and_params(M_h, params, "ELG", ELG_ELG=True)
+            hod_dict["ELG_sat_conformity"] = sat_hod_conformity
 
     return hod_dict

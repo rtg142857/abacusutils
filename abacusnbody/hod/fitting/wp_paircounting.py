@@ -133,11 +133,6 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
 
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         if tracer1 == "ELG":
-            # JUST FOR TESTING logM1EE = logM1
-            assert np.all(np.isclose(hod_sat1, hod_sat_weighted))
-            assert np.all(np.isclose(hod_sat1, hod_sat_ELGELG))
-            assert np.all(np.isclose(hod_sat1, hod_sat_EE_ss1))
-
             # CS_lcen_esat can probably be combined 2halo and 1halo for optimisation, because create_weighting_factor is a bottleneck
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen1,hod_sat2)
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen2,hod_sat1)
@@ -148,12 +143,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen2, hod_sat_weighted)
 
         else:
-            # JUST FOR TESTING logM1EE = logM1
-            assert np.all(np.isclose(hod_sat2, hod_sat_weighted))
-            assert np.all(np.isclose(hod_sat2, hod_sat_ELGELG))
             print(f"hod_sat2 (baseline ELG sat HOD): {hod_sat2}")
             print(f"hod_sat_EE_ss1 (EE SS1 sat HOD): {hod_sat_EE_ss1}")
-            assert np.all(np.isclose(hod_sat2, hod_sat_EE_ss1))
 
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen1,hod_sat2)
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen2,hod_sat1)
@@ -171,7 +162,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         # print(f"Sum of CS ecen lsat 1halo: {np.sum(CS_ecen_lsat_1halo)}")
         # print(f"Sum of CS lcen esat 1halo: {np.sum(CS_lcen_esat_1halo)}")
 
-        LL_way_hod_integration = create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2) + create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2)
+        # LL_way_hod_integration = create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2) + create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2)
         # print(f"Just for checking, calculating sum of SS2 after HOD integration the LL way: {np.sum(LL_way_hod_integration)}")
         # print(f"For checking: Sum of CS lcen esat full: {np.sum(create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2))}")
         # print(f"For checking: Sum of CS ecen lsat full: {np.sum(create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2))}")

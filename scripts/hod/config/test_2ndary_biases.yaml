@@ -69,11 +69,11 @@ HOD_params:
         p_max: 0.53
         Q: 10.
         logM_cut: 12.3
-        kappa: 0.63 #1.
+        kappa: 1.
         sigma: 0.58
-        logM1: 14.0 #13.53
-        logM1_EE: 14.0 # 13.53
-        alpha: 0.78 #0.9
+        logM1: 13.53
+        logM1_EE: 13.53
+        alpha: 0.9
         gamma: 4.12
         A_s: 1.
         alpha_c: 0

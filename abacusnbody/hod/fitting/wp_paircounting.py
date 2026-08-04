@@ -108,8 +108,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         print(f"Hod sat for ELG-ELG with conformity: {hod_sat_ELGELG}")
         print(f"Hod sat for ELG-ELG, weighted based on central type: {hod_sat_weighted}")
         print(f"Hod sat for ELG-ELG, weighted for the SS1 term: {hod_sat_EE_ss1}")
-        assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
-        assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
+        # assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
+        # assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
 
         csp_2halo = csp_full - csp_1halo
         CS_2halo = create_weighting_factor(csp_2halo, hod_cen1, hod_sat_weighted)

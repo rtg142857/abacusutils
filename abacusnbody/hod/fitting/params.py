@@ -84,7 +84,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # hod_value[below_cut] = 0
     # hod_value[above_cut] = 0
     # return hod_value
-    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) # For debugging; TODO: UNDO
+    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * 0 # For debugging; TODO: UNDO
 
 def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     """

@@ -652,7 +652,7 @@ class FlamingoHOD:
             'hveldev': hveldev,
             'hsigma3d': hsigma3d,
             'hc': hc,
-            'hrvir': hrvir,
+            'hrvir': hrvir * 0, # For debugging; TODO: UNDO
         }
 
         pweights = 1 / pNp / psubsampling

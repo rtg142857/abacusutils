@@ -109,6 +109,7 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     logM_h = np.log10(M_h)
     phi = phi_fun(logM_h, logM_cut, sigma)
     Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
+    return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # For debugging; TODO: UNDO
     return (
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
     ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01)) # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))

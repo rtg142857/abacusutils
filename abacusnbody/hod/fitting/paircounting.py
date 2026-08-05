@@ -81,7 +81,7 @@ def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,
     for i in range(len(samples1)):
         for j in range(len(samples2)):
             if len(samples1[i])>=1 and len(samples2[j])>=1:
-                n_pairs.append(DDrppi(autocorr=0, nthreads=num_threads, pimax=pi_max, npibins=(pi_max//d_pi),
+                n_pairs.append(DDrppi(autocorr=0, nthreads=num_threads, pimax=pi_max,# npibins=(pi_max//d_pi),
                          binfile=r_bin_edges,
                          X1=samples1[i][:,0],Y1=samples1[i][:,1],Z1=samples1[i][:,2], weights1=samples1[i][:,3], X2=samples2[j][:,0],
                          Y2=samples2[j][:,1],Z2 = samples2[j][:,2],weights2=samples2[j][:,3],periodic=True,verbose=False, boxsize=boxsize, weight_type="pair_product"))

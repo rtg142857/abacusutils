@@ -105,18 +105,20 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
 
-        print(f"Hod sat for ELG-ELG with conformity: {hod_sat_ELGELG}")
-        print(f"Hod sat for ELG-ELG, weighted based on central type: {hod_sat_weighted}")
-        print(f"Hod sat for ELG-ELG, weighted for the SS1 term: {hod_sat_EE_ss1}")
+        # print(f"Hod sat for ELG-ELG with conformity: {hod_sat_ELGELG}")
+        # print(f"Hod sat for ELG-ELG, weighted based on central type: {hod_sat_weighted}")
+        # print(f"Hod sat for ELG-ELG, weighted for the SS1 term: {hod_sat_EE_ss1}")
         assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
         assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
 
         csp_2halo = csp_full - csp_1halo
         CS_2halo = create_weighting_factor(csp_2halo, hod_cen1, hod_sat_weighted)
         CS_1halo = create_weighting_factor(csp_1halo, hod_cen1, hod_sat_ELGELG)
+
         
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
-        CS = (CS_2halo + CS_1halo) * 2 # these paircounts are not doublecounted, but the others (including the randoms) are
+        CS = create_weighting_factor(csp_full, hod_cen1, hod_sat_weighted) * 2
+        #CS = (CS_2halo + CS_1halo) * 2 # these paircounts are not doublecounted, but the others (including the randoms) are
         SS2 = create_weighting_factor(ssp,hod_sat_weighted,hod_sat_weighted)
         SS1 = create_weighting_factor(ss1p,hod_sat_EE_ss1,hod_sat_EE_ss1) / ((num_sat_parts*(num_sat_parts-1))/2)
 

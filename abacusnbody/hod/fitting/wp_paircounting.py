@@ -105,9 +105,9 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
 
-        # print(f"Hod sat for ELG-ELG with conformity: {hod_sat_ELGELG}")
-        # print(f"Hod sat for ELG-ELG, weighted based on central type: {hod_sat_weighted}")
-        # print(f"Hod sat for ELG-ELG, weighted for the SS1 term: {hod_sat_EE_ss1}")
+        print(f"Hod sat for ELG-ELG with conformity: {hod_sat_ELGELG}")
+        print(f"Hod sat for ELG-ELG, weighted based on central type: {hod_sat_weighted}")
+        print(f"Hod sat for ELG-ELG, weighted for the SS1 term: {hod_sat_EE_ss1}")
         assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
         assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
 

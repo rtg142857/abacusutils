@@ -871,6 +871,8 @@ def gen_sats_nfw(
                             * ic_E
                         )
                         print("??? QSO central?")
+                    if base_p_E == None:
+                        print(keep_cent[i])
                     num_sats_E[i] = rng.poisson(base_p_E)
 
                 if want_QSO:

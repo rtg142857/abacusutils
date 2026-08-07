@@ -830,7 +830,8 @@ def gen_sats_nfw(
                         logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
                     )
                     M1_E_temp = 10 ** (
-                        logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                        logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                        #logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                     )
                     base_p_E = (
                         N_sat_elg(

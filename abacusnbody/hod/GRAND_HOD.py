@@ -867,6 +867,7 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
+                        print("ELG central")
                     elif keep_cent[i] == 3:
                         print("??? QSO central?")
                     num_sats_E[i] = rng.poisson(base_p_E)

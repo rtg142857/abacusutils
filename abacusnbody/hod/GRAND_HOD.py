@@ -851,6 +851,7 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
+                        print("??? LRG central?")
                     elif keep_cent[i] == 2:
                         M1_E_temp = 10 ** (
                             logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
@@ -866,6 +867,8 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
+                    elif keep_cent[i] == 3:
+                        print("??? QSO central?")
                     num_sats_E[i] = rng.poisson(base_p_E)
 
                 if want_QSO:

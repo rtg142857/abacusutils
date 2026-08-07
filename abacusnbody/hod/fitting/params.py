@@ -300,8 +300,8 @@ class Params:
         assert tracer=="ELG"
         #print("Debugging: Finding conformity weighted sat HODs")
         ELG_hod_cen, ELG_hod_sat_noconform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=False)
-        #print(f"ELG HOD cen:\n{ELG_hod_cen}")
-        #print(f"ELG HOD sat baseline:\n{ELG_hod_sat_noconform}")
+        print(f"ELG HOD cen:\n{ELG_hod_cen}")
+        print(f"ELG HOD sat baseline:\n{ELG_hod_sat_noconform}")
         _, ELG_hod_sat_conform = self.get_hods_given_tracer_and_params(M_h, hod_params, tracer="ELG", ELG_ELG=True)
         #print(f"ELG HOD sat with conformity (SHOULD BE THE SAME AS BASELINE):\n{ELG_hod_sat_conform}")
 

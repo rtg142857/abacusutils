@@ -829,6 +829,15 @@ def gen_sats_nfw(
                     logM_cut_E_temp = (
                         logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
                     )
+                    M1_E_temp = 10 ** (
+                        logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                    )
+                    base_p_E = (
+                        N_sat_elg(
+                            hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
+                        )
+                        * ic_E
+                    )
                     # elg conformity
                     if keep_cent[i] == 1:
                         M1_E_temp = 10 ** (logM1_EL + As_E * hdeltac[i] + Bs_E * hfenv[i])
@@ -861,15 +870,6 @@ def gen_sats_nfw(
                         )
                         #print("ELG central")
                     elif keep_cent[i] == 3:
-                        M1_E_temp = 10 ** (
-                            logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                        )
-                        base_p_E = (
-                            N_sat_elg(
-                                hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
-                            )
-                            * ic_E
-                        )
                         print("??? QSO central?")
                     if base_p_E == None:
                         print(keep_cent[i])

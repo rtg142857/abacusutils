@@ -864,7 +864,7 @@ def gen_sats_nfw(
                         logM_cut_E_temp = (
                             logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
                         )
-                        if not np.isclose(logM1_EE, logM1_E):
+                        if not np.isclose(logM1_EE, logM1_E): # if we need ELG conformity, go through the shebang
                             if want_LRG:
                                 logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
                             else:
@@ -876,21 +876,18 @@ def gen_sats_nfw(
                             ELG_cen_rate = get_ELG_cen_rate(hmass[i], ELG_hod_dict, logM_cut_E_temp,
                                                             want_LRG, LRG_hod_dict, logM_cut_L_temp,
                                                             want_QSO, QSO_hod_dict, logM_cut_Q_temp)
-                            assert np.isclose(ELG_cen_rate, 1.0) # for debugging
                             if rng.uniform() < ELG_cen_rate:
                                 M1_E_temp = 10 ** (
-                                    logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i] # for debugging
+                                    logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                                     #logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                                 )
                             else:
                                 M1_E_temp = 10 ** (
-                                    #logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i] # for debugging
+                                    #logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                                     logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                                 )
-                                print("oops")
                         else:
                             M1_E_temp = 10 ** (
-                                #logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i] # for debugging
                                 logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                             )
                         base_p_E = (

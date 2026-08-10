@@ -529,7 +529,7 @@ def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
     if want_LRG:
         sigma_L, ic_L = (
             LRG_hod_dict['sigma'],
-            LRG_hod_dict['ic_l']
+            LRG_hod_dict['ic']
         )
         LRG_chance = n_cen_LRG(hmass, logM_cut_L_temp, sigma_L) * ic_L
     else:

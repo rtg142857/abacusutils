@@ -511,7 +511,7 @@ def gen_cent(
     else:
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, None
     
-#@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
                      want_LRG, LRG_hod_dict, logM_cut_L_temp,
                      want_QSO, QSO_hod_dict, logM_cut_Q_temp):

@@ -525,13 +525,16 @@ def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
         ELG_hod_dict['gamma'],
         ELG_hod_dict['ic']
     )
-    ELG_chance =  N_cen_ELG_v1(hmass, pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E) * ic_E
+    ELG_chance =  N_cen_ELG_v1(hmass, pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E)
     if want_LRG:
-        sigma_L, ic_L = (
-            LRG_hod_dict['sigma'],
-            LRG_hod_dict['ic']
+        sigma_L = (
+            LRG_hod_dict['sigma']
         )
-        LRG_chance = n_cen_LRG(hmass, logM_cut_L_temp, sigma_L) * ic_L
+        if want_QSO:
+            pmax_L = 1 - QSO_hod_dict['p_max']
+        else:
+            pmax_L = 1
+        LRG_chance = n_cen_LRG(hmass, logM_cut_L_temp, sigma_L) * pmax_L
     else:
         LRG_chance = 0
     if want_QSO:
@@ -540,7 +543,7 @@ def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
             QSO_hod_dict['sigma'],
             QSO_hod_dict['ic'],
         )
-        QSO_chance = N_cen_QSO(hmass, logM_cut_Q_temp, sigma_Q, pmax_Q) * ic_Q
+        QSO_chance = N_cen_QSO(hmass, logM_cut_Q_temp, sigma_Q, pmax_Q)
     else:
         QSO_chance = 0
     return np.nan_to_num(ELG_chance / (ELG_chance + LRG_chance + QSO_chance))

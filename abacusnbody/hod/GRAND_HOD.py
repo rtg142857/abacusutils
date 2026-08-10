@@ -510,6 +510,40 @@ def gen_cent(
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, hrvir_dict
     else:
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, None
+    
+@njit(fastmath=True)
+def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
+                     want_LRG, LRG_hod_dict, logM_cut_L_temp,
+                     want_QSO, QSO_hod_dict, logM_cut_Q_temp):
+    """
+    Gets the ratio of ELG to non-ELG cens at a certain halo mass
+    """
+    pmax_E, Q_E, sigma_E, gamma_E, ic_E = (
+        ELG_hod_dict['p_max'],
+        ELG_hod_dict['Q'],
+        ELG_hod_dict['sigma'],
+        ELG_hod_dict['gamma'],
+        ELG_hod_dict['ic']
+    )
+    ELG_chance =  N_cen_ELG_v1(hmass, pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E) * ic_E
+    if want_LRG:
+        sigma_L, ic_L = (
+            LRG_hod_dict['sigma'],
+            LRG_hod_dict['ic']
+        )
+        LRG_chance = n_cen_LRG(hmass, logM_cut_L_temp, sigma_L) * ic_L
+    else:
+        LRG_chance = 0
+    if want_QSO:
+        pmax_Q, sigma_Q, ic_Q = (
+            QSO_hod_dict['p_max'],
+            QSO_hod_dict['sigma'],
+            QSO_hod_dict['ic'],
+        )
+        QSO_chance = N_cen_QSO(hmass, logM_cut_Q_temp, sigma_Q, pmax_Q) * ic_Q
+    else:
+        QSO_chance = 0
+    return np.nan_to_num(ELG_chance / (ELG_chance + LRG_chance + QSO_chance))
 
 
 @njit(parallel=True, fastmath=True)
@@ -825,20 +859,48 @@ def gen_sats_nfw(
                     )
                     num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
-                    M1_E_temp = 10 ** (
-                        logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                    )
-                    logM_cut_E_temp = (
-                        logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
-                    )
-                    base_p_E = (
-                        N_sat_elg(
-                            hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
+                    # base_p_E = None # for debugging
+                    if keep_cent[i] == 0: # could be either ELG or LRG/QSO; might need ELG conformity
+                        logM_cut_E_temp = (
+                            logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
                         )
-                        * ic_E
-                    )
+                        if not np.isclose(logM1_EE, logM1_E):
+                            if want_LRG:
+                                logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
+                            else:
+                                logM_cut_L_temp = None
+                            if want_QSO:
+                                logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
+                            else:
+                                logM_cut_Q_temp = None
+                            ELG_cen_rate = get_ELG_cen_rate(hmass[i], ELG_hod_dict, logM_cut_E_temp,
+                                                            want_LRG, LRG_hod_dict, logM_cut_L_temp,
+                                                            want_QSO, QSO_hod_dict, logM_cut_Q_temp)
+                            assert np.isclose(ELG_cen_rate, 1.0) # for debugging
+                            if rng.uniform() < ELG_cen_rate:
+                                M1_E_temp = 10 ** (
+                                    logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i] # for debugging
+                                    #logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                                )
+                            else:
+                                M1_E_temp = 10 ** (
+                                    #logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i] # for debugging
+                                    logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                                )
+                                print("oops")
+                        else:
+                            M1_E_temp = 10 ** (
+                                #logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i] # for debugging
+                                logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                            )
+                        base_p_E = (
+                            N_sat_elg(
+                                hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
+                            )
+                            * ic_E
+                        )
                     # elg conformity
-                    if keep_cent[i] == 1:
+                    elif keep_cent[i] == 1:
                         M1_E_temp = 10 ** (logM1_EL + As_E * hdeltac[i] + Bs_E * hfenv[i])
                         base_p_E = (
                             N_sat_elg(
@@ -851,6 +913,7 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
+                        print("??? LRG central?")
                     elif keep_cent[i] == 2:
                         M1_E_temp = 10 ** (
                             logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
@@ -866,6 +929,11 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
+                        #print("ELG central")
+                    elif keep_cent[i] == 3:
+                        print("??? QSO central?")
+                    if base_p_E == None:
+                        print(keep_cent[i])
                     num_sats_E[i] = rng.poisson(base_p_E)
 
                 if want_QSO:

@@ -442,6 +442,6 @@ def get_hod_values_given_parameters_with_incompleteness(M_h: np.ndarray, params:
 
         if tracer == "ELG" and conformity:
             _, sat_hod_conformity = param_set.get_hods_given_tracer_and_params(M_h, params, "ELG", ELG_ELG=True)
-            hod_dict["ELG_sat_conformity"] = sat_hod_conformity
+            hod_dict["ELG_sat_conformity"] = sat_hod_conformity * incompleteness
 
     return hod_dict

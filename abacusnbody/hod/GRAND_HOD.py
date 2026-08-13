@@ -631,12 +631,14 @@ def compute_fast_NFW(
     # x_h = np.ones(len(x_h)) * Lbox/2
     # y_h = np.ones(len(y_h)) * Lbox/2
     # z_h = np.ones(len(z_h)) * Lbox/2
-    x_h = Lbox/100 * np.arange(100).repeat(10000).reshape((-1, 10000)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
-    y_h = Lbox/100 * np.arange(100).repeat(100).repeat(100).reshape((-1, 100)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
-    z_h = Lbox/100 * np.repeat(np.arange(100), 10000)
+    n_grid = 100
+    x_h = Lbox/n_grid * np.arange(n_grid).repeat(n_grid**2).reshape((-1, n_grid**2)).flatten("F") # np.tile(np.array(range(100)), 10000) # [0, 1, 2, ..., 0, 1, 2, ..., 0, 1, 2...]
+    y_h = Lbox/n_grid * np.arange(n_grid).repeat(n_grid).repeat(n_grid).reshape((-1, n_grid)).T.flatten() # np.tile(np.repeat(np.array(range(100)), 100), 100)
+    z_h = Lbox/n_grid * np.repeat(np.arange(n_grid), n_grid**2)
 
     diff = len(h_id) - len(x_h)
     if diff > 0:
+        print(f"WARNING WARNING TOO MANY HALOS BY {diff}")
         padright = np.zeros(len(h_id) - len(x_h))
         x_h = np.concatenate((x_h, padright))
         y_h = np.concatenate((y_h, padright))
@@ -1596,7 +1598,7 @@ def fast_concatenate(array1, array2, Nthread):
 
 
 def gen_gals(
-    halos_array,
+    halos_array: dict,
     subsample,
     tracers,
     params,
@@ -1778,6 +1780,11 @@ def gen_gals(
     inv_velz2kms = 1 / velz2kms
     lbox = params['Lbox']
     origin = params['origin']
+
+    # For debugging; TODO: UNDO
+    for key in halos_array.keys():
+        if hasattr(halos_array[key], '__len__'):
+            halos_array[key] = halos_array[key][:10**6]
 
     LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict_cent = gen_cent(
         halos_array['hpos'],

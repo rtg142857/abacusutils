@@ -865,10 +865,10 @@ def gen_sats_nfw(
                     num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
                     # base_p_E = None # for debugging
+                    logM_cut_E_temp = (
+                        logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                    )
                     if keep_cent[i] == 0: # could be either ELG or LRG/QSO; might need ELG conformity
-                        logM_cut_E_temp = (
-                            logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
-                        )
                         if not np.isclose(logM1_EE, logM1_E): # if we need ELG conformity, go through the shebang
                             if want_LRG:
                                 logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
@@ -915,7 +915,6 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
-                        print("??? LRG central?")
                     elif keep_cent[i] == 2:
                         M1_E_temp = 10 ** (
                             logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i]
@@ -933,7 +932,18 @@ def gen_sats_nfw(
                         )
                         #print("ELG central")
                     elif keep_cent[i] == 3:
-                        print("??? QSO central?")
+                        logM_cut_E_temp = (
+                            logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                        )
+                        M1_E_temp = 10 ** (
+                            logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                        )
+                        base_p_E = (
+                            N_sat_elg(
+                                hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
+                            )
+                            * ic_E
+                        )
                     if base_p_E == None:
                         print(keep_cent[i])
                     num_sats_E[i] = rng.poisson(base_p_E)

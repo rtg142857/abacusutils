@@ -73,7 +73,7 @@ HOD_params:
         sigma: 0.58
         logM1: 12.0 #14.0 #13.53
         logM1_EE: 12.0 #13.0 #13.53
-        alpha: 0.9
+        alpha: 0.0 #0.9
         gamma: 4.12
         A_s: 1.
         alpha_c: 0

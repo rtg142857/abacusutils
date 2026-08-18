@@ -247,6 +247,8 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
         subsample_file = subsample_files[i]
         masked_halos = h5py.File(subsample_file)
         halo_mass = masked_halos["halos"]["M200_crit"]
+        # For debugging; TODO: UNDO
+        halo_mass = np.full(len(halo_mass), 10**12.5)
         halo_weights = masked_halos["halos"]["multi_halos"]
 
         hmf_big += np.histogram(halo_mass, bins = mass_bins_big, weights=halo_weights)[0]

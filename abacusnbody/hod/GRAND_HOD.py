@@ -1797,9 +1797,9 @@ def gen_gals(
     for key in halos_array.keys():
         if hasattr(halos_array[key], '__len__'):
             halos_array[key] = halos_array[key][:10**6]
-    halos_array['hmass'] = np.full(shape=len(halos_array['hmass']), fill_value=10**12.5)
-    halos_array['hrvir'] = np.full(shape=len(halos_array['hrvir']), fill_value=10**1.0)
-    halos_array['hmultis'] = np.full(shape=len(halos_array['hmultis']), fill_value=1.0)
+    #halos_array['hmass'] = np.full(shape=len(halos_array['hmass']), fill_value=10**12.5)
+    #halos_array['hrvir'] = np.full(shape=len(halos_array['hrvir']), fill_value=10**1.0)
+    #halos_array['hmultis'] = np.full(shape=len(halos_array['hmultis']), fill_value=1.0)
 
     LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict_cent = gen_cent(
         halos_array['hpos'],

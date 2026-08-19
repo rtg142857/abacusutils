@@ -249,8 +249,10 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
         halo_mass = masked_halos["halos"]["M200_crit"]
         # For debugging; TODO: UNDO
         #halo_mass = np.full(shape=10**6, fill_value=10**12.5)
+        halo_mass = halo_mass[:10**6]
         halo_weights = masked_halos["halos"]["multi_halos"]
         #halo_weights = np.full(shape=10**6, fill_value=1.0)
+        halo_weights = halo_weights[:10**6]
 
         hmf_big += np.histogram(halo_mass, bins = mass_bins_big, weights=halo_weights)[0]
         #print("Halo mass function from the files that have been loaded so far:",hmf_big)

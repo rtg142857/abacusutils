@@ -689,14 +689,12 @@ def compute_fast_NFW(
                     ind = np.random.randint(low=0, high=len(NFW_draw))
                 etaVir = NFW_draw[ind] / c[i] * nfw_rescale
 
-            #p = etaVir * Rvir[i] For debugging; TODO: UNDO
-            p = Rvir[i] # UNDO
+            p = etaVir * Rvir[i]
             x_sat[i] = (x_h[i] + rd_pos[i, 0] * p) % Lbox
             y_sat[i] = (y_h[i] + rd_pos[i, 1] * p) % Lbox
             z_sat[i] = (z_h[i] + rd_pos[i, 2] * p) % Lbox
             if vel_sat == 'rd_normal':
-                #sig = vrms_h[i] * 0.577 * f_sigv For debugging; TODO: UNDO
-                sig = 0 # UNDO
+                sig = vrms_h[i] * 0.577 * f_sigv
                 vx_sat[i] = np.random.normal(loc=vx_h[i], scale=sig)
                 vy_sat[i] = np.random.normal(loc=vy_h[i], scale=sig)
                 vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)

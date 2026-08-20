@@ -71,8 +71,8 @@ HOD_params:
         logM_cut: 11.8 #12.3
         kappa: 1.
         sigma: 0.58
-        logM1: 14.0 #13.53
-        logM1_EE: 12.0 #13.0 #13.53
+        logM1: 12.0 #14.0 #13.53
+        logM1_EE: 14.0 #12.0 #13.0 #13.53
         alpha: 0.9
         gamma: 4.12
         A_s: 1.

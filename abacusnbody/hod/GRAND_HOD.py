@@ -112,7 +112,7 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     #return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # For debugging; TODO: UNDO
     return ((
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) * 0 # For debugging; TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
+    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
 
 
 @njit(fastmath=True)

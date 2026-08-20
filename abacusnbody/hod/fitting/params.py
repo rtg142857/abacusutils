@@ -48,7 +48,7 @@ def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     #return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # for debugging; TODO: UNDO
     return ((
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01))) * 0 # For debugging; TODO: UNDO
+    ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01)))
     # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
 
 def N_sat_ELG(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0):

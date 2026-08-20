@@ -9,11 +9,14 @@ from scipy.special import erfc, erf
 
 # WARNING! Assumes dictionaries in python are ORDERED. Does not work with python <3.7!
 
+# For debugging
+SMALL_NUMBER = 10 ** -20.0
+
 def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
     """
-    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))# * 0 # for debugging; TODO: UNDO
+    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) * 0 # for debugging; TODO: UNDO
 
 def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
     """
@@ -46,9 +49,10 @@ def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     phi = phi_fun(logM_h, logM_cut, sigma)
     Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
     #return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # for debugging; TODO: UNDO
-    return ((
-        2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01)))
+    return np.full(len(M_h), fill_value=SMALL_NUMBER * p_max)
+    # return ((
+    #     2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
+    # ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01)))
     # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
 
 def N_sat_ELG(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0, alpha1=0.0, beta=0.0):
@@ -85,7 +89,8 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # hod_value[below_cut] = 0
     # hod_value[above_cut] = 0
     # return hod_value
-    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))# * 0 # For debugging; TODO: UNDO
+    #return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))# * 0 # For debugging; TODO: UNDO
+    return np.full(len(M_h), fill_value=SMALL_NUMBER * p_max)
 
 def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     """

@@ -66,7 +66,7 @@ HOD_params:
 
     # parameters for setting up the HOD of ELGs
     ELG_params:
-        p_max: 0.53
+        p_max: 0.5 #0.53
         Q: 10.
         logM_cut: 11.8 #12.3
         kappa: 1.
@@ -94,7 +94,7 @@ HOD_params:
 
     # parameters for setting up the HOD of QSOs
     QSO_params:
-        p_max: 0.33
+        p_max: 0.5 #0.33
         logM_cut: 12.21
         kappa: 1.0
         sigma: 0.56

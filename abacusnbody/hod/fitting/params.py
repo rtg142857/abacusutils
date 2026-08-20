@@ -13,7 +13,7 @@ def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
     """
-    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) * 0 # for debugging; TODO: UNDO
+    return 0.5 * erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))# * 0 # for debugging; TODO: UNDO
 
 def N_sat_LRG_modified(M_h: np.ndarray, logM_cut, logM_1, sigma, alpha, kappa):
     """
@@ -85,7 +85,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # hod_value[below_cut] = 0
     # hod_value[above_cut] = 0
     # return hod_value
-    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * 0 # For debugging; TODO: UNDO
+    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))# * 0 # For debugging; TODO: UNDO
 
 def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):
     """

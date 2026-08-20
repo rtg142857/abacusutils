@@ -61,7 +61,7 @@ def n_cen_LRG(M_h, logM_cut, sigma):
     """
     Standard Zheng et al. (2005) central HOD parametrization for LRGs.
     """
-    return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) * 0 # for debugging; TODO: UNDO
+    return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma))# * 0 # for debugging; TODO: UNDO
 
 
 @njit(fastmath=True)
@@ -141,7 +141,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     #     return 0
     # else:
     #     return 1
-    return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * 0 # For debugging; TODO: UNDO
+    return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))# * 0 # For debugging; TODO: UNDO
 
 
 @njit(fastmath=True)

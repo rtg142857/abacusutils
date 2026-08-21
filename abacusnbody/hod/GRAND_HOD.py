@@ -116,7 +116,7 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     #return SMALL_NUMBER * p_max # For debugging; TODO: UNDO
     return ((
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
+    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) * SMALL_NUMBER # TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
 
 
 @njit(fastmath=True)
@@ -146,7 +146,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # else:
     #     return 1
     # return SMALL_NUMBER * p_max # For debugging; TODO: UNDO
-    return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma))# * 0 # For debugging; TODO: UNDO
+    return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * SMALL_NUMBER # * 0 # For debugging; TODO: UNDO
 
 
 
@@ -1802,9 +1802,9 @@ def gen_gals(
         if hasattr(halos_array[key], '__len__'):
             halos_array[key] = halos_array[key][:10**6]
     print(f"GRAND_HOD first mass: {halos_array['hmass'][0]}")
-    halos_array['hmass'] = np.full(shape=len(halos_array['hmass']), fill_value=10**12.5)
+    #halos_array['hmass'] = np.full(shape=len(halos_array['hmass']), fill_value=10**12.5)
     #halos_array['hrvir'] = np.full(shape=len(halos_array['hrvir']), fill_value=10**1.0)
-    halos_array['hmultis'] = np.full(shape=len(halos_array['hmultis']), fill_value=1.0)
+    #halos_array['hmultis'] = np.full(shape=len(halos_array['hmultis']), fill_value=1.0)
 
     LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict_cent = gen_cent(
         halos_array['hpos'],

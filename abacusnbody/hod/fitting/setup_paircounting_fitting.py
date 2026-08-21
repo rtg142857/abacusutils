@@ -253,9 +253,9 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
         sortind = np.argsort(hid)
         halo_mass = halo_mass[sortind]
         halo_weights = halo_weights[sortind]
-        #halo_mass = np.full(shape=10**6, fill_value=10**12.5)
+        halo_mass = np.full(shape=10**6, fill_value=10**12.5)
         halo_mass = halo_mass[:10**6]
-        #halo_weights = np.full(shape=10**6, fill_value=1.0)
+        halo_weights = np.full(shape=10**6, fill_value=1.0)
         halo_weights = halo_weights[:10**6]
         print(f"setup_paircounting_fitting first mass: {halo_mass[0]}")
 

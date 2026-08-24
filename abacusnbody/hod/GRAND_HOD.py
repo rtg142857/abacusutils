@@ -29,6 +29,7 @@ G = 4.302e-6  # in kpc/Msol (km.s)^2
 # For debugging
 SMALL_NUMBER = 10 ** -20.0
 MASS_CUTOFF = 10 ** 12.5
+ratio_list = []
 
 # def assert_nonnan(array, name):
 #     """
@@ -526,7 +527,7 @@ def gen_cent(
     else:
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, None
     
-@njit(fastmath=True)
+#@njit(fastmath=True)
 def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
                      want_LRG, LRG_hod_dict, logM_cut_L_temp,
                      want_QSO, QSO_hod_dict, logM_cut_Q_temp):
@@ -561,7 +562,12 @@ def get_ELG_cen_rate(hmass, ELG_hod_dict, logM_cut_E_temp,
         QSO_chance = N_cen_QSO(hmass, logM_cut_Q_temp, sigma_Q, pmax_Q)
     else:
         QSO_chance = 0
-    return np.nan_to_num(ELG_chance / (ELG_chance + LRG_chance + QSO_chance))
+
+    ratio = np.nan_to_num(ELG_chance / (ELG_chance + LRG_chance + QSO_chance))
+
+    global ratio_list
+    ratio_list.append([ratio, hmass])
+    return ratio
 
 
 @njit(parallel=True, fastmath=True)
@@ -1939,6 +1945,12 @@ def gen_gals(
         )
     if verbose:
         print('generating satellites took ', time.time() - start, flush=True)
+
+    # For debugging; TODO: UNDO
+    print("Outputting ratio array...")
+    global ratio_list
+    ratio_array = np.array(ratio_list)
+    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/GRAND_ratio_array.npy", ratio_array)
 
     # B.H. TODO: need a for loop above so we don't need to do this by hand
     HOD_dict_sat = {'LRG': LRG_dict_sat, 'ELG': ELG_dict_sat, 'QSO': QSO_dict_sat}

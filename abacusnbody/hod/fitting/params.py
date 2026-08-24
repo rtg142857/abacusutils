@@ -331,6 +331,9 @@ class Params:
         #print(f"Sum of non-ELG hod cens (SHOULD BE 1.0 at high end):\n{nonELG_hod_cen}")
         ELG_cen_ratio = np.nan_to_num(ELG_hod_cen / (nonELG_hod_cen + ELG_hod_cen))
         #print(f"ELG cen ratio (SHOULD BE 1 EXCEPT FOR VERY LOW MASS): {ELG_cen_ratio}")
+        ratio_array = np.array([ELG_cen_ratio, M_h]).T
+        print("Saving pair ratio array...")
+        np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/pair_ratio_array.npy", ratio_array)
         #print(f"ELG cen ratio:\n{ELG_cen_ratio}")
         ELG_hod_sat_avg = ELG_hod_sat_conform * ELG_cen_ratio + ELG_hod_sat_noconform * (1 - ELG_cen_ratio)
         #print(f"Cen-weighted conformity ELG sat HOD (should be the same as ELG sat HOD):\n{ELG_hod_sat_avg}")

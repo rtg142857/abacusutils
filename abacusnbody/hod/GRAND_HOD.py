@@ -114,9 +114,13 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
     #return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # For debugging; TODO: UNDO
     #return SMALL_NUMBER * p_max # For debugging; TODO: UNDO
-    return ((
-        2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) * SMALL_NUMBER # TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
+    if M_h < 10 ** 11.5:
+        return SMALL_NUMBER
+    else:
+        return 0
+    # return ((
+    #     2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
+    # ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) * SMALL_NUMBER # TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
 
 
 @njit(fastmath=True)
@@ -146,7 +150,11 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # else:
     #     return 1
     # return SMALL_NUMBER * p_max # For debugging; TODO: UNDO
-    return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * SMALL_NUMBER # * 0 # For debugging; TODO: UNDO
+    if M_h < 10 ** 11.5:
+        return 0
+    else:
+        return SMALL_NUMBER
+    #return p_max * 0.5 * (1 + math.erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * SMALL_NUMBER # * 0 # For debugging; TODO: UNDO
 
 
 

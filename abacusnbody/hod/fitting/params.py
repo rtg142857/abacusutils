@@ -11,6 +11,7 @@ from scipy.special import erfc, erf
 
 # For debugging
 SMALL_NUMBER = 10 ** -20.0
+MASS_CUTOFF = 10 ** 12.0
 
 def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
     """
@@ -53,7 +54,7 @@ def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     # return ((
     #     2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
     # ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01))) * SMALL_NUMBER
-    below_cut = M_h < 10 ** 11.5
+    below_cut = M_h < MASS_CUTOFF
     hod_value = np.full(shape=len(M_h), fill_value=SMALL_NUMBER)
     hod_value[~below_cut] = 0
     return hod_value
@@ -92,7 +93,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # hod_value = np.ones(np.size(M_h))
     # hod_value[below_cut] = 0
     # hod_value[above_cut] = 0
-    below_cut = M_h < 10 ** 11.5
+    below_cut = M_h < MASS_CUTOFF
     hod_value = np.full(shape=len(M_h), fill_value=SMALL_NUMBER)
     hod_value[below_cut] = 0
     return hod_value

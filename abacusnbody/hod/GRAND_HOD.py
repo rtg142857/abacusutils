@@ -28,6 +28,7 @@ G = 4.302e-6  # in kpc/Msol (km.s)^2
 
 # For debugging
 SMALL_NUMBER = 10 ** -20.0
+MASS_CUTOFF = 10 ** 12.0
 
 # def assert_nonnan(array, name):
 #     """
@@ -114,7 +115,7 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     Phi = Phi_fun(logM_h, logM_cut, sigma, gamma)
     #return 0.5 * math.erfc((logM_cut - np.log10(M_h)) / (1.41421356 * sigma)) # For debugging; TODO: UNDO
     #return SMALL_NUMBER * p_max # For debugging; TODO: UNDO
-    if M_h < 10 ** 11.5:
+    if M_h < MASS_CUTOFF:
         return SMALL_NUMBER
     else:
         return 0
@@ -150,7 +151,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # else:
     #     return 1
     # return SMALL_NUMBER * p_max # For debugging; TODO: UNDO
-    if M_h < 10 ** 11.5:
+    if M_h < MASS_CUTOFF:
         return 0
     else:
         return SMALL_NUMBER

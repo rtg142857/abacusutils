@@ -28,7 +28,7 @@ G = 4.302e-6  # in kpc/Msol (km.s)^2
 
 # For debugging
 SMALL_NUMBER = 10 ** -20.0
-MASS_CUTOFF = 10 ** 12.0
+MASS_CUTOFF = 10 ** 12.5
 
 # def assert_nonnan(array, name):
 #     """

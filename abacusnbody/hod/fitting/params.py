@@ -11,7 +11,7 @@ from scipy.special import erfc, erf
 
 # For debugging
 SMALL_NUMBER = 10 ** -20.0
-MASS_CUTOFF = 10 ** 12.0
+MASS_CUTOFF = 10 ** 12.5
 
 def N_cen_LRG(M_h: np.ndarray, logM_cut, sigma):
     """

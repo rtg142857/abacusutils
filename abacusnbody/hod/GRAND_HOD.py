@@ -120,6 +120,10 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     #     return SMALL_NUMBER
     # else:
     #     return 0
+    # return (( # This version has Q; don't use
+    #     2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
+    # ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) # TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
+    Q = np.inf
     return ((
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
     ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) * SMALL_NUMBER # TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))

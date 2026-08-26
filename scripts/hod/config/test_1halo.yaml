@@ -58,10 +58,10 @@ HOD_params:
         s_v: 0
         s_p: 0
         s_r: 0
-        Acent: -0.4
-        Asat: 0.2
-        Bcent: -0.04
-        Bsat: 0.17
+        Acent: 0.0 #-0.4
+        Asat: 0.0 #0.2
+        Bcent: 0.0 #-0.04
+        Bsat: 0.0 #0.17
         ic: 0.3
 
     # parameters for setting up the HOD of ELGs
@@ -82,10 +82,10 @@ HOD_params:
         s_v: 0
         s_p: 0
         s_r: 0
-        Acent: -0.4
-        Asat: 0.2
-        Bcent: -0.04
-        Bsat: 0.17
+        Acent: 0.0 #-0.4
+        Asat: 0.0 #0.2
+        Bcent: 0.0 #-0.04
+        Bsat: 0.0 #0.17
         exp_frac: 0.5
         exp_scale: 9.0
         nfw_rescale: 0.6
@@ -107,10 +107,10 @@ HOD_params:
         s_v: 0
         s_p: 0
         s_r: 0
-        Acent: -0.4
-        Asat: 0.2
-        Bcent: -0.04
-        Bsat: 0.17
+        Acent: 0.0 #-0.4
+        Asat: 0.0 #0.2
+        Bcent: 0.0 #-0.04
+        Bsat: 0.0 #0.17
         ic: 1.0
 
 # clustering parameters

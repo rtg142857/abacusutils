@@ -53,7 +53,7 @@ def N_cen_ELG_v1(M_h: np.ndarray, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     #return np.full(len(M_h), fill_value=SMALL_NUMBER * p_max) # constant function
     return (( # normal one (watch the SMALL_NUMBER)
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01))) * SMALL_NUMBER
+    ) + 0.5/Q*(1 + erf((logM_h-logM_cut)/0.01)))
     # below_cut = M_h < MASS_CUTOFF # step function
     # hod_value = np.full(shape=len(M_h), fill_value=SMALL_NUMBER)
     # hod_value[~below_cut] = 0
@@ -97,7 +97,7 @@ def N_cen_QSO(M_h, logM_cut, sigma, p_max):
     # hod_value = np.full(shape=len(M_h), fill_value=SMALL_NUMBER)
     # hod_value[below_cut] = 0
     # return hod_value
-    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) * SMALL_NUMBER # * 0 # For debugging; TODO: UNDO
+    return p_max * 0.5 * (1 + erf((np.log10(M_h) - logM_cut) / 1.41421356 / sigma)) # * 0 # For debugging; TODO: UNDO
     #return np.full(len(M_h), fill_value=SMALL_NUMBER * p_max)
 
 def N_sat_QSO(M_h, logM_cut, kappa, logM_1, alpha, A_s=1.0):

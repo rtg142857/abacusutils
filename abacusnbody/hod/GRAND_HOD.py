@@ -1817,9 +1817,9 @@ def gen_gals(
     origin = params['origin']
 
     # For debugging; TODO: UNDO
-    # for key in halos_array.keys():
-    #     if hasattr(halos_array[key], '__len__'):
-    #         halos_array[key] = halos_array[key][:10**6]
+    for key in halos_array.keys():
+        if hasattr(halos_array[key], '__len__'):
+            halos_array[key] = halos_array[key][:10**6]
     print(f"GRAND_HOD first mass: {halos_array['hmass'][0]}")
     #halos_array['hmass'] = np.full(shape=len(halos_array['hmass']), fill_value=10**12.5)
     #halos_array['hrvir'] = np.full(shape=len(halos_array['hrvir']), fill_value=10**1.0)

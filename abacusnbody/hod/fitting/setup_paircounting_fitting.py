@@ -225,7 +225,7 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     mass_bin_centres = np.sqrt(mass_bin_edges[1:] * mass_bin_edges[:-1])
 
     # This is hardcoded here and can be changed
-    num_mass_bins_big = 900
+    num_mass_bins_big = 90
 
     mass_min = mass_bin_edges[0]
     mass_max = mass_bin_edges[-1]

@@ -258,6 +258,7 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
         #halo_weights = np.full(shape=10**6, fill_value=1.0)
         halo_weights = halo_weights[:10**6]
         print(f"setup_paircounting_fitting first mass: {halo_mass[0]}")
+        print(f"setup_paircounting_fitting last mass: {halo_mass[-1]}")
 
         hmf_big += np.histogram(halo_mass, bins = mass_bins_big, weights=halo_weights)[0]
         #print("Halo mass function from the files that have been loaded so far:",hmf_big)

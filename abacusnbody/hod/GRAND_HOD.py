@@ -1822,6 +1822,7 @@ def gen_gals(
             halos_array[key] = halos_array[key][:10**6]
     print(f"GRAND_HOD first mass: {halos_array['hmass'][0]}")
     print(f"GRAND_HOD last mass: {halos_array['hmass'][-1]}")
+    print(f"setup_paircounting_fitting mass sum, weight sum: {np.sum(halos_array['hmass'])}, {np.sum(halos_array['hmultis'])}")
     #halos_array['hmass'] = np.full(shape=len(halos_array['hmass']), fill_value=10**12.5)
     #halos_array['hrvir'] = np.full(shape=len(halos_array['hrvir']), fill_value=10**1.0)
     #halos_array['hmultis'] = np.full(shape=len(halos_array['hmultis']), fill_value=1.0)

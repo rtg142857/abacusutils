@@ -776,6 +776,9 @@ def gen_sats_nfw(
     nfw_rescale = 1
     f_sigv_Q = 1
 
+    cut = hmass > 10 ** 12.8
+    print(f"GRAND_HOD estimation for number of LRGs: {np.sum(hmass[cut])}")
+
     if want_LRG:
         # if verbose:
         #     with numba.objmode(): print("Getting LRG params", flush=True)

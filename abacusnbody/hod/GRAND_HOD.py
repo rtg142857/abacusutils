@@ -999,6 +999,7 @@ def gen_sats_nfw(
 
     print(f"Sum of base_p_L (before Poisson): {sum_of_p_L}")
     print(f"Sum of num_sats_L (after Poisson): {np.sum(num_sats_L)}")
+    print(f"Number of halos processed: {num_halos}")
 
     # if verbose:
     #     with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)

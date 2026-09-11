@@ -130,21 +130,19 @@ def main(path_config_filename):
     print("LRG npart:", npart["LRG"])
     print("ELG npart:", npart["ELG"])
     print("QSO npart:", npart["QSO"])
-    # JUST GETTING THE NPART
-    #wp_dict_pair = get_wp(HOD_params_list, paircounts, param_set, npart, other_stuff_dict_here, clustering_params, verbose=True)
+    wp_dict_pair = get_wp(HOD_params_list, paircounts, param_set, npart, other_stuff_dict_here, clustering_params, verbose=True)
     # wp_pair_LRGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="LRG", verbose=True)
     # wp_pair_ELGLRG = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     # wp_pair_ELGELG = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="ELG", verbose=True)
     # wp_pair_LRGQSO = get_wp_given_tracer(HOD_params_list, "LRG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
     # wp_pair_ELGQSO = get_wp_given_tracer(HOD_params_list, "ELG", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
     # wp_pair_QSOQSO = get_wp_given_tracer(HOD_params_list, "QSO", paircounts, npart, other_stuff_dict_here, clustering_params, tracer2="QSO", verbose=True)
-    # COMMENTED OUT WHILE I'M JUST GETTING THE NPART
-    # np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_dict_pair["LRG_LRG"])
-    # np.save(temp_stuff + "pair_wp_LRG_ELG.npy", wp_dict_pair["LRG_ELG"])
-    # np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_dict_pair["ELG_ELG"])
-    # np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_dict_pair["LRG_QSO"])
-    # np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_dict_pair["ELG_QSO"])
-    # np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_dict_pair["QSO_QSO"])
+    np.save(temp_stuff + "pair_wp_LRG_LRG.npy", wp_dict_pair["LRG_LRG"])
+    np.save(temp_stuff + "pair_wp_LRG_ELG.npy", wp_dict_pair["LRG_ELG"])
+    np.save(temp_stuff + "pair_wp_ELG_ELG.npy", wp_dict_pair["ELG_ELG"])
+    np.save(temp_stuff + "pair_wp_LRG_QSO.npy", wp_dict_pair["LRG_QSO"])
+    np.save(temp_stuff + "pair_wp_ELG_QSO.npy", wp_dict_pair["ELG_QSO"])
+    np.save(temp_stuff + "pair_wp_QSO_QSO.npy", wp_dict_pair["QSO_QSO"])
 
         # print("WP from paircounting:", wp_pair)
         # np.save(temp_stuff + "pair_wp.npy", wp_pair)
@@ -245,8 +243,7 @@ def main(path_config_filename):
     # plt.loglog(rpcent, wp_dict_true["LRG_ELG"], label="True LEx")
     # plt.loglog(rpcent, wp_dict_pair["LRG_ELG"], label="Pair LEx")
     plt.loglog(rpcent, wp_dict_true["ELG_ELG"], label="True ELGa")
-    # COMMENTED OUT WHILE I'M JUST GETTING THE NPART
-    #plt.loglog(rpcent, wp_dict_pair["ELG_ELG"], label="Pair ELGa")
+    plt.loglog(rpcent, wp_dict_pair["ELG_ELG"], label="Pair ELGa")
 
     # plt.loglog(rpcent, wp_dict_pair["QSO_QSO"], label="Pair QSOa")
     # plt.loglog(rpcent, wp_dict_true["QSO_QSO"], label="True QSOa") 

@@ -777,7 +777,7 @@ def gen_sats_nfw(
     f_sigv_Q = 1
 
     cut = hmass > 10 ** 12.8
-    print(f"GRAND_HOD estimation for number of LRGs: {np.sum(hmass[cut])}")
+    print(f"GRAND_HOD estimation for number of LRGs: {np.sum(hmultis[cut])}")
 
     if want_LRG:
         # if verbose:

@@ -859,6 +859,9 @@ def gen_sats_nfw(
     numba.set_num_threads(Nthread)
     rng = np.random.default_rng(seed=seed)
 
+    # For debugging; TODO: REMOVE
+    sum_of_p_L = 0.0
+
     # compute nsate for each halo
     # figuring out the number of particles kept for each thread
     num_sats_L = np.zeros(len(hid), dtype=np.int64)
@@ -894,6 +897,7 @@ def gen_sats_nfw(
                         assert np.isclose(base_p_L, ic_L)
                     else:
                         assert np.isclose(base_p_L, 0.0)
+                    sum_of_p_L += base_p_L
                     num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
                     # base_p_E = None # for debugging
@@ -990,6 +994,9 @@ def gen_sats_nfw(
                         * ic_Q
                     )
                     num_sats_Q[i] = rng.poisson(base_p_Q)
+
+    print(f"Sum of base_p_L (before Poisson): {sum_of_p_L}")
+    print(f"Sum of num_sats_L (after Poisson): {np.sum(num_sats_L)}")
 
     # if verbose:
     #     with numba.objmode(): print("Generating points on sphere:",np.sum(num_sats_L),"LRGs",np.sum(num_sats_E),"ELGs,",np.sum(num_sats_Q),"QSOs", flush=True)

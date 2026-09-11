@@ -887,6 +887,10 @@ def gen_sats_nfw(
                         )
                         * ic_L
                     )
+                    if hmass[i] > 10 ** 12.8:
+                        assert np.isclose(base_p_L, ic_L)
+                    else:
+                        assert np.isclose(base_p_L, 0.0)
                     num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
                     # base_p_E = None # for debugging

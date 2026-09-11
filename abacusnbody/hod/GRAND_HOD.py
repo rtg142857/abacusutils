@@ -861,6 +861,7 @@ def gen_sats_nfw(
 
     # For debugging; TODO: REMOVE
     sum_of_p_L = 0.0
+    num_halos = 0
 
     # compute nsate for each halo
     # figuring out the number of particles kept for each thread
@@ -898,6 +899,7 @@ def gen_sats_nfw(
                     else:
                         assert np.isclose(base_p_L, 0.0)
                     sum_of_p_L += base_p_L
+                    num_halos += 1
                     num_sats_L[i] = rng.poisson(base_p_L)
                 if want_ELG:
                     # base_p_E = None # for debugging

@@ -113,7 +113,7 @@ def N_cen_ELG_v1(M_h, p_max, Q, logM_cut, sigma, gamma, Anorm=1):
     Q = np.inf
     return ((
         2.0 * (p_max - 1.0 / Q) * phi * Phi / Anorm
-    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) * 0 # For debugging; TODO: UNDO # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
+    ) + 0.5/Q*(1 + math.erf((logM_h-logM_cut)/0.01))) # + 0.5/Q*(1 + math.erf((logM_h-logM_cut-0.8)*3))
 
 
 @njit(fastmath=True)

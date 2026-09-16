@@ -105,9 +105,6 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
             vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
 
-        print(f"Hod sat for ELG-ELG with conformity: {hod_sat_ELGELG}")
-        print(f"Hod sat for ELG-ELG, weighted based on central type: {hod_sat_weighted}")
-        print(f"Hod sat for ELG-ELG, weighted for the SS1 term: {hod_sat_EE_ss1}")
         # assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
         # assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
 
@@ -149,8 +146,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen2, hod_sat_weighted)
 
         else:
-            print(f"hod_sat2 (baseline ELG sat HOD): {hod_sat2}")
-            print(f"hod_sat_EE_ss1 (EE SS1 sat HOD): {hod_sat_EE_ss1}")
+            # print(f"hod_sat2 (baseline ELG sat HOD): {hod_sat2}")
+            # print(f"hod_sat_EE_ss1 (EE SS1 sat HOD): {hod_sat_EE_ss1}")
 
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen1,hod_sat2)
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen2,hod_sat1)

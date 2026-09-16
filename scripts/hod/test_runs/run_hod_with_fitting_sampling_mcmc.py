@@ -52,12 +52,15 @@ def main(path_config_filename):
     # create a new FlamingoHOD object
     newBall = FlamingoHOD(path_config_filename)
 
-    paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
-                        "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    # paircount_labels = ["cencen", "censat", "satsat", "satsat_onehalo", "cencen_ELGauto", "censat_ELGauto", "satsat_ELGauto", "satsat_onehalo_ELGauto",
+    #                     "cencen_ELGcross", "censat_ELGcross", "satsat_ELGcross", "satsat_onehalo_ELGcross"]
+    pairs_list = ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]
+    category_list = ["", "_ELGauto", "_ELGcross"]
     all_paircounts_exist = True
-    for label in paircount_labels:
-        if not os.path.exists(paircount_path + sim_label + f"/{label}.npy"):
-            all_paircounts_exist = False
+    for pair in pairs_list:
+        for category in category_list:
+            if not os.path.exists(paircount_path + sim_label + f"/{pair}{category}.npy"):
+                all_paircounts_exist = False
     if not all_paircounts_exist:
         print("Paircounts missing; computing them now", flush=True)
         print("Making tracer mock...", flush=True)

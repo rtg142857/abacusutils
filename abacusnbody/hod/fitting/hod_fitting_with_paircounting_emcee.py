@@ -46,7 +46,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Loading precomputed things...")
     paircounts = {}
-    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
+    for pair in ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]:
         for pair_type in ["", "_ELGauto", "_ELGcross"]:
             filename = paircount_path + pair + pair_type + ".npy"
             paircounts[pair+pair_type] = np.load(filename)

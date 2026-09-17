@@ -118,14 +118,14 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
             print("Initialising sampler...", flush=True)
             sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend, pool=pool)
 
-            print("Running chain...", flush=True)
-            sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
+            print("Running chain (parallel)...", flush=True)
+            sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True, progress=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     else:
         print("Initialising sampler...", flush=True)
         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)
 
-        print("Running chain...", flush=True)
-        sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
+        print("Running chain (serial)...", flush=True)
+        sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True, progress=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 

@@ -58,7 +58,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     ndim = len(param_set.prior_bounds)
 
     print("Setting up backend...", flush=True)
-    start_time = time.time()
+    
     if save_chains:
         filename = fitting_params["sampler_save_path"] + f"{sim_label}_emcee.hdf5"
         backend = emcee.backends.HDFBackend(filename)
@@ -77,33 +77,57 @@ def fit_HOD(path_config_filename, save_chains=False):
                            nwalkers=nwalkers,
                            num_steps=num_steps,
                            ndim=ndim,
-                           wp_limit=wp_limit)
-    end_time = time.time()
-    print("fitting took ", end_time - start_time, " seconds", flush=True)
+                           wp_limit=wp_limit,
+                           parallel=False)
+    sampler = sample_chain(target_wp_dict=target_wp,
+                           target_jackknife_inverse_dict=target_jackknife_inverse,
+                           target_ngal_dict=target_ngal,
+                           paircounts=paircounts,
+                           param_set=param_set,
+                           clustering_parameters=clustering_params,
+                           other_stuff_dict_here=other_stuff_dict_here,
+                           backend=backend,
+                           nwalkers=nwalkers,
+                           num_steps=num_steps,
+                           ndim=ndim,
+                           wp_limit=wp_limit,
+                           parallel=True)
+    
+    #print("fitting took ", end_time - start_time, " seconds", flush=True)
 
     # Print the parameters at the end of the chain to check they are reasonable
     print("Parameters at the end of the fitting chain: (These aren't best fits, just a sanity check)")
     print(sampler.backend.get_chain()[-1,0])
 
     print("All done!")
-    print("Saving outputs")
+    # print("Saving outputs")
 
-    plot_sampler(sampler)
+    # plot_sampler(sampler)
 
     return max_like_params(sampler)
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24)):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24), parallel=True):
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = param_set.get_initial_params(positions=nwalkers).T
     #walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
-    with Pool() as pool:
+    start_time = time.time()
+    if parallel:
+        with Pool(10) as pool:
+            print("Initialising sampler...", flush=True)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend, pool=pool)
+
+            print("Running chain...", flush=True)
+            sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
+    else:
         print("Initialising sampler...", flush=True)
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend, pool=pool)
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)
 
         print("Running chain...", flush=True)
         sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
+    end_time = time.time()
+    print("fitting took ", end_time - start_time, " seconds", flush=True)
 
     return sampler
 

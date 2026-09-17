@@ -66,19 +66,19 @@ def fit_HOD(path_config_filename, save_chains=False):
     else:
         backend = None
 
-    sampler = sample_chain(target_wp_dict=target_wp,
-                           target_jackknife_inverse_dict=target_jackknife_inverse,
-                           target_ngal_dict=target_ngal,
-                           paircounts=paircounts,
-                           param_set=param_set,
-                           clustering_parameters=clustering_params,
-                           other_stuff_dict_here=other_stuff_dict_here,
-                           backend=backend,
-                           nwalkers=nwalkers,
-                           num_steps=num_steps,
-                           ndim=ndim,
-                           wp_limit=wp_limit,
-                           parallel=False)
+    # sampler = sample_chain(target_wp_dict=target_wp,
+    #                        target_jackknife_inverse_dict=target_jackknife_inverse,
+    #                        target_ngal_dict=target_ngal,
+    #                        paircounts=paircounts,
+    #                        param_set=param_set,
+    #                        clustering_parameters=clustering_params,
+    #                        other_stuff_dict_here=other_stuff_dict_here,
+    #                        backend=backend,
+    #                        nwalkers=nwalkers,
+    #                        num_steps=num_steps,
+    #                        ndim=ndim,
+    #                        wp_limit=wp_limit,
+    #                        parallel=False)
     sampler = sample_chain(target_wp_dict=target_wp,
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,

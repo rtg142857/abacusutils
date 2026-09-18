@@ -110,7 +110,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     walker_init_pos = param_set.get_initial_params(positions=nwalkers).T
     #walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
-    with Pool(10) as pool:
+    with Pool(32) as pool:
         print("Initialising sampler...", flush=True)
         sampler = emcee.EnsembleSampler(nwalkers, ndim, setup.log_probability, backend=backend, pool=pool)
 

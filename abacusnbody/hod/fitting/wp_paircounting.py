@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import erfc, erf
 from abacusnbody.hod.fitting.params import Params
+from line_profiler import profile
 
 def vprint(input, verbose):
     if verbose:
@@ -89,6 +90,7 @@ def create_weighting_factor(mass_pair_array,hod1,hod2):
     weighting_factor = np.tensordot(np.outer(hod1,hod2),mass_pair_array,axes=([0,1],[0,1]))
     return weighting_factor
 
+@profile
 def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, tracer2: str | None = None,
                     hod_sat_ELGELG=None, hod_sat_weighted=None, hod_sat_EE_ss1=None,
                     num_sat_parts=3, verbose=False):

@@ -110,14 +110,14 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     walker_init_pos = param_set.get_initial_params(positions=nwalkers).T
     #walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
-    #with Pool() as pool:
-    start_time = time.time()
-    print("Initialising sampler...", flush=True)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, setup.log_probability, backend=backend)#, pool=pool)
+    with Pool() as pool:
+        start_time = time.time()
+        print("Initialising sampler...", flush=True)
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, setup.log_probability, backend=backend, pool=pool)
 
-    print("Running chain (serial)...", flush=True)
-    sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
-    end_time = time.time()
+        print("Running chain (serial)...", flush=True)
+        sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True) # It feels like it likes to throw an error for the initial state check with the standard priors
+        end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 
     return sampler

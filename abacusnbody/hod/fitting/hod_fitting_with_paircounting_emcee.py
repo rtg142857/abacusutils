@@ -92,7 +92,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return max_like_params(sampler)
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24), parallel=True):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24), parallel=False):
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = param_set.get_initial_params(positions=nwalkers).T

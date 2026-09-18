@@ -98,12 +98,12 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp_1halo = paircounts["censat_1halo_ELGauto"]
         ssp = paircounts["satsat_2halo_ELGauto"]
         ss1p = paircounts["satsat_1halo_ELGauto"]
-        if verbose:
-            vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-            vprint("Sum of full cs paircounts: "+str(np.sum(csp_full)), verbose)
-            vprint("Sum of 1-halo cs paircounts: "+str(np.sum(csp_1halo)), verbose)
-            vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
-            vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+        # if verbose:
+        #     vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+        #     vprint("Sum of full cs paircounts: "+str(np.sum(csp_full)), verbose)
+        #     vprint("Sum of 1-halo cs paircounts: "+str(np.sum(csp_1halo)), verbose)
+        #     vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+        #     vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
 
         # assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
         # assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
@@ -125,14 +125,14 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp_ecen_lsat_1halo = paircounts["censat_1halo_ELGcross"][1]
         ssp = paircounts["satsat_2halo_ELGcross"]
         ss1p = paircounts["satsat_1halo_ELGcross"]
-        if verbose:
-            vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-            vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat_full)), verbose)
-            vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat_full)), verbose)
-            vprint("Sum of 1-halo cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat_1halo)), verbose)
-            vprint("Sum of 1-halo cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat_1halo)), verbose)
-            vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
-            vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+        # if verbose:
+        #     vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+        #     vprint("Sum of cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat_full)), verbose)
+        #     vprint("Sum of cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat_full)), verbose)
+        #     vprint("Sum of 1-halo cs paircounts (LRG cen, ELG sat): "+str(np.sum(csp_lcen_esat_1halo)), verbose)
+        #     vprint("Sum of 1-halo cs paircounts (ELG cen, LRG sat): "+str(np.sum(csp_ecen_lsat_1halo)), verbose)
+        #     vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+        #     vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
 
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         if tracer1 == "ELG":
@@ -156,19 +156,6 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen2, hod_sat1)
-        #     print(f"Sum of csp ecen lsat 2halo: {np.sum(csp_ecen_lsat_2halo)}")
-        #     print(f"hod_cen2 (ELG): {hod_cen2}")
-        #     print(f"hod_sat1 (LRG): {hod_sat1}")
-
-        # print(f"Sum of CS ecen lsat 2halo: {np.sum(CS_ecen_lsat_2halo)}")
-        # print(f"Sum of CS lcen esat 2halo: {np.sum(CS_lcen_esat_2halo)}")
-        # print(f"Sum of CS ecen lsat 1halo: {np.sum(CS_ecen_lsat_1halo)}")
-        # print(f"Sum of CS lcen esat 1halo: {np.sum(CS_lcen_esat_1halo)}")
-
-        # LL_way_hod_integration = create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2) + create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2)
-        # print(f"Just for checking, calculating sum of SS2 after HOD integration the LL way: {np.sum(LL_way_hod_integration)}")
-        # print(f"For checking: Sum of CS lcen esat full: {np.sum(create_weighting_factor(csp_lcen_esat_full,hod_cen1,hod_sat2))}")
-        # print(f"For checking: Sum of CS ecen lsat full: {np.sum(create_weighting_factor(csp_ecen_lsat_full, hod_sat1, hod_cen2))}")
 
         CS = CS_ecen_lsat_2halo + CS_lcen_esat_2halo + CS_ecen_lsat_1halo + CS_lcen_esat_1halo
 
@@ -183,21 +170,21 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         csp = paircounts["censat_full"]
         ssp = paircounts["satsat_2halo"]
         ss1p = paircounts["satsat_1halo"]
-        if verbose:
-            vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
-            vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
-            vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
-            vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
+        # if verbose:
+        #     vprint("Sum of cc paircounts: "+str(np.sum(ccp)), verbose)
+        #     vprint("Sum of cs paircounts: "+str(np.sum(csp)), verbose)
+        #     vprint("Sum of ss paircounts: "+str(np.sum(ssp)), verbose)
+        #     vprint("Sum of ss1 paircounts: "+str(np.sum(ss1p)), verbose)
         CC = create_weighting_factor(ccp,hod_cen1,hod_cen2)
         CS = create_weighting_factor(csp,hod_cen1,hod_sat2) + create_weighting_factor(csp, hod_sat1, hod_cen2) # could be LRG-QSO cross so we need both
         SS2 = create_weighting_factor(ssp,hod_sat1,hod_sat2)
         SS1 = create_weighting_factor(ss1p,hod_sat1,hod_sat2) / ((num_sat_parts*(num_sat_parts-1))/2)
 
-    if verbose:
-        vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)
-        vprint("Sum of CS after HOD integration: "+str(np.sum(CS)), verbose)
-        vprint("Sum of SS2 after HOD integration: "+str(np.sum(SS2)), verbose)
-        vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
+    # if verbose:
+    #     vprint("Sum of CC after HOD integration: "+str(np.sum(CC)), verbose)
+    #     vprint("Sum of CS after HOD integration: "+str(np.sum(CS)), verbose)
+    #     vprint("Sum of SS2 after HOD integration: "+str(np.sum(SS2)), verbose)
+    #     vprint("Sum of SS1 after HOD integration: "+str(np.sum(SS1)), verbose)
 
     GG = CC + CS + SS2 + SS1
     if verbose:

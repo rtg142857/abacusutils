@@ -66,19 +66,6 @@ def fit_HOD(path_config_filename, save_chains=False):
     else:
         backend = None
 
-    # sampler = sample_chain(target_wp_dict=target_wp,
-    #                        target_jackknife_inverse_dict=target_jackknife_inverse,
-    #                        target_ngal_dict=target_ngal,
-    #                        paircounts=paircounts,
-    #                        param_set=param_set,
-    #                        clustering_parameters=clustering_params,
-    #                        other_stuff_dict_here=other_stuff_dict_here,
-    #                        backend=backend,
-    #                        nwalkers=nwalkers,
-    #                        num_steps=num_steps,
-    #                        ndim=ndim,
-    #                        wp_limit=wp_limit,
-    #                        parallel=False)
     sampler = sample_chain(target_wp_dict=target_wp,
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
@@ -90,8 +77,7 @@ def fit_HOD(path_config_filename, save_chains=False):
                            nwalkers=nwalkers,
                            num_steps=num_steps,
                            ndim=ndim,
-                           wp_limit=wp_limit,
-                           parallel=True)
+                           wp_limit=wp_limit)
     
     #print("fitting took ", end_time - start_time, " seconds", flush=True)
 
@@ -113,19 +99,11 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     #walker_init_pos = initialise_walkers(initial_params_random=True,num_walkers=nwalkers)
 
     start_time = time.time()
-    if parallel:
-        with Pool(10) as pool:
-            print("Initialising sampler...", flush=True)
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend, pool=pool)
+    print("Initialising sampler...", flush=True)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)
 
-            print("Running chain (parallel)...", flush=True)
-            sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True, progress=True) # It feels like it likes to throw an error for the initial state check with the standard priors
-    else:
-        print("Initialising sampler...", flush=True)
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)
-
-        print("Running chain (serial)...", flush=True)
-        sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True, progress=True) # It feels like it likes to throw an error for the initial state check with the standard priors
+    print("Running chain (serial)...", flush=True)
+    sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True, progress=True) # It feels like it likes to throw an error for the initial state check with the standard priors
     end_time = time.time()
     print("fitting took ", end_time - start_time, " seconds", flush=True)
 

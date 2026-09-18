@@ -209,6 +209,17 @@ def get_target_number_density(tracers=["LRG", "ELG", "QSO"], source="DESI"):
             numden_dict["QSO"] = 2 * 10**(-5)
     return numden_dict
 
+def load_paircounts(paircount_path):
+    paircounts = {}
+    for pair in ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]:
+        for pair_type in ["", "_ELGauto", "_ELGcross"]:
+            filename = paircount_path + pair + pair_type + ".npy"
+            paircounts[pair+pair_type] = np.load(filename)
+
+    paircounts["censat_2halo_ELGauto"] = paircounts["censat_full_ELGauto"] - paircounts["censat_1halo_ELGauto"]
+    paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
+    return paircounts
+
 def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     """
     Creates a dict with:

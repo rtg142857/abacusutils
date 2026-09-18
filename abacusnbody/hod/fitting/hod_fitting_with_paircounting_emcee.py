@@ -46,13 +46,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     clustering_params = config["clustering_params"]
 
     print("Loading precomputed things...")
-    paircounts = {}
-    for pair in ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]:
-        for pair_type in ["", "_ELGauto", "_ELGcross"]:
-            filename = paircount_path + pair + pair_type + ".npy"
-            paircounts[pair+pair_type] = np.load(filename)
-        # filename = paircount_path + pair + ".npy"
-        # paircounts[pair] = np.load(filename)
+    paircounts = load_paircounts(paircount_path)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     param_set = Params(tracer_list=tracers)
     ndim = len(param_set.prior_bounds)

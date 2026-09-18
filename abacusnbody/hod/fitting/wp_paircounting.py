@@ -96,7 +96,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
                     num_sat_parts=3, verbose=False):
     if tracer1 == "ELG" and (tracer2 == None or tracer2 == "ELG"):
         ccp = paircounts["cencen_ELGauto"]
-        csp_full = paircounts["censat_full_ELGauto"]
+        #csp_full = paircounts["censat_full_ELGauto"]
+        csp_2halo = paircounts["censat_2halo_ELGauto"]
         csp_1halo = paircounts["censat_1halo_ELGauto"]
         ssp = paircounts["satsat_2halo_ELGauto"]
         ss1p = paircounts["satsat_1halo_ELGauto"]
@@ -110,7 +111,7 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
         # assert np.all(np.isclose(hod_sat_weighted, hod_sat_ELGELG))
         # assert np.all(np.isclose(hod_sat_EE_ss1, hod_sat_ELGELG))
 
-        csp_2halo = csp_full - csp_1halo
+        #csp_2halo = csp_full - csp_1halo
         CS_2halo = create_weighting_factor(csp_2halo, hod_cen1, hod_sat_weighted)
         CS_1halo = create_weighting_factor(csp_1halo, hod_cen1, hod_sat_ELGELG)
         
@@ -121,8 +122,10 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
 
     elif (tracer1 == "ELG" and tracer2 != "ELG") or (tracer2 == "ELG" and tracer1 != "ELG"):
         ccp = paircounts["cencen_ELGcross"]
-        csp_lcen_esat_full = paircounts["censat_full_ELGcross"][0]
-        csp_ecen_lsat_full = paircounts["censat_full_ELGcross"][1]
+        # csp_lcen_esat_full = paircounts["censat_full_ELGcross"][0]
+        # csp_ecen_lsat_full = paircounts["censat_full_ELGcross"][1]
+        csp_lcen_esat_2halo = paircounts["censat_2halo_ELGcross"][0]
+        csp_ecen_lsat_2halo = paircounts["censat_2halo_ELGcross"][1]
         csp_lcen_esat_1halo = paircounts["censat_1halo_ELGcross"][0]
         csp_ecen_lsat_1halo = paircounts["censat_1halo_ELGcross"][1]
         ssp = paircounts["satsat_2halo_ELGcross"]
@@ -142,8 +145,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen1,hod_sat2)
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen2,hod_sat1)
 
-            csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
-            csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
+            # csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
+            # csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen1, hod_sat2)
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen2, hod_sat_weighted)
 
@@ -154,8 +157,8 @@ def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat
             CS_lcen_esat_1halo = create_weighting_factor(csp_lcen_esat_1halo,hod_cen1,hod_sat2)
             CS_ecen_lsat_1halo = create_weighting_factor(csp_ecen_lsat_1halo,hod_cen2,hod_sat1)
 
-            csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
-            csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
+            # csp_lcen_esat_2halo = csp_lcen_esat_full - csp_lcen_esat_1halo
+            # csp_ecen_lsat_2halo = csp_ecen_lsat_full - csp_ecen_lsat_1halo
             CS_lcen_esat_2halo = create_weighting_factor(csp_lcen_esat_2halo, hod_cen1, hod_sat_weighted)
             CS_ecen_lsat_2halo = create_weighting_factor(csp_ecen_lsat_2halo, hod_cen2, hod_sat1)
 

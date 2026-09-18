@@ -80,9 +80,9 @@ def fit_HOD(path_config_filename, save_chains=False):
     print(sampler.backend.get_chain()[-1,0])
 
     print("All done!")
-    # print("Saving outputs")
+    print("Saving outputs")
 
-    # plot_sampler(sampler)
+    #plot_sampler(sampler)
 
     return max_like_params(sampler)
 

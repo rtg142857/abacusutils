@@ -76,18 +76,18 @@ def main(path_config_filename):
     max_like_params = fit_HOD(path_config_filename=path_config_filename, save_chains=True)
 
     # commented out during debugging
-    # print("Done HOD fitting!", flush=True)
-    # newBall.update_HOD_params(max_like_params)
+    print("Done HOD fitting!", flush=True)
+    newBall.update_HOD_params(max_like_params)
 
-    # print("Getting NFW draw for satellites", flush=True)#############################################################
-    # max_nfw = 40
-    # NFW_draw = nfw_draw(10000, max_nfw, seed)
+    print("Getting NFW draw for satellites", flush=True)#############################################################
+    max_nfw = 40
+    NFW_draw = nfw_draw(10000, max_nfw, seed)
 
-    # print("Making final mock...", flush=True)##########################################################################
-    # mock_dict = newBall.run_hod(
-    #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
-    # )
-    # print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
+    print("Making final mock...", flush=True)##########################################################################
+    mock_dict = newBall.run_hod(
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
+    )
+    print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
 
 
 class ArgParseFormatter(

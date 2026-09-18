@@ -115,12 +115,7 @@ def main(path_config_filename):
     #if not pair_wp_exists:
 
     print("Loading paircounts from the tabulation mock", flush=True)###############################################
-    paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
-    paircounts = {}
-    for pair in ["cencen", "censat_full", "censat_1halo", "satsat_2halo", "satsat_1halo"]:
-        for pair_type in ["", "_ELGauto", "_ELGcross"]:
-            filename = paircount_path + pair + pair_type + ".npy"
-            paircounts[pair+pair_type] = np.load(filename)
+    paircounts = load_paircounts(paircount_path)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
 
     param_set = Params(tracer_list=tracer_list)

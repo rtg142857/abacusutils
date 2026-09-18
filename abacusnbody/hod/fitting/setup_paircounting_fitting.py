@@ -7,7 +7,30 @@ from abacusnbody.hod.fitting.wp_paircounting import get_wp, get_npart
 from abacusnbody.hod.fitting.params import Params
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-def log_probability(hod_params, paircounts, param_set: Params, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise = False, wp_limit=(0, 24), verbose=False):
+# Global variables for the purpose of efficient multiprocessing
+paircounts = None
+param_set = None
+target_wp_dict = None
+target_jackknife_inverse_dict = None
+target_ngal_dict = None
+other_stuff_dict_here = None
+clustering_parameters = None
+minimise = False
+wp_limit=(0, 24)
+verbose=False
+
+
+def log_probability(hod_params):
+    global paircounts
+    global param_set
+    global target_wp_dict
+    global target_jackknife_inverse_dict
+    global target_ngal_dict
+    global other_stuff_dict_here
+    global clustering_parameters
+    global minimise
+    global wp_limit
+    global verbose
     tracer_list = param_set.tracer_list
     #param_set.update_hods(hod_params)
 

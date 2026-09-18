@@ -8,7 +8,8 @@ import time
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 
-from abacusnbody.hod.fitting.setup_paircounting_fitting import *
+#from abacusnbody.hod.fitting.setup_paircounting_fitting import *
+import abacusnbody.hod.fitting.setup_paircounting_fitting as setup
 
 import emcee
 from multiprocessing import Pool
@@ -37,8 +38,8 @@ def fit_HOD(path_config_filename, save_chains=False):
             tracers.append(tracer_type)
 
     wp_limit = (12, 20)
-    target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracers, wp_limit=wp_limit)
-    target_ngal = get_target_number_density(tracers=tracers)
+    target_wp, target_jackknife_inverse = setup.get_target_dicts(target_dict_path, tracers=tracers, wp_limit=wp_limit)
+    target_ngal = setup.get_target_number_density(tracers=tracers)
 
     nwalkers = fitting_params["nwalkers"]
     num_steps = fitting_params["num_steps"]
@@ -53,8 +54,8 @@ def fit_HOD(path_config_filename, save_chains=False):
             paircounts[pair+pair_type] = np.load(filename)
         # filename = paircount_path + pair + ".npy"
         # paircounts[pair] = np.load(filename)
-    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
-    param_set = Params(tracer_list=tracers)
+    other_stuff_dict_here = setup.make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    param_set = setup.Params(tracer_list=tracers)
     ndim = len(param_set.prior_bounds)
 
     print("Setting up backend...", flush=True)
@@ -92,7 +93,18 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     return max_like_params(sampler)
 
-def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24), parallel=True):
+def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, paircounts: dict, param_set: setup.Params, clustering_parameters: dict, other_stuff_dict_here: dict, backend: emcee.backends.HDFBackend, nwalkers: int, num_steps: int, ndim=15, wp_limit=(0, 24), parallel=True):
+    # Setting global variables for parallelism
+    setup.paircounts = paircounts
+    setup.param_set = param_set
+    setup.target_wp_dict = target_wp_dict
+    setup.target_jackknife_inverse_dict = target_jackknife_inverse_dict
+    setup.target_ngal_dict = target_ngal_dict
+    setup.other_stuff_dict_here = other_stuff_dict_here
+    setup.clustering_parameters = clustering_parameters
+    setup.minimise = False
+    setup.wp_limit = wp_limit
+    setup.verbose = False
 
     print("Initialising walkers...", flush=True)
     walker_init_pos = param_set.get_initial_params(positions=nwalkers).T
@@ -100,7 +112,7 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
 
     start_time = time.time()
     print("Initialising sampler...", flush=True)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters), kwargs={"minimise": False, "wp_limit": wp_limit, "verbose": False}, backend=backend)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, setup.log_probability, backend=backend)
 
     print("Running chain (serial)...", flush=True)
     sampler.run_mcmc(walker_init_pos, num_steps, skip_initial_state_check=True, progress=True) # It feels like it likes to throw an error for the initial state check with the standard priors

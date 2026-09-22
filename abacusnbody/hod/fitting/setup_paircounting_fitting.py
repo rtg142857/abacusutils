@@ -143,6 +143,14 @@ def log_prior(params, param_set: Params):
         gaussian_sigma = 0.2
         gaussian = 1/(gaussian_sigma*(2*np.pi)**0.5) * np.exp(-(Lkappa-gaussian_mu)**2 / (2 * gaussian_sigma**2))
         log_prior += np.log(gaussian)
+    if "ELG" in param_set.tracer_list:
+        # ELG alpha; equation 16 of https://arxiv.org/pdf/2310.09329
+        ELG_params = param_set.get_params_of_specific_tracer(params, "ELG")
+        Ealpha = param_set.param_from_name(ELG_params, tracer="ELG", param_name="alpha")
+        gaussian_mu = 1.0
+        gaussian_sigma = 0.2
+        gaussian = 1/(gaussian_sigma*(2*np.pi)**0.5) * np.exp(-(Ealpha-gaussian_mu)**2 / (2 * gaussian_sigma**2))
+        log_prior += np.log(gaussian)
 
     return log_prior
 

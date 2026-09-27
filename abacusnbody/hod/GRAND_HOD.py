@@ -215,7 +215,8 @@ def gen_cent(
     origin,
     tabulation_mock=False,
     tabulation_tracer="LRG",
-    hrvir=None
+    hrvir=None,
+    mass_AB = None
 ):
     """
     Generate central galaxies in place in memory with a two pass numba parallel implementation.
@@ -224,11 +225,13 @@ def gen_cent(
     if want_LRG:
         # parse out the hod parameters
         logM_cut_L, sigma_L = LRG_hod_dict['logM_cut'], LRG_hod_dict['sigma']
-        ic_L, alpha_c_L, Ac_L, Bc_L = (
+        ic_L, alpha_c_L, Ac_L, Bc_L, As_L, Bs_L = (
             LRG_hod_dict['ic'],
             LRG_hod_dict['alpha_c'],
             LRG_hod_dict['Acent'],
             LRG_hod_dict['Bcent'],
+            LRG_hod_dict['Asat'],
+            LRG_hod_dict['Bsat']
         )
 
     if want_ELG:
@@ -239,12 +242,14 @@ def gen_cent(
             ELG_hod_dict['sigma'],
             ELG_hod_dict['gamma'],
         )
-        alpha_c_E, Ac_E, Bc_E, Cc_E, ic_E = (
+        alpha_c_E, Ac_E, Bc_E, Cc_E, ic_E, As_E, Bs_E = (
             ELG_hod_dict['alpha_c'],
             ELG_hod_dict['Acent'],
             ELG_hod_dict['Bcent'],
             ELG_hod_dict['Ccent'],
             ELG_hod_dict['ic'],
+            ELG_hod_dict['Asat'],
+            ELG_hod_dict['Bsat']
         )
 
     if want_QSO:
@@ -507,6 +512,12 @@ def gen_cent(
     if tabulation_mock:
         LRG_dict["hmultis"] = multis
         ELG_dict["hmultis"] = multis
+
+        mass_AB_cen_L, mass_AB_sat_L, mass_AB_cen_E, mass_AB_sat_E = mass_AB
+        LRG_dict["mass_AB_cen"] = mass_AB_cen_L
+        LRG_dict["mass_AB_sat"] = mass_AB_sat_L
+        ELG_dict["mass_AB_cen"] = mass_AB_cen_E
+        ELG_dict["mass_AB_sat"] = mass_AB_sat_E
     if hrvir is not None:
         return LRG_dict, ELG_dict, QSO_dict, ID_dict, keep, hrvir_dict
     else:
@@ -731,7 +742,8 @@ def gen_sats_nfw(
     Nthread=16,
     verbose=False,
     want_hrvir=False,
-    seed=None
+    seed=None,
+    mass_AB = None
 ):
     """
     Generate satellite galaxies on an NFW profile, with option for an extended profile. See Rocher et al. 2023.
@@ -848,7 +860,9 @@ def gen_sats_nfw(
             for i in range(hstart[tid], hstart[tid + 1]):
                 if want_LRG:
                     M1_L_temp = 10 ** (logM1_L + As_L * hdeltac[i] + Bs_L * hfenv[i])
-                    logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
+                    #logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
+                    # we need logM_cut to use the same cen and sat AB terms, otherwise it won't be consistent with paircounting
+                    logM_cut_L_temp = logM_cut_L + As_L * hdeltac[i] + Bs_L * hfenv[i]
                     base_p_L = (
                         n_sat_LRG_modified(
                             hmass[i],
@@ -865,7 +879,8 @@ def gen_sats_nfw(
                 if want_ELG:
                     # base_p_E = None # for debugging
                     logM_cut_E_temp = (
-                        logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                        #logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                        logM_cut_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
                     )
                     if keep_cent[i] == 0: # could be either ELG or LRG/QSO; might need ELG conformity
                         if not np.isclose(logM1_EE, logM1_E): # if we need ELG conformity, go through the shebang
@@ -877,7 +892,9 @@ def gen_sats_nfw(
                                 logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
                             else:
                                 logM_cut_Q_temp = None
-                            ELG_cen_rate = get_ELG_cen_rate(hmass[i], ELG_hod_dict, logM_cut_E_temp,
+                            #here we use the central AB terms, since we're looking for the cen rate
+                            logM_cut_E_temp_cen = logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
+                            ELG_cen_rate = get_ELG_cen_rate(hmass[i], ELG_hod_dict, logM_cut_E_temp_cen,
                                                             want_LRG, LRG_hod_dict, logM_cut_L_temp,
                                                             want_QSO, QSO_hod_dict, logM_cut_Q_temp)
                             if rng.uniform() < ELG_cen_rate:
@@ -1125,6 +1142,12 @@ def gen_sats_nfw(
     if tabulation_mock:
         LRG_dict["hmultis"] = np.repeat(hmultis, 3)
         ELG_dict["hmultis"] =  np.repeat(hmultis, 3)
+        mass_AB_cen_L, mass_AB_sat_L, mass_AB_cen_E, mass_AB_sat_E = mass_AB
+
+        LRG_dict["mass_AB_cen"] = np.repeat(mass_AB_cen_L, 3)
+        LRG_dict["mass_AB_sat"] = np.repeat(mass_AB_sat_L, 3)
+        ELG_dict["mass_AB_cen"] = np.repeat(mass_AB_cen_E, 3)
+        ELG_dict["mass_AB_sat"] = np.repeat(mass_AB_sat_E, 3)
 
     return LRG_dict, ELG_dict, QSO_dict, ID_dict, hrvir_dict
 
@@ -1793,6 +1816,25 @@ def gen_gals(
     lbox = params['Lbox']
     origin = params['origin']
 
+    # Calculating assembly bias-weighted masses
+    if tabulation_mock:
+        deltac = halos_array.get('hdeltac', np.zeros(len(halos_array['hmass'])))
+        fenv = halos_array.get('hfenv', np.zeros(len(halos_array['hmass'])))
+        mass = halos_array['hmass']
+
+        AB_factor_cen_L = LRG_hod_dict['Acent'] * deltac + LRG_hod_dict['Bcent'] * fenv
+        AB_factor_sat_L = LRG_hod_dict['Asat'] * deltac + LRG_hod_dict['Bsat'] * fenv
+        AB_factor_cen_E = ELG_hod_dict['Acent'] * deltac + ELG_hod_dict['Bcent'] * fenv
+        AB_factor_sat_E = ELG_hod_dict['Asat'] * deltac + ELG_hod_dict['Bsat'] * fenv
+
+        mass_AB_cen_L = mass * 10 ** (-1.0 * AB_factor_cen_L)
+        mass_AB_sat_L = mass * 10 ** (-1.0 * AB_factor_sat_L)
+        mass_AB_cen_E = mass * 10 ** (-1.0 * AB_factor_cen_E)
+        mass_AB_sat_E = mass * 10 ** (-1.0 * AB_factor_sat_E)
+        mass_AB = (mass_AB_cen_L, mass_AB_sat_L, mass_AB_cen_E, mass_AB_sat_E)
+    else:
+        mass_AB = None
+
     LRG_dict_cent, ELG_dict_cent, QSO_dict_cent, ID_dict_cent, keep_cent, hrvir_dict_cent = gen_cent(
         halos_array['hpos'],
         halos_array['hvel'],
@@ -1816,7 +1858,8 @@ def gen_gals(
         Nthread,
         origin,
         tabulation_mock=tabulation_mock,
-        hrvir = halos_array['hrvir']
+        hrvir = halos_array['hrvir'],
+        mass_AB = mass_AB
     )
     if tabulation_mock:
         _, ELG_dict_cent, _, _, _, _ = gen_cent(
@@ -1843,7 +1886,8 @@ def gen_gals(
             origin,
             tabulation_mock=tabulation_mock,
             tabulation_tracer="ELG",
-            hrvir = halos_array['hrvir']
+            hrvir = halos_array['hrvir'],
+            mass_AB = mass_AB
         )
 
     if verbose:
@@ -1880,8 +1924,9 @@ def gen_gals(
             hmultis=halos_array["hmultis"],
             verbose=verbose,
             tabulation_mock=tabulation_mock,
-            want_hrvir=True,
-            seed=seed
+            want_hrvir=False,
+            seed=seed,
+            mass_AB = mass_AB
         )
     else:
         LRG_dict_sat, ELG_dict_sat, QSO_dict_sat, ID_dict_sat = gen_sats(

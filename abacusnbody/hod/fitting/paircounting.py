@@ -13,16 +13,19 @@ def split_cen_sat(mock_galaxies: dict):
     Also sorts the satellite arrays according to the parent halo ID.
     """
     Ncent = mock_galaxies["Ncent"]
-    Mvir = mock_galaxies["mass"]
+    #Mvir = mock_galaxies["mass"]
     x = mock_galaxies["x"]
     y = mock_galaxies["y"]
     z = mock_galaxies["z"]
     id = mock_galaxies["id"]
     weight = mock_galaxies["hmultis"]
+    M_AB_cen = mock_galaxies["mass_AB_cen"]
+    M_AB_sat = mock_galaxies["mass_AB_sat"]
     # Split into centrals and satellites
 
     #mask1 = np.array(is_central)
-    Mvir_sat = Mvir[Ncent:]
+    #Mvir_sat = Mvir[Ncent:]
+    Mvir_sat = M_AB_sat[Ncent:]
     x_sat = x[Ncent:]
     y_sat = y[Ncent:]
     z_sat = z[Ncent:]
@@ -39,7 +42,8 @@ def split_cen_sat(mock_galaxies: dict):
     z_sat = z_sat[halo_id_sat_sorted[:]]
     weight_sat = weight_sat[halo_id_sat_sorted[:]]
 
-    Mvir = Mvir[:Ncent]
+    #Mvir = Mvir[:Ncent]
+    Mvir = M_AB_cen[:Ncent]
     x = x[:Ncent]
     y = y[:Ncent]
     z = z[:Ncent]
@@ -143,7 +147,8 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     We can use the fact that both the central and satellite data here is always
     ordered according to halo id
 
-    Weights and Ms have 2 arguments for sanity checking
+    Weights have 2 arguments for sanity checking, but masses might actually be different because assembly bias
+    affects M_cen and M_sat differently
     """
     # Only one pair per halo, from central to satellite
 
@@ -162,16 +167,16 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     distances_pi = ((z_disp)**2)**0.5
 
     print("Binning...")
-    bin_3d, _ = np.histogramdd(sample = np.array([M_cen1,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weight_cen1)
+    bin_4d, _ = np.histogramdd(sample = np.array([M_cen1,M_sat2,distances_rp,distances_pi]).T,bins=[mass_bin_edges,mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weight_cen1) # weight is same for both
 
-    print("Transforming into M,M,rp,pi bins...")
-    n_pairs_mass_r_bins = np.zeros((len(mass_bin_edges)-1,len(mass_bin_edges)-1,len(r_bin_edges)-1,(pi_max//d_pi)))
-    for i in range(len(mass_bin_edges)-1):
-        for j in range(len(r_bin_edges)-1):
-            for k in range(pi_max//d_pi):
-                n_pairs_mass_r_bins[i,i,j,k] = bin_3d[i,j,k]
+    # print("Transforming into M,M,rp,pi bins...")
+    # n_pairs_mass_r_bins = np.zeros((len(mass_bin_edges)-1,len(mass_bin_edges)-1,len(r_bin_edges)-1,(pi_max//d_pi)))
+    # for i in range(len(mass_bin_edges)-1):
+    #     for j in range(len(r_bin_edges)-1):
+    #         for k in range(pi_max//d_pi):
+    #             n_pairs_mass_r_bins[i,i,j,k] = bin_3d[i,j,k]
 
-    return n_pairs_mass_r_bins
+    return bin_4d
 
 def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
                              cross=False, x2=None, y2=None, z2=None, weight2=None, Ms2=None):

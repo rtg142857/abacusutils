@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.special import erfc, erf
 from abacusnbody.hod.fitting.params import Params
-from line_profiler import profile
 
 def vprint(input, verbose):
     if verbose:
@@ -18,8 +17,13 @@ def get_npart_given_tracer(hod_params: np.ndarray, tracer: str, param_set: Param
     if tracer == "ELG":
         hod_sat_big, _ = param_set.get_conformity_weighted_sat_hod(mass_bin_centres_big, hod_params, tracer)
 
-    npart_cen = np.sum(hmf_big * hod_cen_big)
-    npart_sat = np.sum(hmf_big * hod_sat_big)
+    if tracer == "ELG":
+        tracer_type = "ELG"
+    else:
+        tracer_type = "LRG"
+
+    npart_cen = np.sum(hmf_big[tracer_type]["cen"] * hod_cen_big)
+    npart_sat = np.sum(hmf_big[tracer_type]["sat"] * hod_sat_big)
     npart_total = npart_cen + npart_sat
     return npart_total
 
@@ -47,25 +51,30 @@ def get_npart(hod_params: np.ndarray, param_set: Params, other_stuff_dict_here: 
 #######################################################################################
 # wp stuff
 
-def get_accurate_tracer_HOD(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray]:
+def get_accurate_tracer_HOD(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: dict, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray]:
 
     hod_cen_big, hod_sat_big = param_set.get_hods_given_tracer_and_params(M_h, hod_params, tracer)
 
-    hod_cen = create_accurate_HOD(hod_cen_big,hmf_big,mass_bin_edges,num_mass_bins_big)
-    hod_sat = create_accurate_HOD(hod_sat_big,hmf_big,mass_bin_edges,num_mass_bins_big)
+    if tracer == "ELG":
+        tracer_type = "ELG"
+    else:
+        tracer_type = "LRG"
+
+    hod_cen = create_accurate_HOD(hod_cen_big,hmf_big[tracer_type]["cen"],mass_bin_edges,num_mass_bins_big)
+    hod_sat = create_accurate_HOD(hod_sat_big,hmf_big[tracer_type]["sat"],mass_bin_edges,num_mass_bins_big)
     return hod_cen, hod_sat
 
-def get_accurate_ELG_sat_HOD_with_conformity(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: np.ndarray, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def get_accurate_ELG_sat_HOD_with_conformity(hod_params: np.ndarray, tracer: str, M_h: np.ndarray, hmf_big: dict, mass_bin_edges: np.ndarray, num_mass_bins_big: int, param_set: Params) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     assert tracer == "ELG"
     _, hod_sat_ELGELG_big = param_set.get_hods_given_tracer_and_params(M_h, hod_params, tracer, ELG_ELG = True)
     hod_sat_weighted_big, hod_sat_EE_SS1_big = param_set.get_conformity_weighted_sat_hod(M_h, hod_params, tracer)
 
-    hod_sat_ELGELG = create_accurate_HOD(hod_sat_ELGELG_big, hmf_big, mass_bin_edges, num_mass_bins_big)
-    hod_sat_weighted = create_accurate_HOD(hod_sat_weighted_big, hmf_big, mass_bin_edges, num_mass_bins_big)
-    hod_sat_EE_SS1 = create_accurate_HOD(hod_sat_EE_SS1_big, hmf_big, mass_bin_edges, num_mass_bins_big)
+    hod_sat_ELGELG = create_accurate_HOD(hod_sat_ELGELG_big, hmf_big["ELG"]["sat"], mass_bin_edges, num_mass_bins_big)
+    hod_sat_weighted = create_accurate_HOD(hod_sat_weighted_big, hmf_big["ELG"]["sat"], mass_bin_edges, num_mass_bins_big)
+    hod_sat_EE_SS1 = create_accurate_HOD(hod_sat_EE_SS1_big, hmf_big["ELG"]["sat"], mass_bin_edges, num_mass_bins_big)
     return hod_sat_ELGELG, hod_sat_weighted, hod_sat_EE_SS1
 
-def create_accurate_HOD(hod,halos,mass_bin_edges,num_mass_bins_big):
+def create_accurate_HOD(hod,hmf: np.ndarray,mass_bin_edges,num_mass_bins_big):
     """
     Using just 30 mass bins for the HOD isn't accurate enough. Take smaller
     mass subdivisions and use these to create an accurate HOD for only 30 mass bins.
@@ -75,9 +84,9 @@ def create_accurate_HOD(hod,halos,mass_bin_edges,num_mass_bins_big):
     if num_mass_bins_big % num_mass_bins_small != 0:
         raise ValueError("finer grained mass bins do not evenly divide coarser mass bins:",num_mass_bins_small," is not a factor of ",num_mass_bins_big)
     hod[np.isnan(hod)] = 0
-    HOD_halo_product = halos * hod
+    HOD_halo_product = hmf * hod
     HOD_recalc = np.sum(np.reshape(HOD_halo_product,(num_mass_bins_small,mass_bins_factor)),axis=1) / (
-                 np.sum(np.reshape(halos,(num_mass_bins_small,mass_bins_factor)),axis=1))
+                 np.sum(np.reshape(hmf,(num_mass_bins_small,mass_bins_factor)),axis=1))
     HOD_recalc[np.isnan(HOD_recalc)] = 0
     return HOD_recalc
 
@@ -90,7 +99,6 @@ def create_weighting_factor(mass_pair_array,hod1,hod2):
     weighting_factor = np.tensordot(np.outer(hod1,hod2),mass_pair_array,axes=([0,1],[0,1]))
     return weighting_factor
 
-@profile
 def get_galaxy_pairs(tracer1: str, paircounts: dict, hod_cen1, hod_cen2, hod_sat1, hod_sat2, tracer2: str | None = None,
                     hod_sat_ELGELG=None, hod_sat_weighted=None, hod_sat_EE_ss1=None,
                     num_sat_parts=3, verbose=False):

@@ -228,7 +228,59 @@ def load_paircounts(paircount_path):
     paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
     return paircounts
 
-def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
+def get_hmf(mass_bins_big, subsample_dir, sim_label, HOD_params):
+    """
+    Creates a dict with:
+        ["LRG"]["cen"]: HMF of the simulation, where halo mass is modified by the LRG assembly bias central parameters
+        "LRG" "sat": likewise, but for the satellite parameters
+        and ditto for the ELGs
+    """
+    LRG_hod_dict = HOD_params["LRG_params"]
+    ELG_hod_dict = HOD_params["ELG_params"]
+
+    print("Loading halos for hmf...", flush=True)
+    meta_subsample_dir = Path(subsample_dir)
+    full_subsample_dir = meta_subsample_dir / sim_label
+
+    subsample_files = [full_subsample_dir / subsample_file for subsample_file in os.listdir(full_subsample_dir)]
+    subsample_files.sort()
+    num_subsample_files = len(subsample_files)
+    if num_subsample_files == 0:
+        raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
+    
+    hmf_big = {}
+    hmf_big["LRG"] = {}
+    hmf_big["ELG"] = {}
+
+    hmf_big["LRG"]["cen"] = hmf_big["LRG"]["sat"] = hmf_big["ELG"]["cen"] = hmf_big["ELG"]["sat"] = np.zeros(len(mass_bins_big)-1)
+    for i in range(num_subsample_files):
+        print("    Loading halo file",i,flush=True)
+        subsample_file = subsample_files[i]
+        masked_halos = h5py.File(subsample_file)
+        halo_mass = masked_halos["halos"]["M200_crit"]
+        halo_weights = masked_halos["halos"]["multi_halos"]
+        deltac = masked_halos["halos"]["deltac_rank"]
+        fenv = masked_halos["halos"]["fenv_rank"]
+
+        AB_factor_cen_L = LRG_hod_dict['Acent'] * deltac + LRG_hod_dict['Bcent'] * fenv
+        AB_factor_sat_L = LRG_hod_dict['Asat'] * deltac + LRG_hod_dict['Bsat'] * fenv
+        AB_factor_cen_E = ELG_hod_dict['Acent'] * deltac + ELG_hod_dict['Bcent'] * fenv
+        AB_factor_sat_E = ELG_hod_dict['Asat'] * deltac + ELG_hod_dict['Bsat'] * fenv
+
+        mass_AB_cen_L = halo_mass * 10 ** (-1.0 * AB_factor_cen_L)
+        mass_AB_sat_L = halo_mass * 10 ** (-1.0 * AB_factor_sat_L)
+        mass_AB_cen_E = halo_mass * 10 ** (-1.0 * AB_factor_cen_E)
+        mass_AB_sat_E = halo_mass * 10 ** (-1.0 * AB_factor_sat_E)
+
+        hmf_big["LRG"]["cen"] += np.histogram(mass_AB_cen_L, bins = mass_bins_big, weights=halo_weights)[0]
+        hmf_big["LRG"]["sat"] += np.histogram(mass_AB_sat_L, bins = mass_bins_big, weights=halo_weights)[0]
+        hmf_big["ELG"]["cen"] += np.histogram(mass_AB_cen_E, bins = mass_bins_big, weights=halo_weights)[0]
+        hmf_big["ELG"]["sat"] += np.histogram(mass_AB_sat_E, bins = mass_bins_big, weights=halo_weights)[0]
+
+    return hmf_big
+    
+
+def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label, HOD_param_dict):
     """
     Creates a dict with:
         boxsize
@@ -251,25 +303,7 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     mass_bins_big = np.logspace(np.log10(mass_min),np.log10(mass_max),num_mass_bins_big + 1)
     mass_bin_centres_big = np.sqrt(mass_bins_big[1:] * mass_bins_big[:-1])
 
-    print("Loading halos for hmf...", flush=True)
-    meta_subsample_dir = Path(subsample_dir)
-    full_subsample_dir = meta_subsample_dir / sim_label
-
-    subsample_files = [full_subsample_dir / subsample_file for subsample_file in os.listdir(full_subsample_dir)]
-    subsample_files.sort()
-    num_subsample_files = len(subsample_files)
-    if num_subsample_files == 0:
-        raise Exception("No subsample files found in directory: "+str(full_subsample_dir))
-    hmf_big = np.zeros(len(mass_bin_centres_big))
-    for i in range(num_subsample_files):
-        print("    Loading halo file",i,flush=True)
-        subsample_file = subsample_files[i]
-        masked_halos = h5py.File(subsample_file)
-        halo_mass = masked_halos["halos"]["M200_crit"]
-        halo_weights = masked_halos["halos"]["multi_halos"]
-
-        hmf_big += np.histogram(halo_mass, bins = mass_bins_big, weights=halo_weights)[0]
-        #print("Halo mass function from the files that have been loaded so far:",hmf_big)
+    hmf_big = get_hmf(mass_bins_big, subsample_dir, sim_label, HOD_param_dict)
 
     stuff = {}
     stuff["boxsize"] = boxsize
@@ -279,165 +313,6 @@ def make_other_stuff_dict(boxsize, num_sat_parts, subsample_dir, sim_label):
     stuff["num_mass_bins_big"] = num_mass_bins_big
     stuff["hmf_big"] = hmf_big
     return stuff
-
-# def get_priors(type="bounds"):
-#     match type:
-#         case "bounds":
-#             return np.array([[10,16],
-#                         [10,16],
-#                         [0,5],
-#                         [0,5],
-#                         [0,5],
-#                         [0,1],
-#                         [0,100],
-#                         [10,16],
-#                         [0,5],
-#                         [0, 5],
-#                         [10,16],
-#                         [0,5],
-#                         [0,100],
-#                         [10,16],
-#                         [10,16],
-#                         [0,5],
-#                         [0,5],
-#                         [0,5],
-#                         [0,1]
-#             ])
-#         case "mean":
-#             return np.array([ # Yuan et al.
-#                 13.3, # LRGs
-#                 14.4,
-#                 0.5,
-#                 1.0,
-#                 0.5,
-#                 0.7, # ELGs
-#                 20.0,
-#                 13.3,
-#                 0.8,
-#                 0.5,
-#                 14.4,
-#                 0.7,
-#                 6.0,
-#                 13.3, # QSOs
-#                 14.4,
-#                 0.5,
-#                 1.0,
-#                 0.5,
-#                 0.5
-#             ])
-#         case "std":
-#             return np.array([ # Yuan et al.
-#                 0.5, #LRGs
-#                 0.5,
-#                 0.2,
-#                 0.3,
-#                 0.2,
-#                 0.5, # ELGs
-#                 0.5,
-#                 0.5,
-#                 0.2,
-#                 0.3,
-#                 0.5,
-#                 0.2,
-#                 1.0,
-#                 0.5, # QSOs
-#                 0.5,
-#                 0.2,
-#                 0.3,
-#                 0.2,
-#                 0.5
-#             ])
-
-# def print_hod_values(hod_params):
-#     print("LRG params:")
-#     print("logM_cut:", hod_params[0])
-#     print("logM1:", hod_params[1])
-#     print("sigma:", hod_params[2])
-#     print("alpha:", hod_params[3])
-#     print("kappa:", hod_params[4])
-#     print("ELG params:")
-#     print("p_max:", hod_params[5])
-#     print("Q:", hod_params[6])
-#     print("logM_cut:", hod_params[7])
-#     print("kappa:", hod_params[8])
-#     print("sigma:", hod_params[9])
-#     print("logM1:", hod_params[10])
-#     print("alpha:", hod_params[11])
-#     print("gamma:", hod_params[12])
-#     print("QSO params:")
-#     print("logM_cut:", hod_params[13])
-#     print("logM1:", hod_params[14])
-#     print("sigma:", hod_params[15])
-#     print("alpha:", hod_params[16])
-#     print("kappa:", hod_params[17])
-#     print("p_max:", hod_params[18])
-
-# def initialise_walkers(initial_params_random: bool, num_walkers):
-#     """
-#     Initialise the positions of the walkers for fitting the HOD parameters
-#     Do this randomly within the prior space if initial_params_random=True
-#     Else populate in a small region around some provided params
-
-#     Params:
-#     np.array([(LRGs:) logM_cut, logM1, sigma, alpha, kappa,
-#         (ELGs): p_max, Q, logM_cut, kappa, sigma, logM1, alpha, gamma,
-#         (QSOs): logM_cut, logM1, sigma, alpha, kappa])
-#     """
-#     priors = get_priors(type="bounds")
-
-#     mean_priors = get_priors(type="mean")
-
-#     std_priors = get_priors(type="std")
-
-#     initial_params = np.array([
-#         13.3,
-#         14.4,
-#         0.8,
-#         1.0,
-#         0.4,
-#         0.7,
-#         20.0,
-#         13.3,
-#         0.8,
-#         0.5,
-#         14.4,
-#         0.7,
-#         6.0,
-#         13.3,
-#         14.4,
-#         0.8,
-#         1.0,
-#         0.4,
-#         0.5
-#     ])
-
-#     rng = np.random.default_rng(seed=0)
-
-#     pos = np.zeros((num_walkers,np.shape(initial_params)[0]))
-#     if (initial_params_random):
-#         for i in range(num_walkers):
-#             for j in range(np.shape(priors)[0]):
-#                 pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
-#                 #pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
-
-#     else:
-#         #if len(initial_params)!=np.shape(priors)[0]:
-#         #    raise ValueError("Your initial parameter values and priors have different shapes")
-#         for i in range(num_walkers):
-#             # Populate in a 10% region around parameters provided
-#             # Potential to make the size of this region an input variable if necessary
-#             pos[i,:] = initial_params*(0.95 + 0.1*np.random.random(np.shape(initial_params)[0]))
-#     #print(pos)
-
-#     # Check none of the walkers lie outside the prior space
-#     #for i in range(num_walkers):
-#     #    for j in range(np.shape(priors)[0]):
-#     #        if pos[i,j] < priors[j,0]:
-#     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too low")
-#     #        if pos[i,j] > priors[j,1]:
-#     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
-#     print(pos, flush=True)
-#     return pos
 
 def get_hod_values_given_parameters_with_incompleteness(M_h: np.ndarray, params: np.ndarray, param_set: Params, other_stuff_dict_here: dict, conformity=False) -> dict:
     """

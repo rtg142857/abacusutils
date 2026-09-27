@@ -117,7 +117,7 @@ def main(path_config_filename):
     print("Loading paircounts from the tabulation mock", flush=True)###############################################
     paircount_path = config["fitting_params"]["paircounts_save_path"] + sim_label + "/"
     paircounts = load_paircounts(paircount_path)
-    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label, HOD_param_dict=HOD_params)
 
     param_set = Params(tracer_list=tracer_list)
 

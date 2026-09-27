@@ -47,7 +47,7 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Loading precomputed things...")
     paircounts = load_paircounts(paircount_path)
-    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
+    other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label, HOD_param_dict=config["HOD_params"])
     param_set = Params(tracer_list=tracers)
     ndim = len(param_set.prior_bounds)
 

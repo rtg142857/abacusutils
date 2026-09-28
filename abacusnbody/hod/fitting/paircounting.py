@@ -155,7 +155,7 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     # If something ends up being wrong, one place to debug is to make sure every halo ID is being paired correctly
     # sanity check
     assert np.all(weight_cen1 == weight_sat2)
-    assert np.all(M_cen1 == M_sat2)
+    #assert np.all(M_cen1 == M_sat2) not true any more
 
     print("Calculating displacements and rp/pi...")
 

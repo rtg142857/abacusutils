@@ -155,7 +155,7 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     # If something ends up being wrong, one place to debug is to make sure every halo ID is being paired correctly
     # sanity check
     assert np.all(weight_cen1 == weight_sat2)
-    #assert np.all(M_cen1 == M_sat2) not true any more
+    #assert np.all(M_cen1 == M_sat2) not true with assembly bias
 
     print("Calculating displacements and rp/pi...")
 
@@ -203,6 +203,8 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
         pairs_per_halo = num_sat_parts*(num_sat_parts-1)/2
     Ms_reduced = np.zeros((len(Ms[::num_sat_parts]),
                            int(pairs_per_halo)))
+    Ms2_reduced = np.zeros((len(Ms[::num_sat_parts]),
+                           int(pairs_per_halo)))
 
     # distances in LOS and projected directions are binned
     distances_rp = np.zeros((len(Ms[::num_sat_parts]),
@@ -219,7 +221,8 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
     else:
         # sanity check
         assert np.all(weights == weight2)
-        assert np.all(Ms == Ms2)
+        # assert np.all(Ms == Ms2) # no longer true in case of LRG-ELG crosscorr, because they may have different AB-weighted masses
+        # TODO: fix the histogramdd
 
     k = 0
     # For any number of satellite particles can take every combination of ith and 
@@ -232,6 +235,7 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
         for j in range(max_j_index):
             print(k)
             Ms_reduced[:,k] = Ms[::num_sat_parts]
+            Ms2_reduced[:,k] = Ms2[::num_sat_parts]
             x_disp = wrap(x[i::num_sat_parts]-x2[j::num_sat_parts], boxsize)
             y_disp = wrap(y[i::num_sat_parts]-y2[j::num_sat_parts], boxsize)
             z_disp = wrap(z[i::num_sat_parts]-z2[j::num_sat_parts], boxsize)
@@ -250,22 +254,23 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
     # Reshape the masses and distances of the pairs so they can
     # be binned
     Ms_reduced = np.reshape(Ms_reduced,(1,-1))[0]
+    Ms2_reduced = np.reshape(Ms_reduced,(1,-1))[0]
     distances_rp = np.reshape(distances_rp,(1,-1))[0]
     distances_pi = np.reshape(distances_pi,(1,-1))[0]
     weights_reduced = np.ravel(weights_reduced)
 
-    final_data = np.histogramdd(sample = np.array([Ms_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weights_reduced)
+    final_data = np.histogramdd(sample = np.array([Ms_reduced,Ms2_reduced,distances_rp,distances_pi]).T,bins=[mass_bin_edges,mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weights_reduced)
     final_data = final_data[0]
     # Finally transform into the usual format with 2 separate M bins so that it easily fits into the rest of my existing code
 
-    n_pairs_mass_r_bins = np.zeros((len(mass_bin_edges)-1,len(mass_bin_edges)-1,len(r_bin_edges)-1,(pi_max//d_pi)))
-    for i in range(len(mass_bin_edges)-1):
-        for j in range(len(r_bin_edges)-1):
-            for k in range(pi_max//d_pi):
-                n_pairs_mass_r_bins[i,i,j,k] = final_data[i,j,k]
+    # n_pairs_mass_r_bins = np.zeros((len(mass_bin_edges)-1,len(mass_bin_edges)-1,len(r_bin_edges)-1,(pi_max//d_pi)))
+    # for i in range(len(mass_bin_edges)-1):
+    #     for j in range(len(r_bin_edges)-1):
+    #         for k in range(pi_max//d_pi):
+    #             n_pairs_mass_r_bins[i,i,j,k] = final_data[i,j,k]
 
-
-    return n_pairs_mass_r_bins
+    return final_data
+    #return n_pairs_mass_r_bins
 
 def correct_doublecounting(npairs, type):
     """

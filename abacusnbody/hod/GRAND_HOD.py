@@ -190,7 +190,7 @@ def wrap(x, L):
 
 
 
-@njit(parallel=True, fastmath=True)
+#@njit(parallel=True, fastmath=True) while debugging
 def gen_cent(
     pos,
     vel,

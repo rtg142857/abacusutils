@@ -47,11 +47,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     target_ngal = get_target_number_density(tracers=tracer_list)
 
     print("Loading precomputed things...")
-    paircounts = {}
-    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
-        for pair_type in ["", "_ELGauto", "_ELGcross"]:
-            filename = paircount_path + pair + pair_type + ".npy"
-            paircounts[pair+pair_type] = np.load(filename)
+    paircounts = load_paircounts(paircount_path)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     param_set = Params(tracer_list=tracer_list)
 

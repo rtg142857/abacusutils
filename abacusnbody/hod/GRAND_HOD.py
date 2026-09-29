@@ -867,33 +867,10 @@ def gen_sats_nfw(
                     logM_cut_E_temp = (
                         logM_cut_E + Ac_E * hdeltac[i] + Bc_E * hfenv[i] + Cc_E * hshear[i]
                     )
-                    if keep_cent[i] == 0: # could be either ELG or LRG/QSO; might need ELG conformity
-                        if not np.isclose(logM1_EE, logM1_E): # if we need ELG conformity, go through the shebang
-                            if want_LRG:
-                                logM_cut_L_temp = logM_cut_L + Ac_L * hdeltac[i] + Bc_L * hfenv[i]
-                            else:
-                                logM_cut_L_temp = None
-                            if want_QSO:
-                                logM_cut_Q_temp = logM_cut_Q + Ac_Q * hdeltac[i] + Bc_Q * hfenv[i]
-                            else:
-                                logM_cut_Q_temp = None
-                            ELG_cen_rate = get_ELG_cen_rate(hmass[i], ELG_hod_dict, logM_cut_E_temp,
-                                                            want_LRG, LRG_hod_dict, logM_cut_L_temp,
-                                                            want_QSO, QSO_hod_dict, logM_cut_Q_temp)
-                            if rng.uniform() < ELG_cen_rate:
-                                M1_E_temp = 10 ** (
-                                    logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                                    #logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                                )
-                            else:
-                                M1_E_temp = 10 ** (
-                                    #logM1_EE + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                                    logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                                )
-                        else:
-                            M1_E_temp = 10 ** (
-                                logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
-                            )
+                    if keep_cent[i] == 0: # non-ELG centre; no ELG conformity
+                        M1_E_temp = 10 ** (
+                            logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i] + Cs_E * hshear[i]
+                        )
                         base_p_E = (
                             N_sat_elg(
                                 hmass[i], 10**logM_cut_E_temp, kappa_E, M1_E_temp, alpha_E, A_E
@@ -930,9 +907,7 @@ def gen_sats_nfw(
                             )
                             * ic_E
                         )
-                        #print("ELG central")
                     elif keep_cent[i] == 3:
-                        #print("??? QSO central?")
                         M1_E_temp = 10 ** (logM1_E + As_E * hdeltac[i] + Bs_E * hfenv[i])
                         base_p_E = (
                             N_sat_elg(

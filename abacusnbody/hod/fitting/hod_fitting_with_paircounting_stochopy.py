@@ -95,12 +95,13 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Saving HOD values...", flush=True)
     M_h = np.logspace(10, 16, 90)
-    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, best_fit, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, best_fit, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here, conformity=True)
+    ELG_sat_conformity = hod_values["ELG_sat_conformity"]
     for key, val in hod_values.items():
         np.save(save_path + key + ".npy", val)
 
     print("Plotting HODs...")
-    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)
+    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list, ELG_sat_conformity=ELG_sat_conformity)
 
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=best_fit, param_set=param_set, paircounts=paircounts,

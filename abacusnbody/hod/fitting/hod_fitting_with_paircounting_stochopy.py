@@ -52,7 +52,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     param_set = Params(tracer_list=tracer_list)
 
     nwalkers = fitting_params["nwalkers"]
-    num_steps = fitting_params["num_steps"]
+    num_steps = fitting_params["num_steps_optimising"]
 
     start_time = time.time()
 
@@ -120,13 +120,11 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     #    1.42474565e+01, 1.48874045e+01, 9.64330200e-01, 1.96001803e-01, 5.42685958e-01]
     #         x0 = [12.71631964, 13.80127516,  0.03398003,  1.37542625,  0.47764538,
     #    14.52401744, 15.83453532,  1.03107951,  0.11468305,  0.32196389]
-            x0 = [12.72612254, 13.84169279,  0.08853626,  1.5050399 ,  0.58075061,
-        0.10320492, 10.51905478,  4.41709811,  4.67046554, 15.86817656,
-       11.54366456,  0.61901208, 19.5180666 , 14.66994339, 15.57269848,
-        1.04232889,  0.64778393,  0.26027709,  0.20948996]
-
-
-
+            x0 = [12.72959237, 13.88229675,  0.08054213,  1.60747791,  0.47599498,
+        0.97994208, 11.47487057,  0.52361089,  0.58527631, 14.69007607,
+       10.08069049,  0.68755412,  0.60683426, 14.57291737, 15.87396005,
+        1.04244335,  0.6491427 ,  0.14846743,  0.16160012]
+            
             # alt_x0 = param_set.get_initial_params(positions=1)
         case "cpso":
             x0 = None#get_priors(type=) # trying without 

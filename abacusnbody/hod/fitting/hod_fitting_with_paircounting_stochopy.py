@@ -47,16 +47,12 @@ def fit_HOD(path_config_filename, save_chains=False):
     target_ngal = get_target_number_density(tracers=tracer_list)
 
     print("Loading precomputed things...")
-    paircounts = {}
-    for pair in ["cencen", "censat", "satsat", "satsat_onehalo"]:
-        for pair_type in ["", "_ELGauto", "_ELGcross"]:
-            filename = paircount_path + pair + pair_type + ".npy"
-            paircounts[pair+pair_type] = np.load(filename)
+    paircounts = load_paircounts(paircount_path)
     other_stuff_dict_here = make_other_stuff_dict(boxsize=boxsize, num_sat_parts=3, subsample_dir=subsample_dir, sim_label=sim_label)
     param_set = Params(tracer_list=tracer_list)
 
     nwalkers = fitting_params["nwalkers"]
-    num_steps = fitting_params["num_steps"]
+    num_steps = fitting_params["num_steps_optimising"]
 
     start_time = time.time()
 
@@ -99,12 +95,13 @@ def fit_HOD(path_config_filename, save_chains=False):
 
     print("Saving HOD values...", flush=True)
     M_h = np.logspace(10, 16, 90)
-    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, best_fit, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here)
+    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, best_fit, param_set=param_set, other_stuff_dict_here=other_stuff_dict_here, conformity=True)
+    ELG_sat_conformity = hod_values["ELG_sat_conformity"]
     for key, val in hod_values.items():
         np.save(save_path + key + ".npy", val)
 
     print("Plotting HODs...")
-    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list)
+    plot_HODs(save_path+"HODs.png", M_h, hod_values, tracer_list, ELG_sat_conformity=ELG_sat_conformity)
 
     print("Plotting wps...", flush=True)
     plot_wp(save_path+"wps.png", hod_params=best_fit, param_set=param_set, paircounts=paircounts,
@@ -121,11 +118,13 @@ def sample_chain(target_wp_dict: dict, target_jackknife_inverse_dict: dict, targ
     #         x0 = [1.27314746e+01, 1.37869038e+01, 7.37897281e-02, 1.35030823e+00, 2.94064664e+00, 
     #    4.93588538e-01, 1.18648813e+01, 2.80654619e-01, 4.97620174e+00, 1.15249929e+01, 2.23047182e-02, 5.46581661e+00,
     #    1.42474565e+01, 1.48874045e+01, 9.64330200e-01, 1.96001803e-01, 5.42685958e-01]
-            x0 = [12.71631964, 13.80127516,  0.03398003,  1.37542625,  0.47764538,
-       14.52401744, 15.83453532,  1.03107951,  0.11468305,  0.32196389]
-
-
-
+    #         x0 = [12.71631964, 13.80127516,  0.03398003,  1.37542625,  0.47764538,
+    #    14.52401744, 15.83453532,  1.03107951,  0.11468305,  0.32196389]
+            x0 = [12.72959237, 13.88229675,  0.08054213,  1.60747791,  0.47599498,
+        0.97994208, 11.47487057,  0.52361089,  0.58527631, 14.69007607,
+       10.08069049,  0.68755412,  0.60683426, 14.57291737, 15.87396005,
+        1.04244335,  0.6491427 ,  0.14846743,  0.16160012]
+            
             # alt_x0 = param_set.get_initial_params(positions=1)
         case "cpso":
             x0 = None#get_priors(type=) # trying without 

@@ -101,6 +101,7 @@ def main(path_config_filename):
         for category in category_list:
             if not os.path.exists(paircount_path + sim_label + f"/{pair_label}{category}.npy"):
                 all_paircounts_exist = False
+                print(f"Missing paircount file {pair_label}{category} at {paircount_path}{sim_label}/{pair_label}{category}.npy")
     if not all_paircounts_exist:
         print("Paircounts missing; computing them now", flush=True)
         print("Making tracer mock...", flush=True)

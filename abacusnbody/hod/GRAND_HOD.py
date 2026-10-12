@@ -342,6 +342,9 @@ def gen_cent(
                 else:
                     keep[i] = 0
 
+    over1_list = np.array(over1_list)
+    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/over1_list.npy", over1_list)
+
     # compose galaxy array, first create array of galaxy starting indices for the threads
     gstart = np.empty((Nthread + 1, 3), dtype=np.int64)
     gstart[0, :] = 0

@@ -62,7 +62,7 @@ HOD_params:
         Asat: 0.2
         Bcent: 0.4
         Bsat: -0.2
-        ic: 0.66
+        ic: 0.25
 
     # parameters for setting up the HOD of ELGs
     ELG_params:

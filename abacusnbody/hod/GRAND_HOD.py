@@ -188,8 +188,6 @@ def wrap(x, L):
         return x + L
     return x
 
-over1_list = []
-
 #@njit(parallel=True, fastmath=True) while debugging
 def gen_cent(
     pos,
@@ -271,6 +269,8 @@ def gen_cent(
     )  # starting index of each thread
 
     keep = np.empty(H, dtype=np.int8)  # mask array tracking which halos to keep
+
+    over1_list = [] # for debugging
 
     # figuring out the number of halos kept for each thread
     if tabulation_mock and tabulation_tracer == "LRG": # Each halo gets an LRG tracer

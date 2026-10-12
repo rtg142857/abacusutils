@@ -252,7 +252,10 @@ def get_hmf(mass_bins_big, subsample_dir, sim_label, HOD_params):
     hmf_big["LRG"] = {}
     hmf_big["ELG"] = {}
 
-    hmf_big["LRG"]["cen"] = hmf_big["LRG"]["sat"] = hmf_big["ELG"]["cen"] = hmf_big["ELG"]["sat"] = np.zeros(len(mass_bins_big)-1)
+    hmf_big["LRG"]["cen"] = np.zeros(len(mass_bins_big)-1)
+    hmf_big["LRG"]["sat"] = np.zeros(len(mass_bins_big)-1)
+    hmf_big["ELG"]["cen"] = np.zeros(len(mass_bins_big)-1)
+    hmf_big["ELG"]["sat"] = np.zeros(len(mass_bins_big)-1)
     for i in range(num_subsample_files):
         print("    Loading halo file",i,flush=True)
         subsample_file = subsample_files[i]

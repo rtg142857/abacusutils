@@ -47,11 +47,11 @@ HOD_params:
 
     # parameters for setting up the HOD of LRGs
     LRG_params:
-        logM_cut: 12.21 #12.8 # 13.0 #13.3
+        logM_cut: 12.8 # 13.0 #13.3
         logM1: 14.0 # 14.24 # 14.4
-        sigma: 0.0000001 #0.1 # 0.25 #0.6 # 0.6 # 0.8
+        sigma: 0.1 # 0.25 #0.6 # 0.6 # 0.8
         alpha: 0.9 #0.78 # 0.4 # 1.0
-        kappa: 1000000 #0.63 # 0.98 # 0.4
+        kappa: 0.63 # 0.98 # 0.4
         alpha_c: 0
         alpha_s: 1
         s: 0
@@ -62,7 +62,7 @@ HOD_params:
         Asat: 0.2
         Bcent: 0.4
         Bsat: -0.2
-        ic: 0.005
+        ic: 0.66
 
     # parameters for setting up the HOD of ELGs
     ELG_params:
@@ -94,10 +94,10 @@ HOD_params:
 
     # parameters for setting up the HOD of QSOs
     QSO_params:
-        p_max: 0.5 # 0.33
+        p_max: 0.33
         logM_cut: 12.21
-        kappa: 1000000 #1.0
-        sigma: 0.0000001 #0.56
+        kappa: 1.0
+        sigma: 0.56
         logM1: 13.94
         alpha: 0.4
         A_s: 1.

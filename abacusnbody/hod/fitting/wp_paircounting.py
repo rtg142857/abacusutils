@@ -10,12 +10,18 @@ def vprint(input, verbose):
 # Number density stuff
 def get_npart_given_tracer(hod_params: np.ndarray, tracer: str, param_set: Params, other_stuff_dict_here: dict):
     # because it uses big, we don't use the in-built HODs I guess
+    print(f"Getting npart for tracer {tracer} via wp_paircounting")
     hmf_big = other_stuff_dict_here["hmf_big"]
+    print(f"hmf_big: {hmf_big}")
     mass_bin_centres_big = other_stuff_dict_here["mass_bin_centres_big"]
+    print(f"mass_bin_centres_big = {mass_bin_centres_big}")
 
     hod_cen_big, hod_sat_big = param_set.get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer) #get_hods_given_tracer_and_params(M_h=mass_bin_centres_big, hod_params=hod_params, tracer=tracer)
+    print(f"hod_cen_big: {hod_cen_big}")
+    print(f"hod_sat_big: {hod_sat_big}")
     if tracer == "ELG":
         hod_sat_big, _ = param_set.get_conformity_weighted_sat_hod(mass_bin_centres_big, hod_params, tracer)
+        print(f"conformity weighted sat big: {hod_sat_big}")
 
     if tracer == "ELG":
         tracer_type = "ELG"
@@ -23,8 +29,11 @@ def get_npart_given_tracer(hod_params: np.ndarray, tracer: str, param_set: Param
         tracer_type = "LRG"
 
     npart_cen = np.sum(hmf_big[tracer_type]["cen"] * hod_cen_big)
+    print(f"npart_cen: {npart_cen}")
     npart_sat = np.sum(hmf_big[tracer_type]["sat"] * hod_sat_big)
+    print(f"npart_sat: {npart_sat}")
     npart_total = npart_cen + npart_sat
+    print(f"npart_total: {npart_total}")
     return npart_total
 
 def get_npart(hod_params: np.ndarray, param_set: Params, other_stuff_dict_here: dict) -> dict:

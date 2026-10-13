@@ -315,19 +315,19 @@ def gen_cent(
                         N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q) * ic_Q * multis[i]
                     )
 
-                if QSO_marker > 1.0:
-                    # message = f"More than 1.0 chance of central galaxy\n"
-                    # message += f"Halo mass: {mass[i]}\n"
-                    # message += f"Deltac: {deltac[i]}, fenv: {fenv[i]}"
-                    # message += f"(effective log mass for LRG/QSO: {np.log10(mass[i]) - Ac_L * deltac[i] - Bc_L * fenv[i] })"
-                    # message += f"(effective log mass for ELG: {np.log10(mass[i]) - Ac_E * deltac[i] - Bc_E * fenv[i] })"
-                    # message += f"N_cen_LRG: {n_cen_LRG(mass[i], logM_cut_L_temp, sigma_L)}, ic_L: {ic_L}, downsampling: {multis[i]}"
-                    # message += f"(LRG marker: {LRG_marker})"
-                    # message += f"N_cen_ELG: {N_cen_ELG_v1(mass[i], pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E)}, ic_E: {ic_E}, downsampling: {multis[i]}"
-                    # message += f"(ELG marker: {ELG_marker})"
-                    # message += f"N_cen_QSO: {N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q)}, ic_Q: {ic_Q}, downsampling: {multis[i]}"
-                    # message += f"(QSO marker: {QSO_marker})"
-                    # raise Exception(message)
+                if QSO_marker > 10.0:
+                    message = f"More than 10.0 chance of central galaxy\n"
+                    message += f"Halo mass: {mass[i]}\n"
+                    message += f"Deltac: {deltac[i]}, fenv: {fenv[i]}\n"
+                    message += f"(effective log mass for LRG/QSO: {np.log10(mass[i]) - Ac_L * deltac[i] - Bc_L * fenv[i] })\n"
+                    message += f"(effective log mass for ELG: {np.log10(mass[i]) - Ac_E * deltac[i] - Bc_E * fenv[i] })\n"
+                    message += f"N_cen_LRG: {n_cen_LRG(mass[i], logM_cut_L_temp, sigma_L)}, ic_L: {ic_L}, downsampling: {multis[i]}\n"
+                    message += f"(LRG marker: {LRG_marker})\n"
+                    message += f"N_cen_ELG: {N_cen_ELG_v1(mass[i], pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E)}, ic_E: {ic_E}, downsampling: {multis[i]}\n"
+                    message += f"(ELG marker: {ELG_marker})\n"
+                    message += f"N_cen_QSO: {N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q)}, ic_Q: {ic_Q}, downsampling: {multis[i]}\n"
+                    message += f"(QSO marker: {QSO_marker})\n"
+                    raise Exception(message)
                     over1_list.append(QSO_marker)
 
                 if randoms[i] <= LRG_marker: 

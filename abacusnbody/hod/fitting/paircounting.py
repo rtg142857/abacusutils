@@ -218,6 +218,7 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
     
     if not cross:
         x2, y2, z2 = x, y, z
+        Ms2 = Ms
     else:
         # sanity check
         assert np.all(weights == weight2)

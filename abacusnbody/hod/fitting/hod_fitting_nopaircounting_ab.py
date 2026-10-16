@@ -65,7 +65,6 @@ def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: d
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
                               args=(newBall, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
                               options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
-
     return OptimizeResult
 
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):

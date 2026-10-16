@@ -15,7 +15,7 @@ import yaml
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusutils.abacusnbody.hod.fitting.hod_fitting_old import fit_HOD
+from abacusnbody.hod.fitting.hod_fitting_nopaircounting_ab import fit_HOD
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
@@ -60,13 +60,13 @@ def main(path_config_filename):
     print("Doing HOD fitting...", flush=True)#########################################################################
     max_like_params = fit_HOD(newBall=newBall, path_config_filename=path_config_filename, NFW_draw=NFW_draw, save_chains=True)
 
-    print("Done HOD fitting!", flush=True)
-    newBall.update_HOD_params(max_like_params)
+    # print("Done HOD fitting!", flush=True)
+    # newBall.update_HOD_params(max_like_params)
 
-    print("Making final mock...", flush=True)##########################################################################
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
-    )
+    # print("Making final mock...", flush=True)##########################################################################
+    # mock_dict = newBall.run_hod(
+    #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
+    # )
     print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
 
 

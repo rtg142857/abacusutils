@@ -5,15 +5,16 @@
 import yaml
 import numpy as np
 import time
+import math
 
-from abacusnbody.hod.abacus_hod import AbacusHOD
+import AbacusHOD
 from stochopy.optimize import minimize
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-nthread = 64 # For debugging
+nthread = 1 # For debugging
 
 def fit_HOD(newBall: AbacusHOD, path_config_filename, NFW_draw, save_chains=False):
-    # Initialise the fitting using emcee
+    # Initialise the fitting using stochopy
     # Use a different function to actually do the fit (modularity)
     # Print to files: the updated parameters, an image of the HODs, the final fit to the wp (text and image), the errors in fitting to the wp (text and image)
     config = yaml.safe_load(open(path_config_filename))
@@ -57,9 +58,9 @@ def fit_HOD(newBall: AbacusHOD, path_config_filename, NFW_draw, save_chains=Fals
 
 def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, boxsize, clustering_parameters: dict, nwalkers: int, num_steps: int, NFW_draw, wp_limit=(0, 24)):
 
-    method = "cmaes"
+    method = "cpso"
     bounds = np.array([[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0]])
-    x0 = [0, 0, 0, 0, 0, 0, 0, 0]
+    #x0 = [0, 0, 0, 0, 0, 0, 0, 0]
 
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
@@ -71,6 +72,18 @@ def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: d
 def log_probability(params, newBall: AbacusHOD, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
     if params_inside_priors(params):
         newBall.update_AB_params(params)
+        total_log_prob = 0.0
+
+        ngal_dict = newBall.compute_ngal(Nthread=1)[0]
+        
+        for i1, tr1 in enumerate(newBall.tracers.keys()):
+            Ngal = ngal_dict[tr1]
+            if Ngal == 0 or math.isnan(Ngal):
+                return np.inf
+            fitting_ngal = Ngal / boxsize**3
+            target_ngal = target_ngal_dict[tr1]
+            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tr1)
+
         #print(params, flush=True) # Debugging
         mock_dict = newBall.run_hod(
             newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False
@@ -81,7 +94,6 @@ def log_probability(params, newBall: AbacusHOD, target_wp_dict, target_jackknife
         pi_bin_size = clustering_parameters["pi_bin_size"]
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
         
-        total_log_prob = 0.0
         for i1, tr1 in enumerate(newBall.tracers.keys()):
             for i2, tr2 in enumerate(newBall.tracers.keys()):
                 if i1 <= i2:
@@ -91,13 +103,10 @@ def log_probability(params, newBall: AbacusHOD, target_wp_dict, target_jackknife
                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
                     total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk_inv, wp_limit)
 
-        for i1, tr1 in enumerate(newBall.tracers.keys()):
-            ngal_dict = newBall.compute_ngal(Nthread=1)
-            fitting_ngal = ngal_dict[tr1] / boxsize**3
-            target_ngal = target_ngal_dict[tr1]
-            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tr1)
     else:
         total_log_prob = -np.inf
+
+    print(f"Total log prob: {total_log_prob}", flush=True)
 
     return total_log_prob * -1
 

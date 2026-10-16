@@ -41,7 +41,7 @@ def fit_HOD(path_config_filename, save_chains=False):
     rpcent = np.sqrt(rpbins[1:] * rpbins[:-1])
     i0 = np.count_nonzero(rpcent < 0.8)
     i1 = 24 - np.count_nonzero(rpcent > 50)
-    i0, i1 = 11, 20
+    i0, i1 = 11, 21
     #i0, i1 = 3, 18 # these are the lower and upper bounds for which wp values are going to be fit
     target_wp, target_jackknife_inverse = get_target_dicts(target_dict_path, tracers=tracer_list, wp_limit=(i0, i1))
     target_ngal = get_target_number_density(tracers=tracer_list)

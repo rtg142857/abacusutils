@@ -1993,23 +1993,27 @@ class FlamingoHOD:
         self.tracers["QSO"]["alpha"] = params[16]
         self.tracers["QSO"]["kappa"] = params[17]
 
-    def update_AB_params(self, params):
+    def update_AB_params(self, params, bias_type=None):
         """
         Takes in an array of 8 parameters: the LRG/QSO Acent, Bcent, Asat, and Bsat params in that order, followed by the ELG equivalents.
         Updates the FlamingoHOD object's HOD parameter values accordingly.
         """
-        self.tracers["LRG"]["Acent"] = params[0]
-        self.tracers["LRG"]["Bcent"] = params[1]
-        self.tracers["LRG"]["Asat"] = params[2]
-        self.tracers["LRG"]["Bsat"] = params[3]
-        self.tracers["ELG"]["Acent"] = params[4]
-        self.tracers["ELG"]["Bcent"] = params[5]
-        self.tracers["ELG"]["Asat"] = params[6]
-        self.tracers["ELG"]["Bsat"] = params[7]
-        self.tracers["QSO"]["Acent"] = params[0]
-        self.tracers["QSO"]["Bcent"] = params[1]
-        self.tracers["QSO"]["Asat"] = params[2]
-        self.tracers["QSO"]["Bsat"] = params[3]
+        if bias_type == "ELG_env":
+            self.tracers["ELG"]["Bcent"] = params[0]
+            self.tracers["ELG"]["Bsat"] = params[1]
+        else:
+            self.tracers["LRG"]["Acent"] = params[0]
+            self.tracers["LRG"]["Bcent"] = params[1]
+            self.tracers["LRG"]["Asat"] = params[2]
+            self.tracers["LRG"]["Bsat"] = params[3]
+            self.tracers["ELG"]["Acent"] = params[4]
+            self.tracers["ELG"]["Bcent"] = params[5]
+            self.tracers["ELG"]["Asat"] = params[6]
+            self.tracers["ELG"]["Bsat"] = params[7]
+            self.tracers["QSO"]["Acent"] = params[0]
+            self.tracers["QSO"]["Bcent"] = params[1]
+            self.tracers["QSO"]["Asat"] = params[2]
+            self.tracers["QSO"]["Bsat"] = params[3]
 
 
 @njit(parallel=True)

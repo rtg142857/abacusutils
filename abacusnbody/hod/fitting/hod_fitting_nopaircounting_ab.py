@@ -5,6 +5,7 @@
 import yaml
 import numpy as np
 import time
+import math
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from stochopy.optimize import minimize
@@ -58,8 +59,8 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, boxsize, clustering_parameters: dict, nwalkers: int, num_steps: int, NFW_draw, wp_limit=(0, 24)):
 
     method = "cmaes"
-    bounds = np.array([[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0]])
-    x0 = [0, 0, 0, 0, 0, 0, 0, 0]
+    bounds = np.array([[-1.0,1.0],[-1.0,1.0]])
+    x0 = [0, 0]
 
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
@@ -69,7 +70,20 @@ def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: d
 
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
     if params_inside_priors(params):
-        newBall.update_AB_params(params)
+        newBall.update_AB_params(params, bias_type="ELG_env")
+
+        total_log_prob = 0.0
+
+        ngal_dict = newBall.compute_ngal(Nthread=1)[0]
+
+        for i1, tr1 in enumerate(newBall.tracers.keys()):
+            Ngal = ngal_dict[tr1]
+            if Ngal == 0 or math.isnan(Ngal):
+                return np.inf
+            fitting_ngal = Ngal / boxsize**3
+            target_ngal = target_ngal_dict[tr1]
+            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tr1)
+
         #print(params, flush=True) # Debugging
         mock_dict = newBall.run_hod(
             newBall.tracers, want_rsd=True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False
@@ -80,7 +94,6 @@ def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackkni
         pi_bin_size = clustering_parameters["pi_bin_size"]
         wp_dict = newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size, Nthread=nthread)
         
-        total_log_prob = 0.0
         for i1, tr1 in enumerate(newBall.tracers.keys()):
             for i2, tr2 in enumerate(newBall.tracers.keys()):
                 if i1 <= i2:
@@ -90,11 +103,6 @@ def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackkni
                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
                     total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk_inv, wp_limit)
 
-        for i1, tr1 in enumerate(newBall.tracers.keys()):
-            ngal_dict = newBall.compute_ngal(Nthread=1)
-            fitting_ngal = ngal_dict[tr1] / boxsize**3
-            target_ngal = target_ngal_dict[tr1]
-            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tr1)
     else:
         total_log_prob = -np.inf
 
@@ -125,12 +133,12 @@ def negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tracer):
 def params_inside_priors(params):
     priors = np.array([[-1.0,1.0],
                 [-1.0,1.0],
-                [-1.0,1.0],
-                [-1.0,1.0],
-                [-1.0,1.0],
-                [-1.0,1.0],
-                [-1.0,1.0],
-                [-1.0,1.0]
+                # [-1.0,1.0],
+                # [-1.0,1.0],
+                # [-1.0,1.0],
+                # [-1.0,1.0],
+                # [-1.0,1.0],
+                # [-1.0,1.0]
     ])
     for i in range(len(params)):
         if params[i] <= priors[i][0] or params[i] >= priors[i][1]:
@@ -219,107 +227,107 @@ def get_target_number_density(tracers=["LRG", "ELG", "QSO"], source="DESI"):
             numden_dict["QSO"] = 2 * 10**(-5)
     return numden_dict
 
-def initialise_walkers(initial_params_random: bool, num_walkers):
-    """
-    Initialise the positions of the walkers for fitting the HOD parameters
-    Do this randomly within the prior space if initial_params_random=True
-    Else populate in a small region around some provided params
-    """
-    priors = np.array([[10,16],
-                   [10,16],
-                   [0,5],
-                   [0,5],
-                   [0,5],
-                   [10,16],
-                   [10,16],
-                   [0,5],
-                   [0,5],
-                   [0,5],
-                   [10,16],
-                   [10,16],
-                   [0,5],
-                   [0,5],
-                   [0,5]
-    ])
+# def initialise_walkers(initial_params_random: bool, num_walkers):
+#     """
+#     Initialise the positions of the walkers for fitting the HOD parameters
+#     Do this randomly within the prior space if initial_params_random=True
+#     Else populate in a small region around some provided params
+#     """
+#     priors = np.array([[10,16],
+#                    [10,16],
+#                    [0,5],
+#                    [0,5],
+#                    [0,5],
+#                    [10,16],
+#                    [10,16],
+#                    [0,5],
+#                    [0,5],
+#                    [0,5],
+#                    [10,16],
+#                    [10,16],
+#                    [0,5],
+#                    [0,5],
+#                    [0,5]
+#     ])
 
-    mean_priors = np.array([ # Yuan et al.
-        13.3,
-        14.4,
-        0.5,
-        1.0,
-        0.5,
-        13.3,
-        14.4,
-        0.5,
-        1.0,
-        0.5,
-        13.3,
-        14.4,
-        0.5,
-        1.0,
-        0.5
-    ])
+#     mean_priors = np.array([ # Yuan et al.
+#         13.3,
+#         14.4,
+#         0.5,
+#         1.0,
+#         0.5,
+#         13.3,
+#         14.4,
+#         0.5,
+#         1.0,
+#         0.5,
+#         13.3,
+#         14.4,
+#         0.5,
+#         1.0,
+#         0.5
+#     ])
 
-    std_priors = np.array([ # Yuan et al.
-        0.5,
-        0.5,
-        0.2,
-        0.3,
-        0.2,
-        0.5,
-        0.5,
-        0.2,
-        0.3,
-        0.2,
-        0.5,
-        0.5,
-        0.2,
-        0.3,
-        0.2
-    ])
+#     std_priors = np.array([ # Yuan et al.
+#         0.5,
+#         0.5,
+#         0.2,
+#         0.3,
+#         0.2,
+#         0.5,
+#         0.5,
+#         0.2,
+#         0.3,
+#         0.2,
+#         0.5,
+#         0.5,
+#         0.2,
+#         0.3,
+#         0.2
+#     ])
 
-    initial_params = np.array([
-        13.3,
-        14.4,
-        0.8,
-        1.0,
-        0.4,
-        13.3,
-        14.4,
-        0.8,
-        1.0,
-        0.4,
-        13.3,
-        14.4,
-        0.8,
-        1.0,
-        0.4
-    ])
+#     initial_params = np.array([
+#         13.3,
+#         14.4,
+#         0.8,
+#         1.0,
+#         0.4,
+#         13.3,
+#         14.4,
+#         0.8,
+#         1.0,
+#         0.4,
+#         13.3,
+#         14.4,
+#         0.8,
+#         1.0,
+#         0.4
+#     ])
 
-    rng = np.random.default_rng(seed=0)
+#     rng = np.random.default_rng(seed=0)
 
-    pos = np.zeros((num_walkers,np.shape(initial_params)[0]))
-    if (initial_params_random):
-        for i in range(num_walkers):
-            for j in range(np.shape(priors)[0]):
-                #pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
-                pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
+#     pos = np.zeros((num_walkers,np.shape(initial_params)[0]))
+#     if (initial_params_random):
+#         for i in range(num_walkers):
+#             for j in range(np.shape(priors)[0]):
+#                 #pos[i,j] = np.random.uniform(priors[j,0],priors[j,1])
+#                 pos[i,j] = rng.normal(loc=mean_priors[j], scale=std_priors[j])
 
-    else:
-        #if len(initial_params)!=np.shape(priors)[0]:
-        #    raise ValueError("Your initial parameter values and priors have different shapes")
-        for i in range(num_walkers):
-            # Populate in a 10% region around parameters provided
-            # Potential to make the size of this region an input variable if necessary
-            pos[i,:] = initial_params*(0.95 + 0.1*np.random.random(np.shape(initial_params)[0]))
-    #print(pos)
+#     else:
+#         #if len(initial_params)!=np.shape(priors)[0]:
+#         #    raise ValueError("Your initial parameter values and priors have different shapes")
+#         for i in range(num_walkers):
+#             # Populate in a 10% region around parameters provided
+#             # Potential to make the size of this region an input variable if necessary
+#             pos[i,:] = initial_params*(0.95 + 0.1*np.random.random(np.shape(initial_params)[0]))
+#     #print(pos)
 
-    # Check none of the walkers lie outside the prior space
-    #for i in range(num_walkers):
-    #    for j in range(np.shape(priors)[0]):
-    #        if pos[i,j] < priors[j,0]:
-    #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too low")
-    #        if pos[i,j] > priors[j,1]:
-    #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
-    print(pos, flush=True)
-    return pos
+#     # Check none of the walkers lie outside the prior space
+#     #for i in range(num_walkers):
+#     #    for j in range(np.shape(priors)[0]):
+#     #        if pos[i,j] < priors[j,0]:
+#     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too low")
+#     #        if pos[i,j] > priors[j,1]:
+#     #            raise ValueError("Your initial parameter values lie outside the prior space, parameter ",j, " is too high")
+#     print(pos, flush=True)
+#     return pos

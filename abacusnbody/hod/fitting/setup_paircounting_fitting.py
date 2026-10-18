@@ -115,14 +115,19 @@ def negative_chi_squared_wp_single_tracer_pair(fitting_wp: np.ndarray, target_wp
     return -chi2
 
 def negative_chi_squared_central_occupation(hod_params, param_set: Params, other_stuff_dict_here):
+    # factor out incompleteness from the LRG cen hod; the other two are already without incompleteness
     tracers = param_set.tracer_list
     M_h = np.logspace(10, 16, 90) # doesn't need to be the same as in other cases
-    hod_values = get_hod_values_given_parameters_with_incompleteness(M_h, hod_params, param_set, other_stuff_dict_here)
+    hod_values_ic = get_hod_values_given_parameters_with_incompleteness(M_h, hod_params, param_set, other_stuff_dict_here)
 
-    cenHOD_sum = np.zeros(len(hod_values["LRG_cen"]))
+    cenHOD_sum = np.zeros(len(hod_values_ic["LRG_cen"]))
 
     for tracer in tracers:
-        cenHOD_sum += hod_values[tracer+"_cen"]
+        if tracer == "LRG":
+            cenHOD_sum += hod_values_ic[tracer+"_cen"]
+        else:
+            cen_hod, sat_hod = param_set.get_hods_given_tracer_and_params(M_h, param_set, tracer)
+            cenHOD_sum += cen_hod
     
     amount_greater_than_1 = np.maximum(np.ones(len(cenHOD_sum)), cenHOD_sum) - 1
     chi2 = np.dot(amount_greater_than_1, amount_greater_than_1) * 10 ** 7 # guess at what works

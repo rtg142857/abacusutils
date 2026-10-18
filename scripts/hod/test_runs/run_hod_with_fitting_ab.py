@@ -51,11 +51,11 @@ def main(path_config_filename):
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
 
-    print("Throwaway run for jit to compile, write to disk", flush=True)##############################################
-    # throw away run for jit to compile, don't write to disk
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
-    )
+    # print("Throwaway run for jit to compile, write to disk", flush=True)##############################################
+    # # throw away run for jit to compile, don't write to disk
+    # mock_dict = newBall.run_hod(
+    #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
+    # )
 
     print("Doing HOD fitting...", flush=True)#########################################################################
     max_like_params = fit_HOD(newBall=newBall, path_config_filename=path_config_filename, NFW_draw=NFW_draw, save_chains=True)
@@ -67,7 +67,7 @@ def main(path_config_filename):
     # mock_dict = newBall.run_hod(
     #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
     # )
-    print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
+    #print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
 
 
 class ArgParseFormatter(

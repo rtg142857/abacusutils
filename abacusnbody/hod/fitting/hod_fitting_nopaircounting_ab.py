@@ -11,7 +11,7 @@ from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from stochopy.optimize import minimize
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-nthread = 64 # For debugging
+nthread = 16 # For debugging
 
 def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=False):
     # Initialise the fitting using emcee
@@ -58,14 +58,14 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
 def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, boxsize, clustering_parameters: dict, nwalkers: int, num_steps: int, NFW_draw, wp_limit=(0, 24)):
 
-    method = "cmaes"
+    method = "cpso"
     bounds = np.array([[-1.0,1.0],[-1.0,1.0]])
-    x0 = [0, 0]
+    #x0 = [0, 0]
 
     print("Running optimisation...", flush=True)
-    OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
+    OptimizeResult = minimize(log_probability, bounds, method=method,
                               args=(newBall, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": -1})
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": 16})
     return OptimizeResult
 
 def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):

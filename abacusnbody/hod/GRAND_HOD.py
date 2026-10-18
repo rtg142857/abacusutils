@@ -188,7 +188,7 @@ def wrap(x, L):
         return x + L
     return x
 
-@njit(parallel=True, fastmath=True)
+#@njit(parallel=True, fastmath=True)
 def gen_cent(
     pos,
     vel,

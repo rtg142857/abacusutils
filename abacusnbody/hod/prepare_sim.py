@@ -46,7 +46,7 @@ def subsample_halos(m, MT):
     downfactors = np.zeros(len(x))
     from scipy.special import erf
     if MT:
-        mask1 = x < 11.4
+        mask1 = x < 11.0
         #mask2 = x < 11.6
         #downfactors[mask1] = 0.2 / (1.0 + 10 * np.exp(-(x[mask1] - 11.2) * 25))
         #downfactors[mask2 & (~mask1)] = 0.4 / (
@@ -54,7 +54,7 @@ def subsample_halos(m, MT):
         #)
         #downfactors[~mask2] = 1.0 / (1.0 + 0.1 * np.exp(-(x[~mask2] - 11.7) * 10))
         downfactors[~mask1] = 1.0
-        QSO_hod = 0.26 * 0.5 * (1 + erf((x[mask1] - 14.9) / 1.41421356 / 1.09))
+        QSO_hod = 0.39 * 0.5 * (1 + erf((x[mask1] - 14.8) / 1.41421356 / 1.10))
         downfactors[mask1] = 2.0 * QSO_hod
         return downfactors
     else:

@@ -108,7 +108,7 @@ def main(path_config_filename):
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=32, verbose=True, tabulation_mock=True, seed=seed
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=32, verbose=True, tabulation_mock=True, seed=seed
         )
         print("Paircounting...")
         paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=32, save=True, verbose=True)

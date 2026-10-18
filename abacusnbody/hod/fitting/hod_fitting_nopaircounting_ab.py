@@ -102,10 +102,10 @@ def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackkni
                     target_wp = target_wp_dict[tr1+"_"+tr2]
                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
                     total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk_inv, wp_limit)
-
     else:
         total_log_prob = -np.inf
 
+    print(f"Total log prob for {params}: {total_log_prob}", flush=True)
     return total_log_prob * -1
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24)):

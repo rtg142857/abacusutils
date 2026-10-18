@@ -11,7 +11,7 @@ from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from stochopy.optimize import minimize
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
-nthread = 16 # For debugging
+nthread = 64 # For debugging
 
 def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=False):
     # Initialise the fitting using emcee
@@ -34,7 +34,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
     print("Fitting...", flush=True)
 
-    OptimizeResult = sample_chain(newBall=newBall,
+    OptimizeResult = sample_chain(path_config_filename=path_config_filename,
                             target_wp_dict=target_wp,
                            target_jackknife_inverse_dict=target_jackknife_inverse,
                            target_ngal_dict=target_ngal,
@@ -56,7 +56,7 @@ def fit_HOD(newBall: FlamingoHOD, path_config_filename, NFW_draw, save_chains=Fa
 
     return
 
-def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, boxsize, clustering_parameters: dict, nwalkers: int, num_steps: int, NFW_draw, wp_limit=(0, 24)):
+def sample_chain(path_config_filename, target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, boxsize, clustering_parameters: dict, nwalkers: int, num_steps: int, NFW_draw, wp_limit=(0, 24)):
 
     method = "cpso"
     bounds = np.array([[-1.0,1.0],[-1.0,1.0]])
@@ -64,12 +64,13 @@ def sample_chain(newBall, target_wp_dict: dict, target_jackknife_inverse_dict: d
 
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability, bounds, method=method,
-                              args=(newBall, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": 16})
+                              args=(path_config_filename, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": 1})
     return OptimizeResult
 
-def log_probability(params, newBall: FlamingoHOD, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+def log_probability(params, path_config_filename, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
     if params_inside_priors(params):
+        newBall = FlamingoHOD(path_config_filename)
         newBall.update_AB_params(params, bias_type="ELG_env")
 
         total_log_prob = 0.0

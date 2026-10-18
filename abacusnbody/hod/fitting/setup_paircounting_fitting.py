@@ -126,7 +126,7 @@ def negative_chi_squared_central_occupation(hod_params, param_set: Params, other
         if tracer == "LRG":
             cenHOD_sum += hod_values_ic[tracer+"_cen"]
         else:
-            cen_hod, sat_hod = param_set.get_hods_given_tracer_and_params(M_h, param_set, tracer)
+            cen_hod, sat_hod = param_set.get_hods_given_tracer_and_params(M_h, hod_params, tracer)
             cenHOD_sum += cen_hod
     
     amount_greater_than_1 = np.maximum(np.ones(len(cenHOD_sum)), cenHOD_sum) - 1

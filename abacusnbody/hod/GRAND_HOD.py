@@ -188,7 +188,7 @@ def wrap(x, L):
         return x + L
     return x
 
-#@njit(parallel=True, fastmath=True) while debugging
+@njit(parallel=True, fastmath=True)
 def gen_cent(
     pos,
     vel,
@@ -315,20 +315,20 @@ def gen_cent(
                         N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q) * ic_Q * multis[i]
                     )
 
-                if QSO_marker > 5.0:
-                    message = f"More than 5.0 chance of central galaxy\n"
-                    message += f"Halo mass: {mass[i]}\n"
-                    message += f"Deltac: {deltac[i]}, fenv: {fenv[i]}\n"
-                    message += f"(effective log mass for LRG/QSO: {np.log10(mass[i]) - Ac_L * deltac[i] - Bc_L * fenv[i] })\n"
-                    message += f"(effective log mass for ELG: {np.log10(mass[i]) - Ac_E * deltac[i] - Bc_E * fenv[i] })\n"
-                    message += f"N_cen_LRG: {n_cen_LRG(mass[i], logM_cut_L_temp, sigma_L)}, ic_L: {ic_L}, downsampling: {multis[i]}\n"
-                    message += f"(LRG marker: {LRG_marker})\n"
-                    message += f"N_cen_ELG: {N_cen_ELG_v1(mass[i], pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E)}, ic_E: {ic_E}, downsampling: {multis[i]}\n"
-                    message += f"(ELG marker: {ELG_marker})\n"
-                    message += f"N_cen_QSO: {N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q)}, ic_Q: {ic_Q}, downsampling: {multis[i]}\n"
-                    message += f"(QSO marker: {QSO_marker})\n"
-                    raise Exception(message)
-                    over1_list.append(QSO_marker)
+                # if QSO_marker > 5.0:
+                #     message = f"More than 5.0 chance of central galaxy\n"
+                #     message += f"Halo mass: {mass[i]}\n"
+                #     message += f"Deltac: {deltac[i]}, fenv: {fenv[i]}\n"
+                #     message += f"(effective log mass for LRG/QSO: {np.log10(mass[i]) - Ac_L * deltac[i] - Bc_L * fenv[i] })\n"
+                #     message += f"(effective log mass for ELG: {np.log10(mass[i]) - Ac_E * deltac[i] - Bc_E * fenv[i] })\n"
+                #     message += f"N_cen_LRG: {n_cen_LRG(mass[i], logM_cut_L_temp, sigma_L)}, ic_L: {ic_L}, downsampling: {multis[i]}\n"
+                #     message += f"(LRG marker: {LRG_marker})\n"
+                #     message += f"N_cen_ELG: {N_cen_ELG_v1(mass[i], pmax_E, Q_E, logM_cut_E_temp, sigma_E, gamma_E)}, ic_E: {ic_E}, downsampling: {multis[i]}\n"
+                #     message += f"(ELG marker: {ELG_marker})\n"
+                #     message += f"N_cen_QSO: {N_cen_QSO(mass[i], logM_cut_Q_temp, sigma_Q, pmax_Q)}, ic_Q: {ic_Q}, downsampling: {multis[i]}\n"
+                #     message += f"(QSO marker: {QSO_marker})\n"
+                #     raise Exception(message)
+                #     over1_list.append(QSO_marker)
 
                 if randoms[i] <= LRG_marker: 
                     Nout[tid, 0, 0] += 1  # counting
@@ -342,8 +342,8 @@ def gen_cent(
                 else:
                     keep[i] = 0
 
-    over1_list = np.array(over1_list)
-    np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/over1_list.npy", over1_list)
+    # over1_list = np.array(over1_list)
+    # np.save("/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/output/temp_stuff/over1_list.npy", over1_list)
 
     # compose galaxy array, first create array of galaxy starting indices for the threads
     gstart = np.empty((Nthread + 1, 3), dtype=np.int64)
@@ -626,7 +626,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
                 ur[i, 2] = np.cos(dec)
     return ur
 
-#@njit(fastmath=True, parallel=True)  # parallel=True,
+@njit(fastmath=True, parallel=True)  # parallel=True,
 def compute_fast_NFW(
     NFW_draw,
     h_id,
@@ -726,8 +726,8 @@ def compute_fast_NFW(
                 vx_sat[i] = np.random.normal(loc=vx_h[i], scale=sig)
                 vy_sat[i] = np.random.normal(loc=vy_h[i], scale=sig)
                 vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
-            else:
-                raise ValueError('Wrong vel_sat argument only "rd_normal"')
+            # else:
+            #     raise ValueError('Wrong vel_sat argument only "rd_normal"')
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
 
 

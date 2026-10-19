@@ -67,10 +67,10 @@ def main(path_config_filename):
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True, tabulation_mock=True
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=1, verbose=True, tabulation_mock=True
         )
         print("Paircounting...")
-        get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
+        get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=1, save=True, verbose=True)
 
     print("Doing HOD fitting...", flush=True)#########################################################################
     max_like_params = fit_HOD(path_config_filename=path_config_filename, save_chains=True)
@@ -85,7 +85,7 @@ def main(path_config_filename):
 
     print("Making final mock...", flush=True)##########################################################################
     mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
+        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=1, verbose=True
     )
     print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
 

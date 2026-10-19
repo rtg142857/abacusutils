@@ -13,7 +13,7 @@ from abacusnbody.hod.fitting.setup_paircounting_fitting import *
 import emcee
 from multiprocessing import Pool
 
-nthread = 64 # For debugging
+nthread = 1 # For debugging
 
 def fit_HOD(path_config_filename, save_chains=False):
     # Initialise the fitting using emcee

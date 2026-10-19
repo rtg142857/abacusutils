@@ -67,10 +67,10 @@ def main(path_config_filename):
         max_nfw = 40
         NFW_draw = nfw_draw(10000, max_nfw, seed)
         mock_dict = newBall.run_hod(
-            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=1, verbose=True, tabulation_mock=True
+            newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True, tabulation_mock=True
         )
         print("Paircounting...")
-        get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=1, save=True, verbose=True)
+        get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=16, save=True, verbose=True)
 
     print("Doing HOD fitting...", flush=True)#########################################################################
     max_like_params = fit_HOD(path_config_filename=path_config_filename, save_chains=True)

@@ -39,7 +39,7 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
                     14.722956054431767, 15.999447827435503, 1.0662610726965838, 0.5213767659281989, 0.17531635198702045, 0.20453152785347317])
     
     newBall = FlamingoHOD(path_config_filename)
-    other_stuff_dict_here = make_other_stuff_dict(boxsize, num_sat_parts=3, subsample_dir=config["sim_params"]["subsample_dir"], sim_label=config["Labels"]["sim_label"])
+    other_stuff_dict_here = make_other_stuff_dict(boxsize, num_sat_parts=3, subsample_dir=config["sim_params"]["subsample_dir"], sim_label=config["Labels"]["sim_label"], HOD_param_dict=config["HOD_params"])
 
     print("Fitting...", flush=True)
 

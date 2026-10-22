@@ -85,8 +85,8 @@ def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_p
         total_log_prob = 0.0
         newBall.update_AB_params(AB_params, bias_type="ELG_env")
 
-        mock_dict = newBall.run_hod(newBall.tracers, True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=True, tabulation_mock=True, seed=42)
-        paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=nthread, save=False, verbose=True)
+        mock_dict = newBall.run_hod(newBall.tracers, True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False, tabulation_mock=True, seed=42)
+        paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=nthread, save=False, verbose=False)
         paircounts["censat_2halo_ELGauto"] = paircounts["censat_full_ELGauto"] - paircounts["censat_1halo_ELGauto"]
         paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
         param_set = Params(tracer_list=["LRG", "ELG", "QSO"])
@@ -112,6 +112,7 @@ def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_p
     else:
         total_log_prob = -np.inf
 
+    print(f"Log prob for parameters {AB_params}: {total_log_prob}", flush=True)
     return total_log_prob * -1
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24)):

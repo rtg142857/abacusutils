@@ -46,7 +46,7 @@ HOD_params:
     write_to_disk: True
 
     # parameters for setting up the HOD of LRGs
-    LRG params:
+    LRG_params:
         logM_cut: 12.71640860698368
         logM1: 13.871056239607789
         sigma: 0.029465757962274353
@@ -65,7 +65,7 @@ HOD_params:
         ic: 0.25
 
     # parameters for setting up the HOD of ELGs
-    ELG params:
+    ELG_params:
         p_max: 0.9411729696544535
         Q: 10000
         logM_cut: 11.402841884350932
@@ -93,7 +93,7 @@ HOD_params:
         ic: 1.0
 
     # parameters for setting up the HOD of QSOs
-    QSO params:
+    QSO_params:
         logM_cut: 14.722956054431767
         logM1: 15.999447827435503
         sigma: 1.0662610726965838

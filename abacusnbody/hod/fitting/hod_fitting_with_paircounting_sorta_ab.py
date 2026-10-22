@@ -87,6 +87,8 @@ def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_p
 
         mock_dict = newBall.run_hod(newBall.tracers, True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=True, tabulation_mock=True, seed=42)
         paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=nthread, save=False, verbose=True)
+        paircounts["censat_2halo_ELGauto"] = paircounts["censat_full_ELGauto"] - paircounts["censat_1halo_ELGauto"]
+        paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
         param_set = Params(tracer_list=["LRG", "ELG", "QSO"])
         ngal_dict = get_npart(HOD_params_list, param_set, other_stuff_dict_here)
         wp_dict = get_wp(HOD_params_list, paircounts, param_set, ngal_dict, other_stuff_dict_here, clustering_parameters, verbose=False)

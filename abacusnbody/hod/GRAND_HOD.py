@@ -626,7 +626,7 @@ def getPointsOnSphere(nPoints, Nthread, seed=None, verbose=False):
                 ur[i, 2] = np.cos(dec)
     return ur
 
-#@njit(fastmath=True, parallel=True)  # parallel=True,
+@njit(fastmath=True, parallel=True)  # parallel=True,
 def compute_fast_NFW(
     NFW_draw,
     h_id,
@@ -726,8 +726,8 @@ def compute_fast_NFW(
                 vx_sat[i] = np.random.normal(loc=vx_h[i], scale=sig)
                 vy_sat[i] = np.random.normal(loc=vy_h[i], scale=sig)
                 vz_sat[i] = np.random.normal(loc=vz_h[i], scale=sig)
-            else:
-                raise ValueError('Wrong vel_sat argument only "rd_normal"')
+            # else:
+            #     raise ValueError('Wrong vel_sat argument only "rd_normal"')
     return h_id, x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, M, Rvir
 
 

@@ -15,7 +15,7 @@ import yaml
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 from abacusnbody.hod.NFW import nfw_draw
-from abacusnbody.hod.fitting.hod_fitting_nopaircounting_ab import fit_HOD
+from abacusnbody.hod.fitting.hod_fitting_with_paircounting_sorta_ab import fit_HOD
 
 DEFAULTS = {}
 DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
@@ -24,41 +24,41 @@ DEFAULTS['path_config_filename'] = 'config/abacus_hod.yaml'
 def main(path_config_filename):
     # load the yaml parameters
     config = yaml.safe_load(open(path_config_filename))
-    sim_params = config['sim_params']
-    HOD_params = config['HOD_params']
-    clustering_params = config['clustering_params']
-    Paths = config["Paths"]
-    Labels = config["Labels"]
-    Params = config["Params"]
+    # sim_params = config['sim_params']
+    # HOD_params = config['HOD_params']
+    # clustering_params = config['clustering_params']
+    # Paths = config["Paths"]
+    # Labels = config["Labels"]
+    # Params = config["Params"]
     Misc = config["Misc"]
     seed = Misc["random_seed"]
 
     # additional parameter choices
-    want_rsd = HOD_params['want_rsd']
-    write_to_disk = HOD_params['write_to_disk']
-    bin_params = clustering_params['bin_params']
-    rpbins = np.logspace(
-        bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1
-    )
-    pimax = clustering_params['pimax']
-    pi_bin_size = clustering_params['pi_bin_size']
+    # want_rsd = HOD_params['want_rsd']
+    # write_to_disk = HOD_params['write_to_disk']
+    # bin_params = clustering_params['bin_params']
+    # rpbins = np.logspace(
+    #     bin_params['logmin'], bin_params['logmax'], bin_params['nbins'] + 1
+    # )
+    # pimax = clustering_params['pimax']
+    # pi_bin_size = clustering_params['pi_bin_size']
 
-    print("Making new FlamingoHOD object", flush=True)###############################################################
-    # create a new FlamingoHOD object
-    newBall = FlamingoHOD(path_config_filename)
+    # print("Making new FlamingoHOD object", flush=True)###############################################################
+    # # create a new FlamingoHOD object
+    # newBall = FlamingoHOD(path_config_filename)
 
     print("Getting NFW draw for satellites", flush=True)#############################################################
     max_nfw = 40
     NFW_draw = nfw_draw(10000, max_nfw, seed)
 
-    print("Throwaway run for jit to compile, write to disk", flush=True)##############################################
-    # throw away run for jit to compile, don't write to disk
-    mock_dict = newBall.run_hod(
-        newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
-    )
+    # print("Throwaway run for jit to compile, write to disk", flush=True)##############################################
+    # # throw away run for jit to compile, don't write to disk
+    # mock_dict = newBall.run_hod(
+    #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=16, verbose=True
+    # )
 
     print("Doing HOD fitting...", flush=True)#########################################################################
-    max_like_params = fit_HOD(newBall=newBall, path_config_filename=path_config_filename, NFW_draw=NFW_draw, save_chains=True)
+    max_like_params = fit_HOD(path_config_filename=path_config_filename, NFW_draw=NFW_draw, save_chains=True)
 
     # print("Done HOD fitting!", flush=True)
     # newBall.update_HOD_params(max_like_params)
@@ -67,7 +67,7 @@ def main(path_config_filename):
     # mock_dict = newBall.run_hod(
     #     newBall.tracers, want_rsd, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=True, Nthread=16, verbose=True
     # )
-    print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
+    #print("wp of final mock:", newBall.compute_wp(mock_dict, rpbins, pimax, pi_bin_size), flush=True)
 
 
 class ArgParseFormatter(

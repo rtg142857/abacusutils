@@ -66,7 +66,7 @@ def mass_mask(x,y,z,weight,Mvir,mass_bin_edges):
         samples_.append(np.vstack((x[mass_mask],y[mass_mask],z[mass_mask],weight[mass_mask])).T)
     return samples_
 
-def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,pi_max,d_pi=1):
+def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,pi_max,d_pi=1, verbose=False):
     """"
     Takes two lists created from mass_mask(), radial bins, a boxsize,
     and a number of threads to use. 
@@ -93,7 +93,8 @@ def create_npairs_corrfunc_wp(samples1,samples2,r_bin_edges,boxsize,num_threads,
                 # return 0 for this combination
             else:
                 n_pairs.append(0)
-        print(i, flush=True)
+        if verbose:
+            print(i, flush=True)
     return(n_pairs)
 
 def npairs_conversion_wp(samples1,samples2,n_pairs,r_bin_edges,pi_max, d_pi=1):
@@ -138,7 +139,7 @@ def wrap(x, L):
     return x
 
 def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, boxsize, 
-                           mass_bin_edges, r_bin_edges, pi_max, d_pi=1):
+                           mass_bin_edges, r_bin_edges, pi_max, d_pi=1, verbose=False):
     """
     We cannot use corrfunc for the one halo central-satellite term.
     This is because it would be too inefficient to split by
@@ -156,8 +157,8 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     # sanity check
     assert np.all(weight_cen1 == weight_sat2)
     #assert np.all(M_cen1 == M_sat2) not true with assembly bias
-
-    print("Calculating displacements and rp/pi...")
+    if verbose:
+        print("Calculating displacements and rp/pi...")
 
     x_disp = wrap(x_cen1-x_sat2, boxsize)
     y_disp = wrap(y_cen1-y_sat2, boxsize)
@@ -166,7 +167,8 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     distances_rp = ((x_disp)**2 + (y_disp)**2)**0.5
     distances_pi = ((z_disp)**2)**0.5
 
-    print("Binning...")
+    if verbose:
+        print("Binning...")
     bin_4d, _ = np.histogramdd(sample = np.array([M_cen1,M_sat2,distances_rp,distances_pi]).T,bins=[mass_bin_edges,mass_bin_edges,r_bin_edges,np.arange(0, pi_max+1, d_pi)], weights=weight_cen1) # weight is same for both
 
     # print("Transforming into M,M,rp,pi bins...")
@@ -179,7 +181,7 @@ def npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, 
     return bin_4d
 
 def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_edges,r_bin_edges,pi_max, d_pi=1,
-                             cross=False, x2=None, y2=None, z2=None, weight2=None, Ms2=None):
+                             cross=False, x2=None, y2=None, z2=None, weight2=None, Ms2=None, verbose=False):
     """
     We cannot use corrfunc for the one halo satellite-satellite term.
     This is because it would be too inefficient to split by
@@ -234,7 +236,8 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
         else:
             max_j_index = i
         for j in range(max_j_index):
-            print(k)
+            if verbose:
+                print(k)
             Ms_reduced[:,k] = Ms[::num_sat_parts]
             Ms2_reduced[:,k] = Ms2[::num_sat_parts]
             x_disp = wrap(x[i::num_sat_parts]-x2[j::num_sat_parts], boxsize)
@@ -250,7 +253,8 @@ def npairs_satsat_1halo_wp(x,y,z, weights, Ms,num_sat_parts, boxsize, mass_bin_e
             # [::num_sat_parts] is actually looping the specific paircount 
             # (particles i and j) over every halo
             k += 1
-            print(i,j)
+            if verbose:
+                print(i,j)
 
     # Reshape the masses and distances of the pairs so they can
     # be binned
@@ -358,7 +362,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             samples_2 = mass_mask(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, mass_bin_edges)
             num_threads = Nthread
 
-            npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
+            npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi, verbose=verbose)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
 
         case "censat_full":
@@ -370,7 +374,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
             num_threads = Nthread
 
-            npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
+            npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi, verbose=verbose)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
 
             if category == "_ELGcross":
@@ -381,7 +385,7 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
                 num_threads = Nthread
 
-                npairs_test_cross = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
+                npairs_test_cross = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi, verbose=verbose)
                 npairs_mass_r_bins_test_cross = npairs_conversion_wp(samples_1,samples_2,npairs_test_cross,rpbins,pi_max, d_pi)
 
                 npairs_mass_r_bins_test = np.array([npairs_mass_r_bins_test, npairs_mass_r_bins_test_cross])
@@ -390,11 +394,11 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
             # Only one sat particle per halo is necessary
             x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2 = (i[::num_sat_parts] for i in (x_sat2, y_sat2, z_sat2, M_sat2, weight_sat2))
 
-            npairs_mass_r_bins_test = npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, Lbox, mass_bin_edges, rpbins, pi_max, d_pi)
+            npairs_mass_r_bins_test = npairs_censat_1halo_wp(x_cen1, y_cen1, z_cen1, weight_cen1, M_cen1, x_sat2, y_sat2, z_sat2, weight_sat2, M_sat2, Lbox, mass_bin_edges, rpbins, pi_max, d_pi, verbose=verbose)
 
             if category == "_ELGcross":
                 x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1 = (i[::num_sat_parts] for i in (x_sat1, y_sat1, z_sat1, M_sat1, weight_sat1))
-                npairs_mass_r_bins_cross = npairs_censat_1halo_wp(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, Lbox, mass_bin_edges, rpbins, pi_max, d_pi)
+                npairs_mass_r_bins_cross = npairs_censat_1halo_wp(x_cen2, y_cen2, z_cen2, weight_cen2, M_cen2, x_sat1, y_sat1, z_sat1, weight_sat1, M_sat1, Lbox, mass_bin_edges, rpbins, pi_max, d_pi, verbose=verbose)
                 npairs_mass_r_bins_test = np.array([npairs_mass_r_bins_test, npairs_mass_r_bins_cross])
 
         case "satsat_2halo":
@@ -406,15 +410,15 @@ def count_npairs(path_config_filename, tracer_mock: dict, type, category, Nthrea
 
             num_threads = Nthread
 
-            npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi)
+            npairs_test = create_npairs_corrfunc_wp(samples_1,samples_2,rpbins,Lbox,num_threads,pi_max,d_pi, verbose=verbose)
             npairs_mass_r_bins_test = npairs_conversion_wp(samples_1,samples_2,npairs_test,rpbins,pi_max, d_pi)
 
         case "satsat_1halo":
             # Want all 3 sat particles per halo
             if category == "_ELGcross":
-                npairs_mass_r_bins_test = npairs_satsat_1halo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2)
+                npairs_mass_r_bins_test = npairs_satsat_1halo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi, cross=True, x2=x_sat2, y2=y_sat2, z2=z_sat2, weight2=weight_sat2, Ms2=M_sat2, verbose=verbose)
             else:
-                npairs_mass_r_bins_test = npairs_satsat_1halo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi)
+                npairs_mass_r_bins_test = npairs_satsat_1halo_wp(x_sat1,y_sat1,z_sat1, weight_sat1, M_sat1,num_sat_parts, Lbox, mass_bin_edges,rpbins,pi_max, d_pi, verbose=verbose)
         
     time2 = time.time()
     if verbose:

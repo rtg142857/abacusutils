@@ -70,14 +70,14 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
 
 def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict: dict, target_jackknife_inverse_dict: dict, target_ngal_dict: dict, boxsize, clustering_parameters: dict, nwalkers: int, num_steps: int, NFW_draw, wp_limit=(0, 24)):
 
-    method = "cpso"
+    method = "cmaes"
     bounds = np.array([[-1.0,1.0],[-1.0,1.0]])
-    #x0 = [0, 0]
+    x0 = [0.01298522, 0.00307768]
 
     print("Running optimisation...", flush=True)
-    OptimizeResult = minimize(log_probability, bounds, x0=None, method=method,
+    OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
                               args=(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "return_all": True, "workers": 1})
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
     return OptimizeResult
 
 def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):

@@ -98,7 +98,7 @@ def oned_fit(newBall, path_config_filename, HOD_params_list, other_stuff_dict_he
     #test_value = 2 * best_fit_cmaes
 
     fun = lambda x: log_probability(best_fit_cmaes * x, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
-    best_1d = minimize_scalar(fun, bracket=(0, 1, 2), method="Brent")
+    best_1d = minimize_scalar(fun, bracket=(-1, 1, 2), method="Brent")
     print(best_1d)
     #log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
 

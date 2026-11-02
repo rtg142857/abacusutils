@@ -6,6 +6,7 @@ import yaml
 import numpy as np
 import time
 import math
+from scipy.optimize import minimize_scalar
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 import abacusnbody.hod.fitting.paircounting as paircounting
@@ -41,7 +42,7 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
     newBall = FlamingoHOD(path_config_filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize, num_sat_parts=3, subsample_dir=config["sim_params"]["subsample_dir"], sim_label=config["Labels"]["sim_label"], HOD_param_dict=config["HOD_params"])
 
-    lp_single_value(newBall=newBall,
+    oned_fit(newBall=newBall,
                                   path_config_filename=path_config_filename,
                                   HOD_params_list=HOD_params_list,
                                   other_stuff_dict_here=other_stuff_dict_here,
@@ -92,10 +93,14 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
                               options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
     return OptimizeResult
 
-def lp_single_value(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+def oned_fit(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
     best_fit_cmaes = np.array([0.02422136, 0.00035492])
-    test_value = 2 * best_fit_cmaes
-    log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
+    #test_value = 2 * best_fit_cmaes
+
+    fun = lambda x: log_probability(best_fit_cmaes * x, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
+    best_1d = minimize_scalar(fun, bracket=(0, 1, 2), bounds=(0, 2), method="Brent")
+    print(best_1d)
+    #log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
 
 def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
     if params_inside_priors(AB_params):
@@ -130,7 +135,7 @@ def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_p
         total_log_prob = -np.inf
 
     print(f"Log prob for parameters {AB_params}: {total_log_prob}", flush=True)
-    return total_log_prob * -1
+    return total_log_prob * -1 # trying to minimise
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24)):
     i0, i1 = wp_limit

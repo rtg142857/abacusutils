@@ -41,9 +41,7 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
     newBall = FlamingoHOD(path_config_filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize, num_sat_parts=3, subsample_dir=config["sim_params"]["subsample_dir"], sim_label=config["Labels"]["sim_label"], HOD_param_dict=config["HOD_params"])
 
-    print("Fitting...", flush=True)
-
-    OptimizeResult = sample_chain(newBall=newBall,
+    lp_single_value(newBall=newBall,
                                   path_config_filename=path_config_filename,
                                   HOD_params_list=HOD_params_list,
                                   other_stuff_dict_here=other_stuff_dict_here,
@@ -52,19 +50,33 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
                            target_ngal_dict=target_ngal,
                            boxsize=boxsize,
                            clustering_parameters=clustering_params,
-                           nwalkers=nwalkers,
-                           num_steps=num_steps,
                            NFW_draw=NFW_draw,
                            wp_limit=(i0, i1))
 
-    print("Optimization done", flush=True)
-    best_fit = OptimizeResult["x"]
-    print("Best params:")#, best_fit, flush=True)
-    print(best_fit)
-    print("Chi squared:", OptimizeResult["fun"], flush=True)
-    print("Iterations:", OptimizeResult["nit"], flush=True)
-    print("Successful:", OptimizeResult["success"], flush=True)
-    print("Output message:", OptimizeResult["message"], flush=True)
+    # print("Fitting...", flush=True)
+
+    # OptimizeResult = sample_chain(newBall=newBall,
+    #                               path_config_filename=path_config_filename,
+    #                               HOD_params_list=HOD_params_list,
+    #                               other_stuff_dict_here=other_stuff_dict_here,
+    #                         target_wp_dict=target_wp,
+    #                        target_jackknife_inverse_dict=target_jackknife_inverse,
+    #                        target_ngal_dict=target_ngal,
+    #                        boxsize=boxsize,
+    #                        clustering_parameters=clustering_params,
+    #                        nwalkers=nwalkers,
+    #                        num_steps=num_steps,
+    #                        NFW_draw=NFW_draw,
+    #                        wp_limit=(i0, i1))
+
+    # print("Optimization done", flush=True)
+    # best_fit = OptimizeResult["x"]
+    # print("Best params:")#, best_fit, flush=True)
+    # print(best_fit)
+    # print("Chi squared:", OptimizeResult["fun"], flush=True)
+    # print("Iterations:", OptimizeResult["nit"], flush=True)
+    # print("Successful:", OptimizeResult["success"], flush=True)
+    # print("Output message:", OptimizeResult["message"], flush=True)
 
     return
 
@@ -79,6 +91,11 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
                               args=(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
                               options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
     return OptimizeResult
+
+def lp_single_value(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+    best_fit_cmaes = np.array([0.02422136, 0.00035492])
+    test_value = 2 * best_fit_cmaes
+    log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
 
 def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
     if params_inside_priors(AB_params):

@@ -92,7 +92,7 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability_wrapper, bounds, x0=x0, method=method,
                               args=(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
-                              options={"maxiter": 1, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
+                              options={"maxiter": 5, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
     return OptimizeResult
 
 def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
@@ -114,12 +114,14 @@ def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filenam
         minimise=True
         OptimizeResult = minimize(log_probability_HOD, bounds, x0=x0, method="cmaes",
                                   args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise, wp_limit),
-                              options={"maxiter": 400, "popsize": 128, "seed": 0, "sigma": 0.01, "return_all": True, "workers": -1})
+                              options={"maxiter": 300, "popsize": 64, "seed": 0, "sigma": 0.01, "return_all": True, "workers": -1})
         x = OptimizeResult["x"]
         print(f"Best params: {x}", flush=True)
         lp = OptimizeResult["fun"]
         print(f"Log probability: {lp}", flush=True)
         return lp
+    else:
+        return np.inf
 
 
 # def oned_fit(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):

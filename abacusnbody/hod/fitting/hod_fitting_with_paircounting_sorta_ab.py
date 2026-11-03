@@ -10,7 +10,9 @@ from scipy.optimize import minimize_scalar
 
 from abacusnbody.hod.flamingo_hod import FlamingoHOD
 import abacusnbody.hod.fitting.paircounting as paircounting
-from abacusnbody.hod.fitting.setup_paircounting_fitting import *
+from abacusnbody.hod.fitting.setup_paircounting_fitting import make_other_stuff_dict
+from abacusnbody.hod.fitting.setup_paircounting_fitting import log_probability as log_probability_HOD
+from abacusnbody.hod.fitting.params import Params
 from stochopy.optimize import minimize
 from pycorr import TwoPointCorrelationFunction, twopoint_estimator
 
@@ -42,21 +44,7 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
     newBall = FlamingoHOD(path_config_filename)
     other_stuff_dict_here = make_other_stuff_dict(boxsize, num_sat_parts=3, subsample_dir=config["sim_params"]["subsample_dir"], sim_label=config["Labels"]["sim_label"], HOD_param_dict=config["HOD_params"])
 
-    oned_fit(newBall=newBall,
-                                  path_config_filename=path_config_filename,
-                                  HOD_params_list=HOD_params_list,
-                                  other_stuff_dict_here=other_stuff_dict_here,
-                            target_wp_dict=target_wp,
-                           target_jackknife_inverse_dict=target_jackknife_inverse,
-                           target_ngal_dict=target_ngal,
-                           boxsize=boxsize,
-                           clustering_parameters=clustering_params,
-                           NFW_draw=NFW_draw,
-                           wp_limit=(i0, i1))
-
-    # print("Fitting...", flush=True)
-
-    # OptimizeResult = sample_chain(newBall=newBall,
+    # oned_fit(newBall=newBall,
     #                               path_config_filename=path_config_filename,
     #                               HOD_params_list=HOD_params_list,
     #                               other_stuff_dict_here=other_stuff_dict_here,
@@ -65,10 +53,24 @@ def fit_HOD(path_config_filename, NFW_draw, save_chains=False):
     #                        target_ngal_dict=target_ngal,
     #                        boxsize=boxsize,
     #                        clustering_parameters=clustering_params,
-    #                        nwalkers=nwalkers,
-    #                        num_steps=num_steps,
     #                        NFW_draw=NFW_draw,
     #                        wp_limit=(i0, i1))
+
+    # print("Fitting...", flush=True)
+
+    OptimizeResult = sample_chain(newBall=newBall,
+                                  path_config_filename=path_config_filename,
+                                  HOD_params_list=HOD_params_list,
+                                  other_stuff_dict_here=other_stuff_dict_here,
+                            target_wp_dict=target_wp,
+                           target_jackknife_inverse_dict=target_jackknife_inverse,
+                           target_ngal_dict=target_ngal,
+                           boxsize=boxsize,
+                           clustering_parameters=clustering_params,
+                           nwalkers=nwalkers,
+                           num_steps=num_steps,
+                           NFW_draw=NFW_draw,
+                           wp_limit=(i0, i1))
 
     # print("Optimization done", flush=True)
     # best_fit = OptimizeResult["x"]
@@ -88,54 +90,80 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
     x0 = [0.01298522, 0.00307768]
 
     print("Running optimisation...", flush=True)
-    OptimizeResult = minimize(log_probability, bounds, x0=x0, method=method,
+    OptimizeResult = minimize(log_probability_wrapper, bounds, x0=x0, method=method,
                               args=(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
-                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
+                              options={"maxiter": 1, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
     return OptimizeResult
 
-def oned_fit(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
-    best_fit_cmaes = np.array([0.02422136, 0.00035492])
-    #test_value = 2 * best_fit_cmaes
-
-    fun = lambda x: log_probability(best_fit_cmaes * x, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
-    best_1d = minimize_scalar(fun, bracket=(-1, 1, 2), method="Brent")
-    print(best_1d)
-    #log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
-
-def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+    # First paircount with the given AB, then optimise the HOD parameters for log_probability
     if params_inside_priors(AB_params):
-        total_log_prob = 0.0
         newBall.update_AB_params(AB_params, bias_type="ELG_env")
-
         mock_dict = newBall.run_hod(newBall.tracers, True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False, tabulation_mock=True, seed=42)
         paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=nthread, save=False, verbose=False)
         paircounts["censat_2halo_ELGauto"] = paircounts["censat_full_ELGauto"] - paircounts["censat_1halo_ELGauto"]
         paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
         param_set = Params(tracer_list=["LRG", "ELG", "QSO"])
-        ngal_dict = get_npart(HOD_params_list, param_set, other_stuff_dict_here)
-        wp_dict = get_wp(HOD_params_list, paircounts, param_set, ngal_dict, other_stuff_dict_here, clustering_parameters, verbose=False)
-
-        for i1, tr1 in enumerate(newBall.tracers.keys()):
-            Ngal = ngal_dict[tr1]
-            if Ngal == 0 or math.isnan(Ngal):
-                return np.inf
-            fitting_ngal = Ngal / boxsize**3
-            target_ngal = target_ngal_dict[tr1]
-            total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tr1)
         
-        for i1, tr1 in enumerate(newBall.tracers.keys()):
-            for i2, tr2 in enumerate(newBall.tracers.keys()):
-                if i1 <= i2:
-                    #crosscorr or autocorr
-                    fitting_wp = wp_dict[tr1+"_"+tr2]
-                    target_wp = target_wp_dict[tr1+"_"+tr2]
-                    target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
-                    total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk_inv, wp_limit)
-    else:
-        total_log_prob = -np.inf
+        print(f"Finding optimal HOD params for AB params {AB_params}...")
+        bounds = param_set.prior_bounds
+        x0 = [12.72959237, 13.88229675,  0.08054213,  1.60747791,  0.47599498,
+        0.97994208, 11.47487057,  0.52361089,  0.58527631, 14.69007607,
+       10.08069049,  0.68755412,  0.60683426, 14.57291737, 15.87396005,
+        1.04244335,  0.6491427 ,  0.14846743,  0.16160012]
+        minimise=True
+        OptimizeResult = minimize(log_probability_HOD, bounds, x0=x0, method="cmaes",
+                                  args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise, wp_limit),
+                              options={"maxiter": 400, "popsize": 128, "seed": 0, "sigma": 0.01, "return_all": True, "workers": -1})
+        print(f"Best params: {OptimizeResult["x"]}")
+        lp = OptimizeResult["fun"]
+        print(f"Log probability: {lp}")
+        return lp
 
-    print(f"Log prob for parameters {AB_params}: {total_log_prob}", flush=True)
-    return total_log_prob * -1 # trying to minimise
+
+# def oned_fit(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+#     best_fit_cmaes = np.array([0.02422136, 0.00035492])
+#     #test_value = 2 * best_fit_cmaes
+
+#     fun = lambda x: log_probability(best_fit_cmaes * x, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
+#     best_1d = minimize_scalar(fun, bracket=(-1, 1, 2), method="Brent")
+#     print(best_1d)
+    #log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
+
+# def log_probability(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
+#     if params_inside_priors(AB_params):
+#         total_log_prob = 0.0
+#         newBall.update_AB_params(AB_params, bias_type="ELG_env")
+
+#         mock_dict = newBall.run_hod(newBall.tracers, True, want_nfw=True, NFW_draw=NFW_draw, write_to_disk=False, Nthread=nthread, verbose=False, tabulation_mock=True, seed=42)
+#         paircounts = paircounting.get_paircounts(path_config_filename=path_config_filename, tracer_mock = mock_dict, Nthread=nthread, save=False, verbose=False)
+#         paircounts["censat_2halo_ELGauto"] = paircounts["censat_full_ELGauto"] - paircounts["censat_1halo_ELGauto"]
+#         paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
+#         param_set = Params(tracer_list=["LRG", "ELG", "QSO"])
+#         ngal_dict = get_npart(HOD_params_list, param_set, other_stuff_dict_here)
+#         wp_dict = get_wp(HOD_params_list, paircounts, param_set, ngal_dict, other_stuff_dict_here, clustering_parameters, verbose=False)
+
+#         for i1, tr1 in enumerate(newBall.tracers.keys()):
+#             Ngal = ngal_dict[tr1]
+#             if Ngal == 0 or math.isnan(Ngal):
+#                 return np.inf
+#             fitting_ngal = Ngal / boxsize**3
+#             target_ngal = target_ngal_dict[tr1]
+#             total_log_prob += negative_chi_squared_ng_single_tracer(fitting_ngal, target_ngal, tr1)
+        
+#         for i1, tr1 in enumerate(newBall.tracers.keys()):
+#             for i2, tr2 in enumerate(newBall.tracers.keys()):
+#                 if i1 <= i2:
+#                     #crosscorr or autocorr
+#                     fitting_wp = wp_dict[tr1+"_"+tr2]
+#                     target_wp = target_wp_dict[tr1+"_"+tr2]
+#                     target_jk_inv = target_jackknife_inverse_dict[tr1+"_"+tr2]
+#                     total_log_prob += negative_chi_squared_single_tracer(fitting_wp, target_wp, target_jk_inv, wp_limit)
+#     else:
+#         total_log_prob = -np.inf
+
+#     print(f"Log prob for parameters {AB_params}: {total_log_prob}", flush=True)
+#     return total_log_prob * -1 # trying to minimise
 
 def negative_chi_squared_single_tracer(fitting_wp: np.ndarray, target_wp: np.ndarray, target_jackknife_inverse: np.ndarray, wp_limit=(0, 24)):
     i0, i1 = wp_limit

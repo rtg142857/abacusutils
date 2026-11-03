@@ -115,7 +115,8 @@ def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filenam
         OptimizeResult = minimize(log_probability_HOD, bounds, x0=x0, method="cmaes",
                                   args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise, wp_limit),
                               options={"maxiter": 400, "popsize": 128, "seed": 0, "sigma": 0.01, "return_all": True, "workers": -1})
-        print(f"Best params: {OptimizeResult["x"]}")
+        x = OptimizeResult["x"]
+        print(f"Best params: {x}")
         lp = OptimizeResult["fun"]
         print(f"Log probability: {lp}")
         return lp

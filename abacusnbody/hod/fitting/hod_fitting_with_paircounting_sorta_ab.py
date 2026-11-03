@@ -105,7 +105,7 @@ def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filenam
         paircounts["censat_2halo_ELGcross"] = paircounts["censat_full_ELGcross"] - paircounts["censat_1halo_ELGcross"]
         param_set = Params(tracer_list=["LRG", "ELG", "QSO"])
         
-        print(f"Finding optimal HOD params for AB params {AB_params}...")
+        print(f"Finding optimal HOD params for AB params {AB_params}...", flush=True)
         bounds = param_set.prior_bounds
         x0 = [12.72959237, 13.88229675,  0.08054213,  1.60747791,  0.47599498,
         0.97994208, 11.47487057,  0.52361089,  0.58527631, 14.69007607,
@@ -116,9 +116,9 @@ def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filenam
                                   args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise, wp_limit),
                               options={"maxiter": 400, "popsize": 128, "seed": 0, "sigma": 0.01, "return_all": True, "workers": -1})
         x = OptimizeResult["x"]
-        print(f"Best params: {x}")
+        print(f"Best params: {x}", flush=True)
         lp = OptimizeResult["fun"]
-        print(f"Log probability: {lp}")
+        print(f"Log probability: {lp}", flush=True)
         return lp
 
 

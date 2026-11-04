@@ -87,12 +87,12 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
 
     method = "cmaes"
     bounds = np.array([[-1.0,1.0],[-1.0,1.0]])
-    x0 = [0.01298522, 0.00307768]
+    x0 = [0, 0] #[0.01298522, 0.00307768]
 
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability_wrapper, bounds, x0=x0, method=method,
                               args=(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
-                              options={"maxiter": 5, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
+                              options={"maxiter": num_steps, "popsize": nwalkers, "seed": 0, "sigma": 0.01, "return_all": True, "workers": 1})
     return OptimizeResult
 
 def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit):
@@ -107,10 +107,9 @@ def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filenam
         
         print(f"Finding optimal HOD params for AB params {AB_params}...", flush=True)
         bounds = param_set.prior_bounds
-        x0 = [12.72959237, 13.88229675,  0.08054213,  1.60747791,  0.47599498,
-        0.97994208, 11.47487057,  0.52361089,  0.58527631, 14.69007607,
-       10.08069049,  0.68755412,  0.60683426, 14.57291737, 15.87396005,
-        1.04244335,  0.6491427 ,  0.14846743,  0.16160012]
+        x0 = [12.71640860698368, 13.871056239607789,  0.029465757962274353,  1.5872218619080192,  0.4992226216105564,
+        0.941172, 11.402841,  0.0553886,  0.7470942, 13.00082, 10.000654,  0.51165938,  65.75868,
+        14.72295, 15.999447, 1.066261,  0.521376,  0.175316,  0.20453152]
         minimise=True
         OptimizeResult = minimize(log_probability_HOD, bounds, x0=x0, method="cmaes",
                                   args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise, wp_limit),

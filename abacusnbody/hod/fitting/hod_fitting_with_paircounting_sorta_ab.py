@@ -90,7 +90,7 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
     x0 = [0, 0] #[0.01298522, 0.00307768]
 
     ######### LINEAR VERSION ##################
-    best_fit_cmaes = np.array([ 0.04947011, -0.09259143])
+    best_fit_cmaes = np.array([ 0.04939243, -0.09244603])
     fun = lambda x: log_probability_wrapper(best_fit_cmaes * x, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
     best_1d = minimize_scalar(fun, bracket=(-1, 1, 2), method="Brent")
     print(f"Best 1D fit: {best_1d} * {best_fit_cmaes} = {best_1d * best_fit_cmaes}")

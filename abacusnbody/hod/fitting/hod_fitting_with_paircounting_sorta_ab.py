@@ -89,6 +89,14 @@ def sample_chain(newBall, path_config_filename, HOD_params_list, other_stuff_dic
     bounds = np.array([[-1.0,1.0],[-1.0,1.0]])
     x0 = [0, 0] #[0.01298522, 0.00307768]
 
+    ######### LINEAR VERSION ##################
+    best_fit_cmaes = np.array([ 0.04947011, -0.09259143])
+    fun = lambda x: log_probability_wrapper(best_fit_cmaes * x, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
+    best_1d = minimize_scalar(fun, bracket=(-1, 1, 2), method="Brent")
+    print(f"Best 1D fit: {best_1d} * {best_fit_cmaes} = {best_1d * best_fit_cmaes}")
+    #log_probability(test_value, newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit)
+
+    ########### 2D VERSION ######################
     print("Running optimisation...", flush=True)
     OptimizeResult = minimize(log_probability_wrapper, bounds, x0=x0, method=method,
                               args=(newBall, path_config_filename, HOD_params_list, other_stuff_dict_here, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, boxsize, clustering_parameters, NFW_draw, wp_limit),
@@ -107,9 +115,15 @@ def log_probability_wrapper(AB_params, newBall: FlamingoHOD, path_config_filenam
         
         print(f"Finding optimal HOD params for AB params {AB_params}...", flush=True)
         bounds = param_set.prior_bounds
-        x0 = [12.71640860698368, 13.871056239607789,  0.029465757962274353,  1.5872218619080192,  0.4992226216105564,
-        0.941172, 11.402841,  0.0553886,  0.7470942, 13.00082, 10.000654,  0.51165938,  65.75868,
-        14.72295, 15.999447, 1.066261,  0.521376,  0.175316,  0.20453152]
+        # x0 = [12.71640860698368, 13.871056239607789,  0.029465757962274353,  1.5872218619080192,  0.4992226216105564,
+        # 0.941172, 11.402841,  0.0553886,  0.7470942, 13.00082, 10.000654,  0.51165938,  65.75868,
+        # 14.72295, 15.999447, 1.066261,  0.521376,  0.175316,  0.20453152]
+        x0 = [1.27223611e+01, 1.38474494e+01, 5.36377522e-02, 1.48684584e+00,
+        5.02484998e-01, 9.58140169e-01, 1.17663576e+01, 3.74313875e-02,
+        1.50660318e-01, 1.57911943e+01, 1.22735280e+01, 3.02729645e-01,
+        5.80290333e+01, 1.43610223e+01, 1.57261866e+01, 9.86547022e-01,
+        6.51920682e-01, 3.62469379e-01, 1.34132500e-01]
+
         minimise=True
         OptimizeResult = minimize(log_probability_HOD, bounds, x0=x0, method="cmaes",
                                   args=(paircounts, param_set, target_wp_dict, target_jackknife_inverse_dict, target_ngal_dict, other_stuff_dict_here, clustering_parameters, minimise, wp_limit),

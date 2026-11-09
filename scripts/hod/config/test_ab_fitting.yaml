@@ -17,7 +17,7 @@ Paths:
   ics_path: '/cosma8/data/dp004/flamingo/InitialConditions/L1000N3600/DMO_FIDUCIAL/gen.conf'
 
 Labels:
-  sim_label: "Debugging_AB_fitting" # just for labelling output files
+  sim_label: "AB_fitting" # just for labelling output files
 
 Params:
   N: 3600
@@ -84,8 +84,8 @@ HOD_params:
         s_r: 0
         Acent: 0.0 #-0.4
         Asat: 0.0 #0.2
-        Bcent: 0.0 #-0.04
-        Bsat: 0.0 #0.17
+        Bcent: 0.04286176 #-0.04
+        Bsat: -0.09914611 #0.17
         exp_frac: 0.5
         exp_scale: 9.0
         nfw_rescale: 0.6
@@ -127,7 +127,7 @@ clustering_params:
 # ===========================================================================================
 # Specifically for fitting the HOD parameters
 fitting_params:
-    nwalkers: 9 #720 #36
+    nwalkers: 36 #720 #36
     num_steps: 100000 #50 #200 #300000
     num_steps_optimising: 10
     target_dict_path: "/cosma8/data/dp004/dc-mene1/abacusutils/scripts/hod/fitting_data/Y1_z0.8-1.1/"
